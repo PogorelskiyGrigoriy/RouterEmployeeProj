@@ -1,6 +1,7 @@
-import { HStack, Link as ChakraLink } from "@chakra-ui/react";
+import { HStack, Link as ChakraLink, Spacer } from "@chakra-ui/react";
 import { NavLink } from "react-router-dom";
 import { MAIN_NAV_LINKS } from "@/config/navigation";
+import StatisticsSelector from "./StatisticsSelector";
 
 const Navbar = () => {
   return (
@@ -17,20 +18,24 @@ const Navbar = () => {
           key={link.to}
           asChild
           variant="plain"
-          color="red.800"
-          _hover={{ color: "red.600" }}
-          // Используем css-проп для стилизации класса .active,
-          // который NavLink добавляет автоматически
+          color="blue.700"
           css={{
             "&.active": {
-              color: "red.500",
-              fontWeight: "bold",
+              color: "blue.700", 
+              fontWeight: "700",
+              borderBottom: "2px solid", 
+              borderColor: "blue.700",
+              pb: "1",
             },
           }}
         >
           <NavLink to={link.to}>{link.label}</NavLink>
         </ChakraLink>
       ))}
+
+      <Spacer />
+
+      <StatisticsSelector />
     </HStack>
   );
 };

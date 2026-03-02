@@ -1,7 +1,6 @@
 export const ROUTES = {
   HOME: "/",
   ADD_EMPLOYEE: "/add-employee",
-  STATS_BASE: "/statistics",
   STATS_AGE: "/statistics/age",
   STATS_SALARY: "/statistics/salary",
   STATS_DEPT: "/statistics/department",
@@ -12,16 +11,15 @@ export interface NavItemConfig {
   label: string;
 }
 
-// Только основные пункты для верхнего NavBar
+// Ссылки, которые будут видны сразу в Navbar
 export const MAIN_NAV_LINKS: NavItemConfig[] = [
   { to: ROUTES.HOME, label: "Home" },
   { to: ROUTES.ADD_EMPLOYEE, label: "Add Employee" },
-  { to: ROUTES.STATS_BASE, label: "Statistics" }, // Ссылка на родительский раздел
 ];
 
-// Подпункты только для страницы статистики
+// Ссылки, которые спрячем в выпадающий список
 export const STATS_NAV_LINKS: NavItemConfig[] = [
-  { to: ROUTES.STATS_AGE, label: "Age" },
-  { to: ROUTES.STATS_SALARY, label: "Salary" },
-  { to: ROUTES.STATS_DEPT, label: "Department" },
+  { to: ROUTES.STATS_AGE, label: "Age Stats" },
+  { to: ROUTES.STATS_SALARY, label: "Salary Stats" },
+  { to: ROUTES.STATS_DEPT, label: "Dept Stats" },
 ];
