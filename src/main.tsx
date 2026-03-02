@@ -6,10 +6,8 @@ import router from "./router/routes";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <ChackraProvider>
-      <RouterProvider router={router}>
-        
-      </RouterProvider>
+    <ChackraProvider>     
+      <RouterProvider router={router} />
     </ChackraProvider>
-  </React.StrictMode>,
+  </React.StrictMode>
 );
