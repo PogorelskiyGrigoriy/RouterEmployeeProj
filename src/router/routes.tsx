@@ -1,9 +1,10 @@
-import LayoutPage from "@/components/pages/LayoutPage";
-import AgeStatisticsPage from "@/components/pages/AgeStatisticsPage";
-import DepartmentStatisticPage from "@/components/pages/DepartmentStatisticPage";
-import HomePage from "@/components/pages/HomePage";
-import SalaryStatisticsPage from "@/components/pages/SalaryStatisticsPage";
 import { createBrowserRouter } from "react-router-dom";
+import { ROUTES } from "@/config/navigation"; // Импорт конфига
+import LayoutPage from "@/components/pages/LayoutPage";
+import HomePage from "@/components/pages/HomePage";
+import AgeStatisticsPage from "@/components/pages/AgeStatisticsPage";
+import SalaryStatisticsPage from "@/components/pages/SalaryStatisticsPage";
+import DepartmentStatisticPage from "@/components/pages/DepartmentStatisticPage";
 import AddEmployeePage from "@/components/pages/AddEmployeePage";
 
 const router = createBrowserRouter([
@@ -12,10 +13,10 @@ const router = createBrowserRouter([
     element: <LayoutPage />,
     children: [
       { path: "", element: <HomePage /> },
-      { path: "/statistics/age", element: <AgeStatisticsPage /> },
-      { path: "/statistics/salary", element: <SalaryStatisticsPage /> },
-      { path: "/statistics/department", element: <DepartmentStatisticPage /> },
-      { path: "/add-employee", element: <AddEmployeePage /> },
+      { path: ROUTES.STATS_AGE, element: <AgeStatisticsPage /> },
+      { path: ROUTES.STATS_SALARY, element: <SalaryStatisticsPage /> },
+      { path: ROUTES.STATS_DEPT, element: <DepartmentStatisticPage /> },
+      { path: ROUTES.ADD_EMPLOYEE, element: <AddEmployeePage /> },
     ],
   },
 ]);

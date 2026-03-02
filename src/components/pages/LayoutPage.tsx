@@ -1,20 +1,15 @@
-import { Box } from "@chakra-ui/react"
+import { Box, VStack } from "@chakra-ui/react"
 import { Outlet } from "react-router-dom"
-
+import Navbar from "../NavBar"
 const LayoutPage = () => {
   return (
-    <div>
-        <ul>
-            <li><a href="/">home</a></li>
-            <li><a href="/statistics/age">age statistics</a></li>
-            <li><a href="/statistics/salary">salary statistics</a></li>
-            <li><a href="/statistics/department">department statistics</a></li>
-            <li><a href="/add-employee">add employee</a></li>
-        </ul>
-        <Box marginTop={"4vh"}>
-            <Outlet></Outlet>
-        </Box>
-        </div>
+    <VStack align="stretch" gap="0">
+      <Navbar />
+      
+      <Box p="6">
+        <Outlet />
+      </Box>
+    </VStack>
   )
 }
 
