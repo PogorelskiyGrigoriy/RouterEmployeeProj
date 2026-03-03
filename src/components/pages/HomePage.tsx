@@ -14,7 +14,7 @@ import {
 } from "@chakra-ui/react";
 
 import api from "@/api/axiosInstance";
-import { type employee } from "@/Employee";
+import { type Employee } from "@/models/Employee";
 import axios, { AxiosError } from "axios";
 
 // --- UTILS (Prepared for future export to utils.ts) ---
@@ -43,7 +43,7 @@ const formatDate = (dateString: string) => {
 };
 
 const HomePage = () => {
-  const [employees, setEmployees] = useState<employee[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -53,7 +53,7 @@ const HomePage = () => {
     const fetchEmployees = async () => {
       try {
         setIsLoading(true);
-        const response = await api.get<employee[]>("/employees", {
+        const response = await api.get<Employee[]>("/employees", {
           signal: controller.signal,
         });
         setEmployees(response.data);
@@ -120,7 +120,6 @@ const HomePage = () => {
     return (
       <VStack h="40vh" justify="center" gap="2">
         <Heading size="lg">No employees found</Heading>
-        <Text color="fg.muted">Try generating some data in your terminal first.</Text>
       </VStack>
     );
   }
