@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import {
   Box,
   Heading,
@@ -13,16 +12,10 @@ import {
   Avatar as ChakraAvatar,
 } from "@chakra-ui/react";
 
-import api from "@/api/axiosInstance";
-import { type Employee } from "@/models/Employee";
-import axios, { AxiosError } from "axios";
+// 1. Импортируем наш новый хук
+import useEmployees from "@/services/hooks/useEmployees";
 
-// --- UTILS (Prepared for future export to utils.ts) ---
-
-/**
-  Formats a number to USD currency string.
-  High-value tip: Keeping this outside the component prevents re-creating the function on every render.
- */
+// --- UTILS (Оставляем здесь или выносим в отдельный файл) ---
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -31,9 +24,6 @@ const formatCurrency = (value: number) => {
   }).format(value);
 };
 
-/**
- * Formats a date string to "MMM D, YYYY" (e.g., Oct 12, 1990)
- */
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString("en-US", {
     month: "short",
@@ -43,47 +33,10 @@ const formatDate = (dateString: string) => {
 };
 
 const HomePage = () => {
-  const [employees, setEmployees] = useState<Employee[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // 2. ВСЯ ЛОГИКА ТЕПЕРЬ ТУТ (Вместо 30 строк useEffect и useState)
+  const { employees, isLoading, error } = useEmployees();
 
-  useEffect(() => {
-    const controller = new AbortController();
-
-    const fetchEmployees = async () => {
-      try {
-        setIsLoading(true);
-        const response = await api.get<Employee[]>("/employees", {
-          signal: controller.signal,
-        });
-        setEmployees(response.data);
-        setError(null);
-      } catch (err) {
-        // Проверяем, является ли ошибка отменой запроса
-        if (axios.isCancel(err)) {
-          return; 
-        }
-
-        // Приводим ошибку к типу AxiosError для типизации
-        const axiosError = err as AxiosError;
-        
-        setError("Failed to connect to the server. Please check your backend.");
-        console.error("Axios error details:", axiosError.message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchEmployees();
-
-    return () => {
-      controller.abort();
-    };
-  }, []);
-
-  // --- RENDERING LOGIC ---
-
-  // Loading State
+  // 3. Состояние загрузки (Loading)
   if (isLoading) {
     return (
       <VStack h="60vh" justify="center" gap="4">
@@ -95,7 +48,7 @@ const HomePage = () => {
     );
   }
 
-  // Error State
+  // 4. Состояние ошибки (Error)
   if (error) {
     return (
       <Container maxW="md" py="20">
@@ -109,13 +62,13 @@ const HomePage = () => {
           borderColor="red.500/20"
         >
           <Text fontWeight="bold">Error!</Text>
-          <Text fontSize="sm">{error}</Text>
+          <Text fontSize="sm">{error.message}</Text> 
         </Box>
       </Container>
     );
   }
 
-  // Empty State
+  // 5. Пустое состояние (Empty)
   if (employees.length === 0) {
     return (
       <VStack h="40vh" justify="center" gap="2">
@@ -124,6 +77,7 @@ const HomePage = () => {
     );
   }
 
+  // 6. Основной рендер (Render)
   return (
     <Box p={{ base: "4", md: "8" }}>
       <VStack align="start" gap="1" mb="8">
