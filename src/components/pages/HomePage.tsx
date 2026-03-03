@@ -15,6 +15,32 @@ import {
 
 import api from "@/api/axiosInstance";
 import { type employee } from "@/Employee";
+import axios, { AxiosError } from "axios";
+
+// --- UTILS (Prepared for future export to utils.ts) ---
+
+/**
+  Formats a number to USD currency string.
+  High-value tip: Keeping this outside the component prevents re-creating the function on every render.
+ */
+const formatCurrency = (value: number) => {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(value);
+};
+
+/**
+ * Formats a date string to "MMM D, YYYY" (e.g., Oct 12, 1990)
+ */
+const formatDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+};
 
 const HomePage = () => {
   const [employees, setEmployees] = useState<employee[]>([]);
@@ -22,39 +48,42 @@ const HomePage = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchEmployees = async () => {
       try {
         setIsLoading(true);
-        const response = await api.get<employee[]>("/employees");
+        const response = await api.get<employee[]>("/employees", {
+          signal: controller.signal,
+        });
         setEmployees(response.data);
+        setError(null);
       } catch (err) {
+        // Проверяем, является ли ошибка отменой запроса
+        if (axios.isCancel(err)) {
+          return; 
+        }
+
+        // Приводим ошибку к типу AxiosError для типизации
+        const axiosError = err as AxiosError;
+        
         setError("Failed to connect to the server. Please check your backend.");
-        console.error(err);
+        console.error("Axios error details:", axiosError.message);
       } finally {
         setIsLoading(false);
       }
     };
+
     fetchEmployees();
+
+    return () => {
+      controller.abort();
+    };
   }, []);
 
-  // Helper to format currency to USD
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      maximumFractionDigits: 0,
-    }).format(value);
-  };
+  // --- RENDERING LOGIC ---
 
-  // Helper to format date: Oct 12, 1990
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
-
+  // Loading State
   if (isLoading) {
     return (
       <VStack h="60vh" justify="center" gap="4">
@@ -66,6 +95,7 @@ const HomePage = () => {
     );
   }
 
+  // Error State
   if (error) {
     return (
       <Container maxW="md" py="20">
@@ -85,6 +115,16 @@ const HomePage = () => {
     );
   }
 
+  // Empty State
+  if (employees.length === 0) {
+    return (
+      <VStack h="40vh" justify="center" gap="2">
+        <Heading size="lg">No employees found</Heading>
+        <Text color="fg.muted">Try generating some data in your terminal first.</Text>
+      </VStack>
+    );
+  }
+
   return (
     <Box p={{ base: "4", md: "8" }}>
       <VStack align="start" gap="1" mb="8">
@@ -92,7 +132,7 @@ const HomePage = () => {
           Employees
         </Heading>
         <Text color="fg.muted">
-          Total database count: **{employees.length}** people
+          Total database count: <strong>{employees.length}</strong> people
         </Text>
       </VStack>
 
@@ -113,7 +153,6 @@ const HomePage = () => {
 
                 <HStack justify="space-between" flex="1">
                   <VStack align="start" gap="1">
-                    {/* color="fg" автоматически адаптируется под темную/светлую тему */}
                     <Text fontWeight="bold" fontSize="lg" color="fg" lineHeight="short">
                       {emp.fullName}
                     </Text>
