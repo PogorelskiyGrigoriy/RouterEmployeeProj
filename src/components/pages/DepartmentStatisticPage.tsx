@@ -1,17 +1,21 @@
 "use client"
 
-import { useAnalytics } from "@/services/hooks/useAnalytics"
-import { StatisticsChart } from "@/components/StatisticsChart"
+import { Container, Heading, VStack, Box } from "@chakra-ui/react"
+import { useDepartmentStats } from "@/services/hooks/useDepartmentStats"
+import DepartmentsTable from "@/components/DepartmentsTable"
 
 const DepartmentStatisticsPage = () => {
-    const chartData = useAnalytics('department')
-    if (!chartData.length) return null
+    const { departmentsInfo, isLoading } = useDepartmentStats()
+
+    if (isLoading) return <Box p="10">Calculating statistics...</Box>
 
     return (
-        <StatisticsChart
-            title="Employees by Department"
-            data={chartData}
-        />
+        <Container maxW="container.xl" py="8">
+            <VStack align="stretch" gap="6">
+                <Heading size="xl" letterSpacing="tight">Department Statistics</Heading>
+                <DepartmentsTable departmentsInfo={departmentsInfo} />
+            </VStack>
+        </Container>
     )
 }
 

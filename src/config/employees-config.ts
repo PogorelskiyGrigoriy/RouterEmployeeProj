@@ -2,14 +2,15 @@ export interface GroupingConfig {
   min: number
   max: number
   interval: number
-  unit?: string      // Например: 'k' для зарплат
-  currency?: string  // Например: '$'
-  label?: string     // Для заголовков
+  unit?: string
+  currency?: string
+  label?: string
 }
 
 interface EmployeesConfig {
   salary: GroupingConfig
   age: GroupingConfig
+  departments: string[] 
 }
 
 const employeesConfig: EmployeesConfig = {
@@ -26,7 +27,14 @@ const employeesConfig: EmployeesConfig = {
     max: 65,
     interval: 5,
     label: 'Age'
-  }
+  },
+  departments: [
+    'Development', 
+    'QA', 
+    'Accounting', 
+    'Audit', 
+    'Management'
+  ]
 }
 
 export default employeesConfig
