@@ -1,7 +1,15 @@
+import { useMemo } from "react"
 import { range, countBy } from "lodash"
-import { Box, Heading, Container, VStack } from "@chakra-ui/react"
-import { Chart, useChart } from "@chakra-ui/charts"
-import { CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis } from "recharts"
+import { Box, Heading, Container, useToken } from "@chakra-ui/react"
+import {
+  CartesianGrid,
+  Bar,
+  BarChart,
+  Tooltip,
+  XAxis,
+  YAxis,
+  ResponsiveContainer
+} from "recharts"
 import useEmployees from "@/services/hooks/useEmployees"
 import employeesConfig from "@/config/employees-config"
 
@@ -9,65 +17,64 @@ const SalaryStatisticsPage = () => {
   const { employees } = useEmployees()
   const { min, max, interval } = employeesConfig.salary
 
-  // Группируем сотрудников по интервалам
-  const stats = countBy(employees, (emp) => {
-    return Math.floor(emp.salary / interval) * interval
-  })
+  // Достаем цвета из темы Chakra, чтобы график соответствовал дизайну
+  const [blue500, gray500, gray100] = useToken("colors", ["blue.500", "gray.500", "gray.100"])
 
-  // Формируем финальный массив данных для графика
-  const chartData = range(min, max, interval).map((v) => ({
-    count: stats[v] || 0, // Берем значение из сгруппированного объекта или 0
-    interval: `${v / 1000}k-${(v + interval - 1) / 1000}k`,
-  }))
+  const chartData = useMemo(() => {
+    if (!employees?.length) return []
 
-  const chart = useChart({
-    data: chartData,
-    series: [{ name: "count", color: "blue.solid" }],
-  })
+    const stats = countBy(employees, (e) => {
+      const offset = e.salary - min
+      return Math.floor(offset / interval) * interval + min
+    })
+
+    return range(min, max, interval).map((v) => ({
+      tickName: `${v / 1000}k`,
+      count: stats[v] || 0,
+      fullRange: `$${v.toLocaleString()} — $${(v + interval - 1).toLocaleString()}`,
+    }))
+  }, [employees, min, max, interval])
 
   if (!employees?.length) return null
 
   return (
     <Container maxW="container.xl" py="8">
-      <VStack align="start" gap="1" mb="8">
-        <Heading size="2xl" letterSpacing="tight">Salary Insights</Heading>
-      </VStack>
+      <Heading size="2xl" mb="8" letterSpacing="tight">Salary Distribution</Heading>
 
-      <Box p="6" borderWidth="1px" borderRadius="2xl" bg="bg.panel" boxShadow="sm">
-        <Chart.Root maxH="md" chart={chart}>
-          <LineChart data={chart.data} responsive>
-            <CartesianGrid stroke={chart.color("border")} vertical={false} />
+      <Box p="6" borderWidth="1px" borderRadius="2xl" bg="bg.panel" boxShadow="sm" height="400px">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gray100} />
+
             <XAxis
+              dataKey="tickName"
               axisLine={false}
-              dataKey="interval"
-              stroke={chart.color("border")}
-              tick={{ fontSize: 10 }}
+              tickLine={false}
+              tick={{ fontSize: 12, fill: gray500 }}
+              interval={0}
             />
+
             <YAxis
               axisLine={false}
               tickLine={false}
-              tickMargin={10}
-              stroke={chart.color("border")}
+              tick={{ fontSize: 12, fill: gray500 }}
               allowDecimals={false}
             />
+
             <Tooltip
-              animationDuration={100}
-              cursor={{ stroke: chart.color("border"), strokeDasharray: "4 4" }}
-              content={<Chart.Tooltip />}
+              cursor={{ fill: gray100, opacity: 0.5 }}
+              contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+              labelFormatter={(_, payload) => payload[0]?.payload?.fullRange}
             />
-            {chart.series.map((item) => (
-              <Line
-                key={item.name}
-                type="monotone"
-                dataKey={chart.key(item.name)}
-                stroke={chart.color(item.color)}
-                strokeWidth={3}
-                dot={{ r: 4, fill: chart.color(item.color), strokeWidth: 2, stroke: "white" }}
-                activeDot={{ r: 6, strokeWidth: 0 }}
-              />
-            ))}
-          </LineChart>
-        </Chart.Root>
+
+            <Bar
+              dataKey="count"
+              fill={blue500}
+              radius={[4, 4, 0, 0]}
+              barSize={Math.min(50, 500 / chartData.length)}
+            />
+          </BarChart>
+        </ResponsiveContainer>
       </Box>
     </Container>
   )
