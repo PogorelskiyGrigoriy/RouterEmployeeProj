@@ -10,10 +10,6 @@ import {
   Center
 } from "@chakra-ui/react";
 
-/**
- * TODO: Вынести эти функции в @/utils/formatters.ts, 
- * когда они понадобятся в других компонентах.
- */
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -53,17 +49,20 @@ const Employees = () => {
     <Box 
       borderWidth="1px" 
       borderRadius="lg" 
-      overflow="auto" 
-      maxH="500px" 
+      overflowX="auto" // Горизонтальный скролл только для таблицы
       boxShadow="sm"
       bg="bg.panel"
+      minW={0} // Защита от переполнения в flex-контейнерах
     >
-      <Table.Root size="md" variant="line" stickyHeader>
+      <Table.Root size={{ base: "sm", md: "md" }} variant="line" stickyHeader>
         <Table.Header>
           <Table.Row bg="bg.subtle">
             <Table.ColumnHeader>Employee</Table.ColumnHeader>
             <Table.ColumnHeader>Department</Table.ColumnHeader>
-            <Table.ColumnHeader>Date of Birth</Table.ColumnHeader>
+            {/* Скрываем дату рождения на мобильных */}
+            <Table.ColumnHeader display={{ base: "none", md: "table-cell" }}>
+              Date of Birth
+            </Table.ColumnHeader>
             <Table.ColumnHeader textAlign="end">Salary</Table.ColumnHeader>
           </Table.Row>
         </Table.Header>
@@ -81,21 +80,24 @@ const Employees = () => {
                     <ChakraAvatar.Fallback name={empl.fullName} />
                     <ChakraAvatar.Image src={empl.avatar} alt={empl.fullName} />
                   </ChakraAvatar.Root>
-                  <Text fontWeight="medium">{empl.fullName}</Text>
+                  <Text fontWeight="medium" fontSize={{ base: "xs", md: "sm" }}>
+                    {empl.fullName}
+                  </Text>
                 </HStack>
               </Table.Cell>
               
               <Table.Cell>
-                <Badge variant="subtle" colorPalette="blue" size="sm">
+                <Badge variant="subtle" colorPalette="blue" size="xs">
                   {empl.department}
                 </Badge>
               </Table.Cell>
 
-              <Table.Cell color="fg.muted" fontSize="sm">
+              {/* Скрываем дату рождения на мобильных */}
+              <Table.Cell display={{ base: "none", md: "table-cell" }} color="fg.muted" fontSize="sm">
                 {formatDate(empl.birthDate)}
               </Table.Cell>
 
-              <Table.Cell textAlign="end" fontWeight="bold" color="green.600">
+              <Table.Cell textAlign="end" fontWeight="bold" color="green.600" fontSize={{ base: "xs", md: "sm" }}>
                 {formatCurrency(empl.salary)}
               </Table.Cell>
             </Table.Row>

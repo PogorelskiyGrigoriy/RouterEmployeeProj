@@ -17,7 +17,7 @@ export const StatisticsChart = ({
   data,
   dataKeyX = "xValue",
   dataKeyY = "yValue",
-  labelY = "Employees", // Значение по умолчанию
+  labelY = "Employees",
   tooltipLabelKey = "tooltipValue",
 }: StatsChartProps) => {
   const [accent, gray500, gridColor, textDark] = useToken("colors", [
@@ -28,22 +28,32 @@ export const StatisticsChart = ({
   ]);
 
   return (
-    <Container maxW="container.xl" py="8">
-      <Heading size="2xl" mb="8" letterSpacing="tight">
+    // Убираем вертикальные отступы контейнера на мобилках (py="0")
+    <Container maxW="container.xl" py={{ base: "0", md: "8" }} px="0">
+      <Heading 
+        size={{ base: "lg", md: "2xl" }} 
+        mb={{ base: "4", md: "8" }} 
+        letterSpacing="tight"
+      >
         {title}
       </Heading>
+
       <Box
-        p="6"
+        p={{ base: "3", md: "6" }}
         borderWidth="1px"
-        borderRadius="2xl"
+        borderRadius={{ base: "xl", md: "2xl" }}
         bg="bg.panel"
-        height="400px"
+        height={{ base: "300px", md: "400px" }}
         shadow="sm"
+        // ПРАВКИ ДЛЯ КОНСОЛИ:
+        minW="0" 
+        minH="0"
+        position="relative"
       >
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={data}
-            margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+            margin={{ top: 10, right: 10, left: -25, bottom: 0 }}
           >
             <CartesianGrid
               strokeDasharray="3 3"
@@ -54,13 +64,13 @@ export const StatisticsChart = ({
               dataKey={dataKeyX}
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 12, fill: gray500 }}
+              tick={{ fontSize: 10, fill: gray500 }}
               interval="preserveStartEnd"
             />
             <YAxis
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 12, fill: gray500 }}
+              tick={{ fontSize: 10, fill: gray500 }}
               allowDecimals={false}
             />
             <Tooltip
@@ -74,16 +84,16 @@ export const StatisticsChart = ({
               labelStyle={{
                 color: textDark,
                 fontWeight: "bold",
-                marginBottom: "4px",
+                marginBottom: "2px",
               }}
-              itemStyle={{ color: textDark, fontSize: "14px" }}
+              itemStyle={{ color: textDark, fontSize: "12px" }}
               labelFormatter={(_, payload) =>
                 payload?.[0]?.payload?.[tooltipLabelKey] ?? ""
               }
             />
             <Bar
               dataKey={dataKeyY}
-              name={labelY} // <--- Вот здесь мы меняем текст в тултипе
+              name={labelY}
               fill={accent}
               radius={[4, 4, 0, 0]}
               minPointSize={2}
