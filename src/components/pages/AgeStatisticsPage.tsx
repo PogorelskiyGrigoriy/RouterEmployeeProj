@@ -1,11 +1,19 @@
-import { Box, Text } from "@chakra-ui/react";
+"use client"
+import { useAnalytics } from "@/services/hooks/useAnalytics"
+import { StatisticsChart } from "@/components/StatisticsChart"
 
 const AgeStatisticsPage = () => {
-    return (
-        <Box>
-            <Text fontSize="3rem">AgeStatisticsPage</Text>
-        </Box>
-    );
-};
+  const chartData = useAnalytics('age')
+  if (!chartData.length) return null
 
-export default AgeStatisticsPage;
+  return (
+    <StatisticsChart
+      title="Age Distribution"
+      data={chartData}
+      dataKeyX="xValue"
+      dataKeyY="yValue"
+      tooltipLabelKey="tooltipValue"
+    />
+  )
+}
+export default AgeStatisticsPage
