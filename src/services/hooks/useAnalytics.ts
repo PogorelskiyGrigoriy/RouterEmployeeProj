@@ -8,7 +8,6 @@ import type { StatsDataItem } from "@/models/StatsInterface"
 export const useAnalytics = (type: 'age' | 'salary' | 'department'): StatsDataItem[] => {
   const { employees } = useEmployees()
   
-  // Год вычисляем один раз
   const currentYear = useMemo(() => new Date().getFullYear(), [])
 
   return useMemo(() => {
@@ -17,13 +16,15 @@ export const useAnalytics = (type: 'age' | 'salary' | 'department'): StatsDataIt
     switch (type) {
       case 'salary': {
         const config = employeesConfig.salary
+        const { unit = '', currency = '' } = config
+
         return getBinnedData(employees, config, (e) => e.salary, {
-          // Подпись на оси: просто "5k", "10k" и т.д.
-          xKey: (v) => `${v / 1000}k`,
+          // Динамически подставляем 'k' (или что угодно другое) из конфига
+          xKey: (v) => `${v / 1000}${unit}`,
           tooltip: (v, isLast) => {
             const start = v.toLocaleString()
             const end = isLast ? config.max : v + config.interval - 1
-            return `$${start} — $${end.toLocaleString()}`
+            return `${currency}${start} — ${currency}${end.toLocaleString()}`
           }
         })
       }
@@ -34,10 +35,8 @@ export const useAnalytics = (type: 'age' | 'salary' | 'department'): StatsDataIt
           (e) => currentYear - new Date(e.birthDate).getFullYear(), 
           {
             xKey: (v) => {
-              // Если интервал 1, выводим просто "60"
               if (config.interval === 1) return `${v}`
               
-              // Если интервал больше 1, выводим "60-64" (или "60-65" для последнего)
               const isLast = v + config.interval >= config.max
               const endValue = isLast ? config.max : v + config.interval - 1
               return `${v}-${endValue}`

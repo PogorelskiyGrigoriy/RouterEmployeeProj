@@ -10,9 +10,6 @@ const AgeStatisticsPage = () => {
     <StatisticsChart
       title="Age Distribution"
       data={chartData}
-      dataKeyX="xValue"
-      dataKeyY="yValue"
-      tooltipLabelKey="tooltipValue"
     />
   )
 }

@@ -10,9 +10,6 @@ const SalaryStatisticsPage = () => {
     <StatisticsChart
       title="Salary Distribution"
       data={chartData}
-      dataKeyX="xValue"
-      dataKeyY="yValue"
-      tooltipLabelKey="tooltipValue"
     />
   )
 }

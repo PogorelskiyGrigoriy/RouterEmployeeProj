@@ -1,11 +1,18 @@
-import { Box, Text } from "@chakra-ui/react";
+"use client"
 
-const DepartmentStatisticPage = () => {
+import { useAnalytics } from "@/services/hooks/useAnalytics"
+import { StatisticsChart } from "@/components/StatisticsChart"
+
+const DepartmentStatisticsPage = () => {
+    const chartData = useAnalytics('department')
+    if (!chartData.length) return null
+
     return (
-        <Box>
-            <Text fontSize="3rem">DepartmentStatisticPage</Text>
-        </Box>
-    );
-};
+        <StatisticsChart
+            title="Employees by Department"
+            data={chartData}
+        />
+    )
+}
 
-export default DepartmentStatisticPage;
+export default DepartmentStatisticsPage
