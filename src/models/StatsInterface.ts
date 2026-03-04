@@ -9,8 +9,8 @@ export interface StatsDataItem {
 export interface StatsChartProps {
   title: string;
   data: StatsDataItem[];
-  // Делаем ключи необязательными, так как в компоненте есть значения по умолчанию
   dataKeyX?: string;
   dataKeyY?: string;
   tooltipLabelKey?: string;
+  labelY?: string; // Добавляем это поле
 }

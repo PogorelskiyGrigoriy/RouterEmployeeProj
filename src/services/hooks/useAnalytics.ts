@@ -8,7 +8,7 @@ import type { StatsDataItem } from "@/models/StatsInterface"
 export const useAnalytics = (type: 'age' | 'salary' | 'department'): StatsDataItem[] => {
   const { employees } = useEmployees()
   
-  // Год не меняется, вычисляем один раз
+  // Год вычисляем один раз
   const currentYear = useMemo(() => new Date().getFullYear(), [])
 
   return useMemo(() => {
@@ -18,10 +18,13 @@ export const useAnalytics = (type: 'age' | 'salary' | 'department'): StatsDataIt
       case 'salary': {
         const config = employeesConfig.salary
         return getBinnedData(employees, config, (e) => e.salary, {
+          // Подпись на оси: просто "5k", "10k" и т.д.
           xKey: (v) => `${v / 1000}k`,
-          tooltip: (v, isLast) => isLast 
-            ? `$${v.toLocaleString()} — $${config.max.toLocaleString()}`
-            : `$${v.toLocaleString()} — $${(v + config.interval - 1).toLocaleString()}`
+          tooltip: (v, isLast) => {
+            const start = v.toLocaleString()
+            const end = isLast ? config.max : v + config.interval - 1
+            return `$${start} — $${end.toLocaleString()}`
+          }
         })
       }
 
@@ -30,8 +33,21 @@ export const useAnalytics = (type: 'age' | 'salary' | 'department'): StatsDataIt
         return getBinnedData(employees, config, 
           (e) => currentYear - new Date(e.birthDate).getFullYear(), 
           {
-            xKey: (v) => `${v}-${v + config.interval - 1}`,
-            tooltip: (v, isLast) => `Age: ${v} — ${isLast ? config.max : v + config.interval - 1}`
+            xKey: (v) => {
+              // Если интервал 1, выводим просто "60"
+              if (config.interval === 1) return `${v}`
+              
+              // Если интервал больше 1, выводим "60-64" (или "60-65" для последнего)
+              const isLast = v + config.interval >= config.max
+              const endValue = isLast ? config.max : v + config.interval - 1
+              return `${v}-${endValue}`
+            },
+            tooltip: (v, isLast) => {
+              if (config.interval === 1) return `Age: ${v}`
+              
+              const endValue = isLast ? config.max : v + config.interval - 1
+              return `Age: ${v} — ${endValue}`
+            }
           }
         )
       }
