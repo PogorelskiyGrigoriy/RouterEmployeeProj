@@ -1,5 +1,5 @@
 "use client"
-//AddEmployeePage.tsx
+// AddEmployeePage.tsx
 
 import { Container, Heading } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
@@ -13,7 +13,7 @@ const AddEmployeePage = () => {
 
   const handleAdd = (data: NewEmployee) => {
     mutate(data, {
-      onSuccess: () => navigate("/")
+      onSuccess: () => navigate("/") // Редирект только после успеха
     });
   };
 
