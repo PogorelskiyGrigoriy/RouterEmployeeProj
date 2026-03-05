@@ -4,7 +4,7 @@
 import { Container, Heading } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import { useAddEmployee } from "@/services/hooks/mutationHooks/useAddEmployee";
-import { EmployeeForm } from "../EmployeeForm";
+import { EmployeeForm } from "../components/EmployeeForm";
 import type { NewEmployee } from "@/models/Employee";
 
 const AddEmployeePage = () => {

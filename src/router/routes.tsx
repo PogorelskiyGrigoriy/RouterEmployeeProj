@@ -2,12 +2,12 @@
 
 import { createBrowserRouter } from "react-router-dom";
 import { ROUTES } from "@/config/navigation";
-import LayoutPage from "@/components/pages/LayoutPage";
-import HomePage from "@/components/pages/HomePage";
-import AddEmployeePage from "@/components/pages/AddEmployeePage";
-import AgeStatisticsPage from "@/components/pages/AgeStatisticsPage";
-import SalaryStatisticsPage from "@/components/pages/SalaryStatisticsPage";
-import DepartmentStatisticPage from "@/components/pages/DepartmentStatisticPage";
+import LayoutPage from "@/pages/LayoutPage";
+import HomePage from "@/pages/HomePage";
+import AddEmployeePage from "@/pages/AddEmployeePage";
+import AgeStatisticsPage from "@/pages/AgeStatisticsPage";
+import SalaryStatisticsPage from "@/pages/SalaryStatisticsPage";
+import DepartmentStatisticPage from "@/pages/DepartmentStatisticPage";
 
 const router = createBrowserRouter([
   {
