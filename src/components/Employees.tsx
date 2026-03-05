@@ -1,8 +1,7 @@
-// Employees.tsx
-
 import useEmployees from "@/services/hooks/useEmployees";
 import { Table, Spinner, Box, Center, Text } from "@chakra-ui/react";
 import { CurrencyText, DateText, EmployeeIdentity, DeptBadge } from "./ui/DataDisplay";
+import { calculateAge } from "@/utils/dateUtils";
 
 const Employees = () => {
   const { employees, isLoading, error } = useEmployees();
@@ -17,7 +16,7 @@ const Employees = () => {
           <Table.Row bg="bg.subtle">
             <Table.ColumnHeader>Employee</Table.ColumnHeader>
             <Table.ColumnHeader>Department</Table.ColumnHeader>
-            <Table.ColumnHeader display={{ base: "none", md: "table-cell" }}>Date of Birth</Table.ColumnHeader>
+            <Table.ColumnHeader display={{ base: "none", md: "table-cell" }}>Date of Birth (Age)</Table.ColumnHeader>
             <Table.ColumnHeader textAlign="end">Salary</Table.ColumnHeader>
           </Table.Row>
         </Table.Header>
@@ -32,7 +31,12 @@ const Employees = () => {
                 <DeptBadge>{empl.department}</DeptBadge>
               </Table.Cell>
               <Table.Cell display={{ base: "none", md: "table-cell" }}>
-                <DateText dateString={empl.birthDate} />
+                <Box>
+                  <DateText dateString={empl.birthDate} />
+                  <Text fontSize="xs" color="fg.muted">
+                    {calculateAge(empl.birthDate)} years old
+                  </Text>
+                </Box>
               </Table.Cell>
               <Table.Cell textAlign="end">
                 <CurrencyText value={empl.salary} />

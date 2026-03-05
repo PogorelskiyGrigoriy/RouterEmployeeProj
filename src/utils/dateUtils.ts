@@ -1,19 +1,37 @@
-// src/utils/dateUtils.ts
+import { 
+  differenceInYears, 
+  parseISO, 
+  format, 
+  isValid, 
+  subYears, 
+  startOfToday 
+} from "date-fns";
 
 /**
- * Рассчитывает возраст на основе строки даты (ISO или YYYY-MM-DD)
+ * Рассчитывает возраст. 
+ * date-fns сама учитывает, наступил ли день рождения в этом году.
  */
 export const calculateAge = (birthDate: string): number => {
-  const today = new Date();
-  const birth = new Date(birthDate);
+  const birth = parseISO(birthDate);
+  if (!isValid(birth)) return 0;
   
-  let age = today.getFullYear() - birth.getFullYear();
-  const monthDiff = today.getMonth() - birth.getMonth();
-  
-  // Корректировка, если день рождения в этом году еще не наступил
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-    age--;
-  }
-  
-  return age;
+  return differenceInYears(startOfToday(), birth);
+};
+
+/**
+ * Форматирует дату для отображения пользователю (например, в таблице)
+ * Вывод: 05.03.1990
+ */
+export const formatDateDisplay = (date: string | Date): string => {
+  const d = typeof date === "string" ? parseISO(date) : date;
+  return isValid(d) ? format(d, "dd.MM.yyyy") : "—";
+};
+
+/**
+ * Возвращает крайнюю дату для календаря (например, 18 лет назад от сегодня)
+ * Вывод: 2008-03-05 (формат для <input type="date">)
+ */
+export const getLimitDate = (yearsBack: number): string => {
+  const limitDate = subYears(startOfToday(), yearsBack);
+  return format(limitDate, "yyyy-MM-dd");
 };

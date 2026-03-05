@@ -1,10 +1,9 @@
-// useDepartmentStats.ts
 import { useMemo } from "react";
 import { groupBy, meanBy } from "lodash";
 import useEmployees from "./useEmployees";
 import employeesConfig from "@/config/employees-config";
 import type { DepartmentInfo } from "@/models/DepartmentInfo";
-import { calculateAge } from "@/utils/dateUtils"; // Импорт утилиты
+import { calculateAge } from "@/utils/dateUtils";
 
 export const useDepartmentStats = () => {
   const { employees, isLoading } = useEmployees();
