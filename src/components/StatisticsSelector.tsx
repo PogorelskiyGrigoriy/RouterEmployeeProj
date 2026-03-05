@@ -1,4 +1,5 @@
-//StatisticsSelector.tsx
+"use client";
+// StatisticsSelector.tsx
 
 import { Button } from "@chakra-ui/react";
 import { 
@@ -10,14 +11,25 @@ import {
 import { useNavigate, useLocation } from "react-router-dom";
 import { STATS_NAV_LINKS } from "@/config/navigation";
 import { LuChevronDown } from "react-icons/lu";
+import { useAuthStore } from "@/store/useAuthStore"; // Импортируем стор
 
 const StatisticsSelector = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, isAuthenticated } = useAuthStore(); // Достаем данные юзера
 
-  // Определяем текст на кнопке: если мы на странице статистики — пишем её имя, иначе "Statistics"
-  const activeStat = STATS_NAV_LINKS.find(link => link.to === location.pathname);
+  // 1. Фильтруем ссылки на основе роли пользователя
+  // Это гарантирует, что юзер не увидит в меню то, на что у него нет прав
+  const allowedStats = STATS_NAV_LINKS.filter(link => 
+    isAuthenticated && user ? link.roles.includes(user.role) : false
+  );
+
+  // 2. Определяем активный пункт среди РАЗРЕШЕННЫХ ссылок
+  const activeStat = allowedStats.find(link => link.to === location.pathname);
   const buttonLabel = activeStat ? activeStat.label : "Statistics";
+
+  // Если для данной роли нет доступных графиков, вообще не рендерим селектор
+  if (allowedStats.length === 0) return null;
 
   return (
     <MenuRoot>
@@ -25,7 +37,6 @@ const StatisticsSelector = () => {
         <Button 
           variant="outline" 
           size="sm"
-          // Стили для контраста на бежевом/сером фоне
           bg="white" 
           color={activeStat ? "blue.600" : "gray.700"}
           borderColor={activeStat ? "blue.500" : "gray.300"}
@@ -33,7 +44,7 @@ const StatisticsSelector = () => {
           px="4"
           height="36px"
           fontWeight={activeStat ? "bold" : "medium"}
-          boxShadow="sm" // Легкая тень для отделения от фона
+          boxShadow="sm"
           _hover={{ 
             bg: "blue.50", 
             borderColor: "blue.400",
@@ -53,12 +64,12 @@ const StatisticsSelector = () => {
         </Button>
       </MenuTrigger>
       <MenuContent>
-        {STATS_NAV_LINKS.map((item) => (
+        {/* Рендерим только те пункты, которые прошли фильтрацию по ролям */}
+        {allowedStats.map((item) => (
           <MenuItem 
             key={item.to} 
             value={item.to}
             onClick={() => navigate(item.to)}
-            closeOnSelect
           >
             {item.label}
           </MenuItem>

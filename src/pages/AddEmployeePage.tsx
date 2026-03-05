@@ -1,11 +1,11 @@
 "use client"
-// AddEmployeePage.tsx
 
 import { Container, Heading } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import { useAddEmployee } from "@/services/hooks/mutationHooks/useAddEmployee";
 import { EmployeeForm } from "../components/EmployeeForm";
 import type { NewEmployee } from "@/models/Employee";
+import { toaster } from "@/components/ui/toaster"; 
 
 const AddEmployeePage = () => {
   const navigate = useNavigate();
@@ -13,7 +13,18 @@ const AddEmployeePage = () => {
 
   const handleAdd = (data: NewEmployee) => {
     mutate(data, {
-      onSuccess: () => navigate("/") // Редирект только после успеха
+      onSuccess: (newEmployee) => {
+        // Показываем уведомление
+        toaster.create({
+          title: "Success",
+          description: `Employee ${newEmployee.fullName} has been added.`,
+          type: "success",
+          duration: 3000, // Висит 3 секунды
+        });
+
+        // Уходим на главную
+        navigate("/");
+      }
     });
   };
 

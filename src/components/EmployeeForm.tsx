@@ -23,16 +23,14 @@ export const EmployeeForm = ({ onSubmit, isLoading }: Props) => {
   });
 
   const handleLocalSubmit = (data: NewEmployee) => {
-    onSubmit({
-      ...data,
-      salary: Number(data.salary) 
-    });
+    onSubmit(data);
   };
 
   return (
     <form onSubmit={handleSubmit(handleLocalSubmit)}>
       <Stack gap="4">
         
+        {/* Full Name */}
         <Field 
           label="Full Name" 
           invalid={!!errors.fullName} 
@@ -51,6 +49,7 @@ export const EmployeeForm = ({ onSubmit, isLoading }: Props) => {
           />
         </Field>
 
+        {/* Department */}
         <Field 
           label="Department"
           invalid={!!errors.department}
@@ -68,6 +67,7 @@ export const EmployeeForm = ({ onSubmit, isLoading }: Props) => {
           </NativeSelectRoot>
         </Field>
 
+        {/* Salary: Используем valueAsNumber для автоматического приведения типа */}
         <Field 
           label={`Salary ($ ${employeesConfig.salary.min} - ${employeesConfig.salary.max})`}
           invalid={!!errors.salary}
@@ -76,13 +76,21 @@ export const EmployeeForm = ({ onSubmit, isLoading }: Props) => {
           <Input 
             type="number" 
             {...register("salary", { 
+              valueAsNumber: true,
               required: "Salary is required",
-              min: { value: employeesConfig.salary.min, message: `Min: ${employeesConfig.salary.min}` },
-              max: { value: employeesConfig.salary.max, message: `Max: ${employeesConfig.salary.max}` }
+              min: { 
+                value: employeesConfig.salary.min, 
+                message: `Min: ${employeesConfig.salary.min}` 
+              },
+              max: { 
+                value: employeesConfig.salary.max, 
+                message: `Max: ${employeesConfig.salary.max}` 
+              }
             })} 
           />
         </Field>
 
+        {/* Birth Date */}
         <Field 
           label={`Birth Date (Age: ${employeesConfig.age.min} - ${employeesConfig.age.max})`}
           invalid={!!errors.birthDate}
@@ -90,7 +98,6 @@ export const EmployeeForm = ({ onSubmit, isLoading }: Props) => {
         >
           <Input 
             type="date" 
-            // Ограничиваем календарь на уровне браузера
             min={getLimitDate(employeesConfig.age.max)} 
             max={getLimitDate(employeesConfig.age.min)}
             {...register("birthDate", { 
