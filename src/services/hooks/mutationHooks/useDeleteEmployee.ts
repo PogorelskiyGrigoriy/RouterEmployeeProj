@@ -1,9 +1,10 @@
-import type { Employee } from "@/models/Employee";
+// useDeleteEmployee.ts
 import apiClient from "@/services/ApiClientImplementation";
 import useEmployeesMutation from "./useEmployeesMutation";
 
 export const useDeleteEmployee = () => {
-  return useEmployeesMutation<string, Employee>(
+  // Передаем ID (string), получаем ничего (void)
+  return useEmployeesMutation<string, void>(
     (id) => apiClient.deleteEmployee(id)
   );
 };

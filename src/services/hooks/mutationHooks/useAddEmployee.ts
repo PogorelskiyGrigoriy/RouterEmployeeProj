@@ -1,9 +1,11 @@
-import type { Employee } from "@/models/Employee";
+// useAddEmployee.ts
+import type { Employee, NewEmployee } from "@/models/Employee"; 
 import apiClient from "@/services/ApiClientImplementation";
 import useEmployeesMutation from "./useEmployeesMutation";
 
 export const useAddEmployee = () => {
-  return useEmployeesMutation<Employee, Employee>(
+  // Вход: NewEmployee (без id), Выход: Employee (с id от сервера)
+  return useEmployeesMutation<NewEmployee, Employee>(
     (newEmp) => apiClient.addEmployee(newEmp)
   );
 };
