@@ -25,7 +25,6 @@ const employeesConfig: EmployeesConfig = {
     interval: 5,
     label: 'Age'
   },
-  // Теперь TS подсветит ошибку, если ты опечатаешься в названии
   departments: DEPARTMENTS,
 };
 

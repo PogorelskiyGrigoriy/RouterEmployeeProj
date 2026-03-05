@@ -16,7 +16,6 @@ const DepartmentsTable = ({ departmentsInfo }: { departmentsInfo: DepartmentInfo
     </Table.Header>
     <Table.Body>
       {departmentsInfo.map((info) => (
-        // Убрали _hover и transition для статичного вида
         <Table.Row key={info.department}>
           <Table.Cell fontWeight="semibold">{info.department}</Table.Cell>
           <Table.Cell textAlign="center">
