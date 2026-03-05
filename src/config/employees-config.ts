@@ -1,16 +1,13 @@
-export interface GroupingConfig {
-  min: number
-  max: number
-  interval: number
-  unit?: string
-  currency?: string
-  label?: string
-}
+//employees-config.ts
+
+import type { Department } from "@/models/Departments";
+import type { GroupingConfig } from "@/models/GroupingConfig";
+import { DEPARTMENTS } from "@/models/Departments";
 
 interface EmployeesConfig {
-  salary: GroupingConfig
-  age: GroupingConfig
-  departments: string[] 
+  salary: GroupingConfig;
+  age: GroupingConfig;
+  departments: Department[]; 
 }
 
 const employeesConfig: EmployeesConfig = {
@@ -28,13 +25,8 @@ const employeesConfig: EmployeesConfig = {
     interval: 5,
     label: 'Age'
   },
-  departments: [
-    'Development', 
-    'QA', 
-    'Accounting', 
-    'Audit', 
-    'Management'
-  ]
-}
+  // Теперь TS подсветит ошибку, если ты опечатаешься в названии
+  departments: DEPARTMENTS,
+};
 
-export default employeesConfig
+export default employeesConfig;

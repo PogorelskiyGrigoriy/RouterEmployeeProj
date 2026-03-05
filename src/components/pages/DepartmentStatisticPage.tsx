@@ -1,4 +1,5 @@
 "use client"
+//DepartmentStatisticPage.tsx
 
 import { Container, Heading, VStack, Box } from "@chakra-ui/react"
 import { useDepartmentStats } from "@/services/hooks/useDepartmentStats"

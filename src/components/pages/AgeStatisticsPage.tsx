@@ -1,4 +1,6 @@
 "use client"
+//AgeStatisticsPage.tsx
+
 import { useAnalytics } from "@/services/hooks/useAnalytics"
 import { StatisticsChart } from "@/components/StatisticsChart"
 

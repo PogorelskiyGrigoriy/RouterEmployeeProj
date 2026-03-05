@@ -1,6 +1,6 @@
 // src/utils/statistics-helpers.ts
 import { range, countBy } from "lodash"
-import type { GroupingConfig } from "@/config/employees-config" // Импорт типа
+import type { GroupingConfig } from "@/models/GroupingConfig"
 
 /**
  * Группирует массив данных по числовым интервалам

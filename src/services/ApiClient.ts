@@ -1,10 +1,12 @@
-import type { Employee } from "@/models/Employee";
+//ApiClient.ts
+
+import type { Employee, NewEmployee } from "@/models/Employee";
 import type { AxiosRequestConfig } from "axios";
-import type { EmployeeUpdater } from "../models/EmployeeUpdater";
+import type { EmployeeUpdater } from "@/models/EmployeeUpdater";
 
 export interface ApiClient {
-    getEmployees(config?: AxiosRequestConfig): Promise<Employee[]>;
-    addEmployee(e : Employee): Promise<Employee>;
-    deleteEmployee(id: string): Promise<Employee>;
-    updateEmployee(updater: EmployeeUpdater): Promise<Employee>;
+  getEmployees(config?: AxiosRequestConfig): Promise<Employee[]>;
+  addEmployee(e: NewEmployee): Promise<Employee>; // Используем NewEmployee
+  deleteEmployee(id: string): Promise<void>; // DELETE обычно ничего не возвращает
+  updateEmployee(updater: EmployeeUpdater): Promise<Employee>;
 }

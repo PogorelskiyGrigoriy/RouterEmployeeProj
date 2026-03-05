@@ -1,4 +1,6 @@
 "use client"
+// SalaryStatisticsPage.tsx
+
 import { useAnalytics } from "@/services/hooks/useAnalytics"
 import { StatisticsChart } from "@/components/StatisticsChart"
 

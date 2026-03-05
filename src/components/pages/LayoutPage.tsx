@@ -1,3 +1,5 @@
+// LayoutPage.tsx
+
 import { Box, VStack } from "@chakra-ui/react";
 import { Outlet } from "react-router-dom";
 import Navbar from "../NavBar";

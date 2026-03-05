@@ -1,6 +1,9 @@
+//EmployeeUpdater.ts
+
 import type { Employee } from "@/models/Employee";
 
-export type EmployeeUpdater = {
-    id: string;
-    fields: Partial<Employee>; 
+export interface EmployeeUpdater {
+  id: string;
+  // Мы исключаем ID из полей для обновления, чтобы случайно его не изменить
+  fields: Partial<Omit<Employee, "id">>;
 }

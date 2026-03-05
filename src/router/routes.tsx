@@ -1,3 +1,5 @@
+//routes.tsx
+
 import { createBrowserRouter } from "react-router-dom";
 import { ROUTES } from "@/config/navigation";
 import LayoutPage from "@/components/pages/LayoutPage";

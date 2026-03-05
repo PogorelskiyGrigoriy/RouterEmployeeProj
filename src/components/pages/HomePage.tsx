@@ -1,3 +1,5 @@
+// HomePage.tsx
+
 import { Box, Heading, Text, VStack, Container } from "@chakra-ui/react";
 import Employees from "@/components/Employees";
 
