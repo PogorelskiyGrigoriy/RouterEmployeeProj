@@ -7,24 +7,25 @@ import {
   Box, 
   Button, 
   Text,
-  Separator
+  Separator,
 } from "@chakra-ui/react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { MAIN_NAV_LINKS, ROUTES } from "@/config/navigation";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useLogout } from "@/services/hooks/authHooks/useLogout";
 import StatisticsSelector from "./StatisticsSelector";
 
 const Navbar = () => {
-  const { user, isAuthenticated, setLogout } = useAuthStore();
-  const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuthStore();
+  
+  // Используем мутацию для выхода
+  const { mutate: logout, isPending } = useLogout();
 
-  // Функция выхода
   const handleLogout = () => {
-    setLogout();
-    navigate(ROUTES.LOGIN);
+    logout();
   };
 
-  // Фильтруем основные ссылки на основе роли (из твоего нового конфига)
+  // Фильтруем ссылки: показываем только те, роли которых совпадают с ролью юзера
   const visibleLinks = MAIN_NAV_LINKS.filter((link) =>
     isAuthenticated && user ? link.roles.includes(user.role) : false
   );
@@ -38,17 +39,18 @@ const Navbar = () => {
       bg="white" 
       borderBottom="1px solid" 
       borderColor="gray.200"
-      sticky="top"
+      position="sticky"
+      top="0"
       zIndex="10"
     >
       <HStack gap={{ base: "3", md: "6" }}>
-        {/* 1. Если НЕ авторизован: показываем только ссылку на Логин */}
+        {/* 1. Если НЕ авторизован: ссылка на Login */}
         {!isAuthenticated ? (
           <ChakraLink asChild variant="plain" color="blue.600" fontWeight="600">
             <NavLink to={ROUTES.LOGIN}>Login</NavLink>
           </ChakraLink>
         ) : (
-          /* 2. Если АВТОРИЗОВАН: показываем ссылки согласно роли */
+          /* 2. Если АВТОРИЗОВАН: системные ссылки */
           visibleLinks.map((link) => (
             <ChakraLink 
               key={link.to} 
@@ -75,14 +77,14 @@ const Navbar = () => {
 
       <Spacer />
 
-      {/* Правая часть: данные пользователя и селектор статистики */}
+      {/* Правая часть: данные пользователя */}
       {isAuthenticated && user && (
         <HStack gap={{ base: "2", md: "4" }}>
-          {/* Отображение имени и роли */}
-          <VStack align="flex-end" gap="0" hideFrom="md">
-             <Text fontSize="xs" fontWeight="bold">{user.username}</Text>
+          {/* Адаптивное отображение имени (мобилки/десктоп) */}
+          <Box textAlign="right" hideFrom="md">
+             <Text fontSize="xs" fontWeight="bold" lineHeight="1">{user.username}</Text>
              <Text fontSize="2xs" color="gray.500">{user.role}</Text>
-          </VStack>
+          </Box>
           
           <Box hideBelow="md">
             <Text fontSize="sm">
@@ -97,24 +99,20 @@ const Navbar = () => {
             <StatisticsSelector />
           </Box>
 
-          {/* Кнопка Logout */}
+          {/* Кнопка Logout с индикацией загрузки */}
           <Button 
             size="sm" 
             variant="ghost" 
             colorPalette="red" 
             onClick={handleLogout}
+            disabled={isPending}
           >
-            Logout
+            {isPending ? "Exiting..." : "Logout"}
           </Button>
         </HStack>
       )}
     </HStack>
   );
 };
-
-// Вспомогательный компонент VStack для компактности (если не импортирован)
-const VStack = ({ children, ...props }: any) => (
-  <Box display="flex" flexDirection="column" {...props}>{children}</Box>
-);
 
 export default Navbar;

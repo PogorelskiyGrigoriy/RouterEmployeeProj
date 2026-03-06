@@ -1,30 +1,23 @@
 "use client";
-// src\pages\LoginPage.tsx 
 
-import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
-import { 
-  Box, 
-  Button, 
-  Fieldset, 
-  Input, 
-  Stack, 
-  Text, 
-  Alert 
+import {
+  Box,
+  Button,
+  Fieldset,
+  Input,
+  Stack,
+  Text,
+  Alert
 } from "@chakra-ui/react";
 import { Field } from "@/components/ui/field";
-import { useAuthStore } from "@/store/useAuthStore";
-import authService from "@/services/AuthServiceImplementation";
+import { useLogin } from "@/services/hooks/authHooks/useLogin";
 import type { LoginData } from "@/models/AuthData";
-import { ROUTES } from "@/config/navigation";
 
 const LoginPage = () => {
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  
-  const setLogin = useAuthStore((s) => s.setLogin);
-  const navigate = useNavigate();
+  // Получаем всё необходимое из хука
+  // mutate — это функция запуска, isPending — лоадер, error — объект ошибки
+  const { mutate, isPending, error, isError } = useLogin();
 
   const {
     register,
@@ -32,25 +25,10 @@ const LoginPage = () => {
     formState: { errors },
   } = useForm<LoginData>();
 
-  const onSubmit = async (data: LoginData) => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      // 1. Вызываем твой дамми-сервис
-      const userData = await authService.login(data);
-      
-      // 2. Сохраняем в глобальный стор (Zustand)
-      setLogin(userData);
-      
-      // 3. Уходим на главную
-      navigate(ROUTES.HOME);
-    } catch (e: any) {
-      // Если пароль неверный (AxiosError из твоего сервиса)
-      setError(e.message || "Invalid email or password");
-    } finally {
-      setIsLoading(false);
-    }
+  const onSubmit = (data: LoginData) => {
+    // Просто вызываем мутацию. Редирект и сохранение в стор 
+    // уже прописаны внутри хука useLogin (в onSuccess)
+    mutate(data);
   };
 
   return (
@@ -58,39 +36,58 @@ const LoginPage = () => {
       <form onSubmit={handleSubmit(onSubmit)}>
         <Fieldset.Root size="lg">
           <Stack gap="4">
-            <Fieldset.Legend fontSize="2xl" fontWeight="bold">Login</Fieldset.Legend>
-            <Fieldset.HelperText>Please enter your credentials</Fieldset.HelperText>
+            <Fieldset.Legend fontSize="2xl" fontWeight="bold" color="gray.800">Login</Fieldset.Legend>
+            <Fieldset.HelperText color="gray.800">Please enter your credentials</Fieldset.HelperText>
 
-            {/* Вывод ошибки при неверном логине */}
-            {error && (
+            {/* Вывод ошибки из хука useLogin */}
+            {isError && (
               <Alert.Root status="error" variant="subtle">
                 <Alert.Indicator />
-                <Alert.Title>{error}</Alert.Title>
+                <Alert.Title>
+                  {error instanceof Error ? error.message : "Invalid credentials"}
+                </Alert.Title>
               </Alert.Root>
             )}
 
             <Field label="Email" invalid={!!errors.email} errorText={errors.email?.message}>
-              <Input 
-                {...register("email", { required: "Email is required" })} 
-                placeholder="admin@tel-ran.com" 
+              <Input
+                {...register("email", {
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: "Invalid email address"
+                  }
+                })}
+                placeholder="admin@tel-ran.com"
+                color="gray.800"
+                _placeholder={{ color: "gray.400" }}
+                disabled={isPending}
               />
             </Field>
 
             <Field label="Password" invalid={!!errors.password} errorText={errors.password?.message}>
-              <Input 
-                {...register("password", { required: "Password is required" })} 
-                type="password" 
-                placeholder="password" 
+              <Input
+                {...register("password", { required: "Password is required" })}
+                type="password"
+                placeholder="password"
+                color="gray.800"
+                _placeholder={{ color: "gray.400" }}
+                disabled={isPending}
               />
             </Field>
 
-            <Button type="submit" colorPalette="blue" width="full" loading={isLoading}>
+            <Button
+              type="submit"
+              colorPalette="blue"
+              width="full"
+              loading={isPending} // Используем состояние из хука
+            >
               Sign In
             </Button>
           </Stack>
         </Fieldset.Root>
       </form>
-      
+
       <Text mt="4" fontSize="xs" color="gray.500" textAlign="center">
         Hint: admin@tel-ran.com / admin1234
       </Text>
