@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useAddEmployee } from "@/services/hooks/mutationHooks/useAddEmployee";
 import { EmployeeForm } from "../components/EmployeeForm";
 import type { NewEmployee } from "@/models/Employee";
-import { toaster } from "@/components/ui/toaster"; 
+import { toaster } from "@/components/ui/toaster-config"; 
 
 const AddEmployeePage = () => {
   const navigate = useNavigate();

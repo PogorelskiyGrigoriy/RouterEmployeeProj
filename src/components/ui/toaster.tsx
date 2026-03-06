@@ -6,13 +6,8 @@ import {
   Spinner,
   Stack,
   Toast,
-  createToaster,
 } from "@chakra-ui/react"
-
-export const toaster = createToaster({
-  placement: "bottom-end",
-  pauseOnPageIdle: true,
-})
+import { toaster } from "./toaster-config" // Импорт конфига
 
 export const Toaster = () => {
   return (
@@ -31,9 +26,6 @@ export const Toaster = () => {
                 <Toast.Description>{toast.description}</Toast.Description>
               )}
             </Stack>
-            {toast.action && (
-              <Toast.ActionTrigger>{toast.action.label}</Toast.ActionTrigger>
-            )}
             {toast.closable && <Toast.CloseTrigger />}
           </Toast.Root>
         )}
