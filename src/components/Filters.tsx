@@ -9,6 +9,7 @@ import {
 } from "@chakra-ui/react";
 import { useFilters, type DepartmentFilterValue } from "@/store/filters-store";
 import { DEPARTMENT_OPTIONS } from "@/models/Departments";
+import employeesConfig from "@/config/employees-config"; 
 import { toNumber } from "lodash";
 
 interface FiltersProps {
@@ -17,8 +18,8 @@ interface FiltersProps {
 
 const Filters = ({ onClose }: FiltersProps) => {
     const f = useFilters();
+    const config = employeesConfig;
 
-    // 1. Создаем локальный черновик, инициализируя его значениями из стора
     const [draft, setDraft] = useState({
         department: f.department,
         minSalary: f.minSalary,
@@ -27,137 +28,116 @@ const Filters = ({ onClose }: FiltersProps) => {
         maxAge: f.maxAge
     });
 
-    // 2. Логика валидации теперь работает на базе локального черновика
-    const isSalaryError = toNumber(draft.minSalary) > toNumber(draft.maxSalary) && draft.maxSalary !== "";
-    const isAgeError = toNumber(draft.minAge) > toNumber(draft.maxAge) && draft.maxAge !== "";
-    const hasError = isSalaryError || isAgeError;
+    // --- ЛОГИКА ВАЛИДАЦИИ ПО КОНФИГУ ---
 
-    // 3. Функция применения: одним махом обновляем глобальный стор
+    // 1. Проверка Зарплаты
+    const salaryMinVal = toNumber(draft.minSalary);
+    const salaryMaxVal = toNumber(draft.maxSalary);
+    
+    const isSalaryRangeInvalid = salaryMinVal > salaryMaxVal && draft.maxSalary !== "";
+    const isSalaryOutBound = 
+        (draft.minSalary !== "" && (salaryMinVal < config.salary.min || salaryMinVal > config.salary.max)) ||
+        (draft.maxSalary !== "" && (salaryMaxVal < config.salary.min || salaryMaxVal > config.salary.max));
+
+    // 2. Проверка Возраста
+    const ageMinVal = toNumber(draft.minAge);
+    const ageMaxVal = toNumber(draft.maxAge);
+
+    const isAgeRangeInvalid = ageMinVal > ageMaxVal && draft.maxAge !== "";
+    const isAgeOutBound = 
+        (draft.minAge !== "" && (ageMinVal < config.age.min || ageMinVal > config.age.max)) ||
+        (draft.maxAge !== "" && (ageMaxVal < config.age.min || ageMaxVal > config.age.max));
+
+    // Общий флаг ошибки для блокировки кнопки
+    const hasError = isSalaryRangeInvalid || isSalaryOutBound || isAgeRangeInvalid || isAgeOutBound;
+
     const handleApply = () => {
         if (hasError) return;
-
         f.setDepartment(draft.department);
         f.setMinSalary(draft.minSalary);
         f.setMaxSalary(draft.maxSalary);
         f.setMinAge(draft.minAge);
         f.setMaxAge(draft.maxAge);
-
         onClose();
     };
 
     return (
         <VStack gap="6" align="stretch" py="4">
-
             {/* 1. Департамент */}
             <Fieldset.Root>
-                <Fieldset.Legend fontSize="sm" fontWeight="bold" mb="2">
-                    Department
-                </Fieldset.Legend>
+                <Fieldset.Legend fontSize="sm" fontWeight="bold" mb="2">Department</Fieldset.Legend>
                 <select
                     value={draft.department}
                     onChange={(e) => setDraft({ ...draft, department: e.target.value as DepartmentFilterValue })}
-                    style={{
-                        width: '100%',
-                        padding: '10px',
-                        borderRadius: '6px',
-                        border: '1px solid #CBD5E0',
-                        backgroundColor: 'white',
-                        color: '#2D3748',
-                        fontSize: '14px',
-                        fontWeight: '500',
-                        outline: 'none',
-                        cursor: 'pointer'
-                    }}
+                    style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #CBD5E0' }}
                 >
                     {DEPARTMENT_OPTIONS.map((option) => (
-                        <option key={option} value={option} style={{ color: '#2D3748' }}>
-                            {option === "All" ? "All Departments" : option}
-                        </option>
+                        <option key={option} value={option}>{option === "All" ? "All Departments" : option}</option>
                     ))}
                 </select>
             </Fieldset.Root>
 
             {/* 2. Зарплата */}
-            <Fieldset.Root invalid={isSalaryError}>
+            <Fieldset.Root invalid={isSalaryRangeInvalid || isSalaryOutBound}>
                 <Fieldset.Legend fontSize="sm" fontWeight="bold" mb="2">
-                    Salary Range
+                    Salary ({config.salary.currency}{config.salary.min} - {config.salary.max})
                 </Fieldset.Legend>
                 <HStack gap="4">
                     <Input
-                        placeholder="Min"
-                        type="number"
+                        placeholder="Min" type="number"
                         value={draft.minSalary}
-                        onChange={(e) => setDraft({ ...draft, minSalary: e.target.value })}
-                        border={isSalaryError ? "2px solid red" : "1px solid #E2E8F0"}
+                        onChange={(e) => setDraft({...draft, minSalary: e.target.value})}
+                        border={(isSalaryRangeInvalid || isSalaryOutBound) ? "2px solid red" : "1px solid #E2E8F0"}
                     />
                     <Input
-                        placeholder="Max"
-                        type="number"
+                        placeholder="Max" type="number"
                         value={draft.maxSalary}
-                        onChange={(e) => setDraft({ ...draft, maxSalary: e.target.value })}
-                        border={isSalaryError ? "2px solid red" : "1px solid #E2E8F0"}
+                        onChange={(e) => setDraft({...draft, maxSalary: e.target.value})}
+                        border={(isSalaryRangeInvalid || isSalaryOutBound) ? "2px solid red" : "1px solid #E2E8F0"}
                     />
                 </HStack>
-                {isSalaryError && (
-                    <Text color="red.500" fontSize="xs" mt="1">Min salary cannot exceed Max</Text>
+                {isSalaryRangeInvalid && <Text color="red.500" fontSize="xs" mt="1">Min cannot exceed Max</Text>}
+                {isSalaryOutBound && !isSalaryRangeInvalid && (
+                    <Text color="red.500" fontSize="xs" mt="1">
+                        Please enter between {config.salary.min} and {config.salary.max}
+                    </Text>
                 )}
             </Fieldset.Root>
 
             {/* 3. Возраст */}
-            <Fieldset.Root invalid={isAgeError}>
+            <Fieldset.Root invalid={isAgeRangeInvalid || isAgeOutBound}>
                 <Fieldset.Legend fontSize="sm" fontWeight="bold" mb="2">
-                    Age Range
+                    Age ({config.age.min} - {config.age.max} years)
                 </Fieldset.Legend>
                 <HStack gap="4">
                     <Input
-                        placeholder="Min"
-                        type="number"
+                        placeholder="Min" type="number"
                         value={draft.minAge}
-                        onChange={(e) => setDraft({ ...draft, minAge: e.target.value })}
-                        border={isAgeError ? "2px solid red" : "1px solid #E2E8F0"}
+                        onChange={(e) => setDraft({...draft, minAge: e.target.value})}
+                        border={(isAgeRangeInvalid || isAgeOutBound) ? "2px solid red" : "1px solid #E2E8F0"}
                     />
                     <Input
-                        placeholder="Max"
-                        type="number"
+                        placeholder="Max" type="number"
                         value={draft.maxAge}
-                        onChange={(e) => setDraft({ ...draft, maxAge: e.target.value })}
-                        border={isAgeError ? "2px solid red" : "1px solid #E2E8F0"}
+                        onChange={(e) => setDraft({...draft, maxAge: e.target.value})}
+                        border={(isAgeRangeInvalid || isAgeOutBound) ? "2px solid red" : "1px solid #E2E8F0"}
                     />
                 </HStack>
-                {isAgeError && (
-                    <Text color="red.500" fontSize="xs" mt="1">Min age cannot exceed Max</Text>
+                {isAgeRangeInvalid && <Text color="red.500" fontSize="xs" mt="1">Min cannot exceed Max</Text>}
+                {isAgeOutBound && !isAgeRangeInvalid && (
+                    <Text color="red.500" fontSize="xs" mt="1">
+                        Age must be {config.age.min} to {config.age.max}
+                    </Text>
                 )}
             </Fieldset.Root>
 
-            {/* 4. Кнопки управления */}
             <HStack justify="space-between" mt="4">
-                <Button
-                    variant="ghost"
-                    colorPalette="red"
-                    onClick={() => {
-                        f.resetFilters(); // Сброс в глобальном сторе
-                        // Сброс в локальном черновике
-                        setDraft({
-                            department: "All",
-                            minSalary: "",
-                            maxSalary: "",
-                            minAge: "",
-                            maxAge: ""
-                        });
-                    }}
-                >
-                    Reset All
-                </Button>
-                <Button
-                    colorPalette="blue"
-                    onClick={handleApply}
-                    disabled={hasError}
-                    opacity={hasError ? 0.5 : 1}
-                >
-                    Show Results
-                </Button>
+                <Button variant="ghost" colorPalette="red" onClick={() => {
+                    f.resetFilters();
+                    setDraft({ department: "All", minSalary: "", maxSalary: "", minAge: "", maxAge: "" });
+                }}>Reset All</Button>
+                <Button colorPalette="blue" onClick={handleApply} disabled={hasError}>Show Results</Button>
             </HStack>
-
         </VStack>
     );
 };
