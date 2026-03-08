@@ -1,144 +1,163 @@
-import { useState } from "react";
-import {
-    VStack,
-    HStack,
-    Input,
-    Button,
-    Fieldset,
-    Text
-} from "@chakra-ui/react";
+"use client"
+
+import { VStack, HStack, Input, Button } from "@chakra-ui/react";
+import { useForm } from "react-hook-form";
 import { useFilters, type DepartmentFilterValue } from "@/store/filters-store";
 import { DEPARTMENT_OPTIONS } from "@/models/Departments";
-import employeesConfig from "@/config/employees-config"; 
-import { toNumber } from "lodash";
+import employeesConfig from "@/config/employees-config";
+import { Field } from "@/components/ui/field";
+import { NativeSelectField, NativeSelectRoot } from "@/components/ui/native-select";
 
 interface FiltersProps {
     onClose: () => void;
+}
+
+// Тип для формы фильтров (используем числа, так как RHF сделает каст через valueAsNumber)
+interface FilterFormValues {
+    department: DepartmentFilterValue;
+    minSalary: number;
+    maxSalary: number;
+    minAge: number;
+    maxAge: number;
 }
 
 const Filters = ({ onClose }: FiltersProps) => {
     const f = useFilters();
     const config = employeesConfig;
 
-    const [draft, setDraft] = useState({
-        department: f.department,
-        minSalary: f.minSalary,
-        maxSalary: f.maxSalary,
-        minAge: f.minAge,
-        maxAge: f.maxAge
+    // Инициализируем форму значениями из стора
+    const { 
+        register, 
+        handleSubmit, 
+        reset,
+        watch,
+        formState: { errors, isValid } 
+    } = useForm<FilterFormValues>({
+        mode: "onChange",
+        defaultValues: {
+            department: f.department,
+            minSalary: Number(f.minSalary),
+            maxSalary: Number(f.maxSalary),
+            minAge: Number(f.minAge),
+            maxAge: Number(f.maxAge),
+        }
     });
 
-    // --- ЛОГИКА ВАЛИДАЦИИ ПО КОНФИГУ ---
+    // Наблюдаем за значениями для кросс-валидации (Min <= Max)
+    const currentMinSalary = watch("minSalary");
+    const currentMinAge = watch("minAge");
 
-    // 1. Проверка Зарплаты
-    const salaryMinVal = toNumber(draft.minSalary);
-    const salaryMaxVal = toNumber(draft.maxSalary);
-    
-    const isSalaryRangeInvalid = salaryMinVal > salaryMaxVal && draft.maxSalary !== "";
-    const isSalaryOutBound = 
-        (draft.minSalary !== "" && (salaryMinVal < config.salary.min || salaryMinVal > config.salary.max)) ||
-        (draft.maxSalary !== "" && (salaryMaxVal < config.salary.min || salaryMaxVal > config.salary.max));
-
-    // 2. Проверка Возраста
-    const ageMinVal = toNumber(draft.minAge);
-    const ageMaxVal = toNumber(draft.maxAge);
-
-    const isAgeRangeInvalid = ageMinVal > ageMaxVal && draft.maxAge !== "";
-    const isAgeOutBound = 
-        (draft.minAge !== "" && (ageMinVal < config.age.min || ageMinVal > config.age.max)) ||
-        (draft.maxAge !== "" && (ageMaxVal < config.age.min || ageMaxVal > config.age.max));
-
-    // Общий флаг ошибки для блокировки кнопки
-    const hasError = isSalaryRangeInvalid || isSalaryOutBound || isAgeRangeInvalid || isAgeOutBound;
-
-    const handleApply = () => {
-        if (hasError) return;
-        f.setDepartment(draft.department);
-        f.setMinSalary(draft.minSalary);
-        f.setMaxSalary(draft.maxSalary);
-        f.setMinAge(draft.minAge);
-        f.setMaxAge(draft.maxAge);
+    const handleApply = (data: FilterFormValues) => {
+        // Синхронизируем с Zustand стором (приводим обратно к строкам, если стор их ждет)
+        f.setDepartment(data.department);
+        f.setMinSalary(String(data.minSalary));
+        f.setMaxSalary(String(data.maxSalary));
+        f.setMinAge(String(data.minAge));
+        f.setMaxAge(String(data.maxAge));
         onClose();
     };
 
+    const handleReset = () => {
+        f.resetFilters();
+        // Сбрасываем форму к начальным значениям конфига
+        reset({
+            department: "All",
+            minSalary: config.salary.min,
+            maxSalary: config.salary.max,
+            minAge: config.age.min,
+            maxAge: config.age.max,
+        });
+    };
+
     return (
-        <VStack gap="6" align="stretch" py="4">
-            {/* 1. Департамент */}
-            <Fieldset.Root>
-                <Fieldset.Legend fontSize="sm" fontWeight="bold" mb="2">Department</Fieldset.Legend>
-                <select
-                    value={draft.department}
-                    onChange={(e) => setDraft({ ...draft, department: e.target.value as DepartmentFilterValue })}
-                    style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #CBD5E0' }}
+        <form onSubmit={handleSubmit(handleApply)}>
+            <VStack gap="6" align="stretch" py="4">
+                
+                {/* 1. Департамент */}
+                <Field label="Department">
+                    <NativeSelectRoot>
+                        <NativeSelectField {...register("department")}>
+                            {DEPARTMENT_OPTIONS.map((option) => (
+                                <option key={option} value={option}>
+                                    {option === "All" ? "All Departments" : option}
+                                </option>
+                            ))}
+                        </NativeSelectField>
+                    </NativeSelectRoot>
+                </Field>
+
+                {/* 2. Зарплата */}
+                <Field 
+                    label={`Salary Range (${config.salary.currency})`}
+                    invalid={!!errors.minSalary || !!errors.maxSalary}
+                    errorText={errors.minSalary?.message || errors.maxSalary?.message}
                 >
-                    {DEPARTMENT_OPTIONS.map((option) => (
-                        <option key={option} value={option}>{option === "All" ? "All Departments" : option}</option>
-                    ))}
-                </select>
-            </Fieldset.Root>
+                    <HStack gap="4" width="full">
+                        <Input 
+                            type="number"
+                            placeholder="Min"
+                            {...register("minSalary", { 
+                                valueAsNumber: true,
+                                min: { value: config.salary.min, message: `Min salary is ${config.salary.min}` },
+                                max: { value: config.salary.max, message: `Max salary is ${config.salary.max}` }
+                            })} 
+                        />
+                        <Input 
+                            type="number"
+                            placeholder="Max"
+                            {...register("maxSalary", { 
+                                valueAsNumber: true,
+                                validate: (val) => val >= currentMinSalary || "Cannot be less than Min",
+                                min: { value: config.salary.min, message: `Min salary is ${config.salary.min}` },
+                                max: { value: config.salary.max, message: `Max salary is ${config.salary.max}` }
+                            })} 
+                        />
+                    </HStack>
+                </Field>
 
-            {/* 2. Зарплата */}
-            <Fieldset.Root invalid={isSalaryRangeInvalid || isSalaryOutBound}>
-                <Fieldset.Legend fontSize="sm" fontWeight="bold" mb="2">
-                    Salary ({config.salary.currency}{config.salary.min} - {config.salary.max})
-                </Fieldset.Legend>
-                <HStack gap="4">
-                    <Input
-                        placeholder="Min" type="number"
-                        value={draft.minSalary}
-                        onChange={(e) => setDraft({...draft, minSalary: e.target.value})}
-                        border={(isSalaryRangeInvalid || isSalaryOutBound) ? "2px solid red" : "1px solid #E2E8F0"}
-                    />
-                    <Input
-                        placeholder="Max" type="number"
-                        value={draft.maxSalary}
-                        onChange={(e) => setDraft({...draft, maxSalary: e.target.value})}
-                        border={(isSalaryRangeInvalid || isSalaryOutBound) ? "2px solid red" : "1px solid #E2E8F0"}
-                    />
+                {/* 3. Возраст */}
+                <Field 
+                    label="Age Range"
+                    invalid={!!errors.minAge || !!errors.maxAge}
+                    errorText={errors.minAge?.message || errors.maxAge?.message}
+                >
+                    <HStack gap="4" width="full">
+                        <Input 
+                            type="number"
+                            placeholder="Min"
+                            {...register("minAge", { 
+                                valueAsNumber: true,
+                                min: { value: config.age.min, message: `Min age: ${config.age.min}` },
+                                max: { value: config.age.max, message: `Max age: ${config.age.max}` }
+                            })} 
+                        />
+                        <Input 
+                            type="number"
+                            placeholder="Max"
+                            {...register("maxAge", { 
+                                valueAsNumber: true,
+                                validate: (val) => val >= currentMinAge || "Cannot be less than Min",
+                                min: { value: config.age.min, message: `Min age: ${config.age.min}` },
+                                max: { value: config.age.max, message: `Max age: ${config.age.max}` }
+                            })} 
+                        />
+                    </HStack>
+                </Field>
+
+                <HStack justify="space-between" mt="4">
+                    <Button variant="ghost" colorPalette="red" onClick={handleReset}>
+                        Reset All
+                    </Button>
+                    <Button 
+                        type="submit" 
+                        colorPalette="blue" 
+                        disabled={!isValid}
+                    >
+                        Show Results
+                    </Button>
                 </HStack>
-                {isSalaryRangeInvalid && <Text color="red.500" fontSize="xs" mt="1">Min cannot exceed Max</Text>}
-                {isSalaryOutBound && !isSalaryRangeInvalid && (
-                    <Text color="red.500" fontSize="xs" mt="1">
-                        Please enter between {config.salary.min} and {config.salary.max}
-                    </Text>
-                )}
-            </Fieldset.Root>
-
-            {/* 3. Возраст */}
-            <Fieldset.Root invalid={isAgeRangeInvalid || isAgeOutBound}>
-                <Fieldset.Legend fontSize="sm" fontWeight="bold" mb="2">
-                    Age ({config.age.min} - {config.age.max} years)
-                </Fieldset.Legend>
-                <HStack gap="4">
-                    <Input
-                        placeholder="Min" type="number"
-                        value={draft.minAge}
-                        onChange={(e) => setDraft({...draft, minAge: e.target.value})}
-                        border={(isAgeRangeInvalid || isAgeOutBound) ? "2px solid red" : "1px solid #E2E8F0"}
-                    />
-                    <Input
-                        placeholder="Max" type="number"
-                        value={draft.maxAge}
-                        onChange={(e) => setDraft({...draft, maxAge: e.target.value})}
-                        border={(isAgeRangeInvalid || isAgeOutBound) ? "2px solid red" : "1px solid #E2E8F0"}
-                    />
-                </HStack>
-                {isAgeRangeInvalid && <Text color="red.500" fontSize="xs" mt="1">Min cannot exceed Max</Text>}
-                {isAgeOutBound && !isAgeRangeInvalid && (
-                    <Text color="red.500" fontSize="xs" mt="1">
-                        Age must be {config.age.min} to {config.age.max}
-                    </Text>
-                )}
-            </Fieldset.Root>
-
-            <HStack justify="space-between" mt="4">
-                <Button variant="ghost" colorPalette="red" onClick={() => {
-                    f.resetFilters();
-                    setDraft({ department: "All", minSalary: "", maxSalary: "", minAge: "", maxAge: "" });
-                }}>Reset All</Button>
-                <Button colorPalette="blue" onClick={handleApply} disabled={hasError}>Show Results</Button>
-            </HStack>
-        </VStack>
+            </VStack>
+        </form>
     );
 };
 
