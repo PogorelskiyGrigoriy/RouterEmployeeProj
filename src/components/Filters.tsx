@@ -3,7 +3,6 @@
 import { VStack, HStack, Input, Button } from "@chakra-ui/react";
 import { useForm } from "react-hook-form";
 import { useFilters, type DepartmentFilterValue } from "@/store/filters-store";
-import { DEPARTMENT_OPTIONS } from "@/models/Departments";
 import employeesConfig from "@/config/employees-config";
 import { Field } from "@/components/ui/field";
 import { NativeSelectField, NativeSelectRoot } from "@/components/ui/native-select";
@@ -12,7 +11,7 @@ interface FiltersProps {
     onClose: () => void;
 }
 
-// Тип для формы фильтров (используем числа, так как RHF сделает каст через valueAsNumber)
+// Теперь этот интерфейс полностью совпадает с FiltersState в сторе
 interface FilterFormValues {
     department: DepartmentFilterValue;
     minSalary: number;
@@ -22,10 +21,10 @@ interface FilterFormValues {
 }
 
 const Filters = ({ onClose }: FiltersProps) => {
-    const f = useFilters();
+    // Достаем методы из стора
+    const { setFilters, resetFilters, ...currentFilters } = useFilters();
     const config = employeesConfig;
 
-    // Инициализируем форму значениями из стора
     const { 
         register, 
         handleSubmit, 
@@ -34,32 +33,28 @@ const Filters = ({ onClose }: FiltersProps) => {
         formState: { errors, isValid } 
     } = useForm<FilterFormValues>({
         mode: "onChange",
+        // Передаем текущие значения из стора напрямую, так как там уже числа
         defaultValues: {
-            department: f.department,
-            minSalary: Number(f.minSalary),
-            maxSalary: Number(f.maxSalary),
-            minAge: Number(f.minAge),
-            maxAge: Number(f.maxAge),
+            department: currentFilters.department,
+            minSalary: currentFilters.minSalary,
+            maxSalary: currentFilters.maxSalary,
+            minAge: currentFilters.minAge,
+            maxAge: currentFilters.maxAge,
         }
     });
 
-    // Наблюдаем за значениями для кросс-валидации (Min <= Max)
     const currentMinSalary = watch("minSalary");
     const currentMinAge = watch("minAge");
 
     const handleApply = (data: FilterFormValues) => {
-        // Синхронизируем с Zustand стором (приводим обратно к строкам, если стор их ждет)
-        f.setDepartment(data.department);
-        f.setMinSalary(String(data.minSalary));
-        f.setMaxSalary(String(data.maxSalary));
-        f.setMinAge(String(data.minAge));
-        f.setMaxAge(String(data.maxAge));
+        // Одной строкой обновляем весь стор
+        setFilters(data);
         onClose();
     };
 
     const handleReset = () => {
-        f.resetFilters();
-        // Сбрасываем форму к начальным значениям конфига
+        resetFilters(); // Сброс Zustand
+        // Сброс полей формы к начальным значениям конфига
         reset({
             department: "All",
             minSalary: config.salary.min,
@@ -77,10 +72,9 @@ const Filters = ({ onClose }: FiltersProps) => {
                 <Field label="Department">
                     <NativeSelectRoot>
                         <NativeSelectField {...register("department")}>
-                            {DEPARTMENT_OPTIONS.map((option) => (
-                                <option key={option} value={option}>
-                                    {option === "All" ? "All Departments" : option}
-                                </option>
+                            <option value="All">All Departments</option>
+                            {config.departments.map((d) => (
+                                <option key={d} value={d}>{d}</option>
                             ))}
                         </NativeSelectField>
                     </NativeSelectRoot>
@@ -98,8 +92,7 @@ const Filters = ({ onClose }: FiltersProps) => {
                             placeholder="Min"
                             {...register("minSalary", { 
                                 valueAsNumber: true,
-                                min: { value: config.salary.min, message: `Min salary is ${config.salary.min}` },
-                                max: { value: config.salary.max, message: `Max salary is ${config.salary.max}` }
+                                min: { value: config.salary.min, message: `Min: ${config.salary.min}` }
                             })} 
                         />
                         <Input 
@@ -107,9 +100,8 @@ const Filters = ({ onClose }: FiltersProps) => {
                             placeholder="Max"
                             {...register("maxSalary", { 
                                 valueAsNumber: true,
-                                validate: (val) => val >= currentMinSalary || "Cannot be less than Min",
-                                min: { value: config.salary.min, message: `Min salary is ${config.salary.min}` },
-                                max: { value: config.salary.max, message: `Max salary is ${config.salary.max}` }
+                                validate: (val) => val >= currentMinSalary || "Min > Max",
+                                max: { value: config.salary.max, message: `Max: ${config.salary.max}` }
                             })} 
                         />
                     </HStack>
@@ -127,8 +119,7 @@ const Filters = ({ onClose }: FiltersProps) => {
                             placeholder="Min"
                             {...register("minAge", { 
                                 valueAsNumber: true,
-                                min: { value: config.age.min, message: `Min age: ${config.age.min}` },
-                                max: { value: config.age.max, message: `Max age: ${config.age.max}` }
+                                min: { value: config.age.min, message: `Min age: ${config.age.min}` }
                             })} 
                         />
                         <Input 
@@ -136,8 +127,7 @@ const Filters = ({ onClose }: FiltersProps) => {
                             placeholder="Max"
                             {...register("maxAge", { 
                                 valueAsNumber: true,
-                                validate: (val) => val >= currentMinAge || "Cannot be less than Min",
-                                min: { value: config.age.min, message: `Min age: ${config.age.min}` },
+                                validate: (val) => val >= currentMinAge || "Min > Max",
                                 max: { value: config.age.max, message: `Max age: ${config.age.max}` }
                             })} 
                         />
