@@ -1,36 +1,82 @@
-// HomePage.tsx
-
-import { Box, Heading, Text, VStack, Container } from "@chakra-ui/react";
+import { 
+  Box, 
+  Heading, 
+  Text, 
+  VStack, 
+  Container, 
+  HStack, 
+  Button,
+} from "@chakra-ui/react";
+import { 
+  DialogBody, 
+  DialogCloseTrigger, 
+  DialogContent, 
+  DialogHeader, 
+  DialogRoot, 
+  DialogTitle, 
+  DialogTrigger 
+} from "@/components/ui/dialog"
+import { LuFilter } from "react-icons/lu"; 
 import Employees from "@/components/Employees";
+import Filters from "@/components/Filters";
+import { useFilteredEmployees } from "@/services/hooks/useFilteredEmployees";
+import { useState } from "react";
 
 const HomePage = () => {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { filteredCount, totalCount } = useFilteredEmployees();
+
+  // Проверка: изменены ли фильтры (нужна для подсветки кнопки)
+  const isFiltered = filteredCount !== totalCount;
+
   return (
     <Container maxW="container.xl" py={{ base: "4", md: "10" }}>
-      {/* Используем массив или объект для адаптивности:
-          align: { base: "center", md: "start" } — центрируем на мобилках 
-      */}
-      <VStack 
-        align={{ base: "center", md: "start" }} 
-        textAlign={{ base: "center", md: "left" }}
-        gap={{ base: "1", md: "2" }} 
+      <HStack 
+        justify="space-between" 
+        align="flex-end" 
         mb={{ base: "6", md: "10" }}
+        wrap="wrap"
+        gap="4"
       >
-        <Heading 
-          // base: размер для смартфонов, md: для планшетов и выше
-          size={{ base: "xl", md: "3xl" }} 
-          letterSpacing="tight"
+        <VStack align="flex-start" gap="2">
+          <Heading size={{ base: "xl", md: "3xl" }} letterSpacing="tight">
+            Team Directory
+          </Heading>
+          <Text color="fg.muted" fontSize={{ base: "sm", md: "lg" }} maxW="2xl">
+            Overview of all active organization members and their departments.
+          </Text>
+        </VStack>
+
+        {/* --- МОДАЛЬНОЕ ОКНО С ФИЛЬТРАМИ --- */}
+        <DialogRoot 
+          open={isDialogOpen} 
+          onOpenChange={(e) => setIsDialogOpen(e.open)}
+          size="sm"
+          placement="center"
         >
-          Team Directory
-        </Heading>
-        
-        <Text 
-          color="fg.muted" 
-          fontSize={{ base: "sm", md: "lg" }}
-          maxW={{ base: "xs", md: "2xl" }} // Ограничиваем ширину, чтобы текст не растягивался во всю ширь
-        >
-          Overview of all active organization members and their departments.
-        </Text>
-      </VStack>
+          <DialogTrigger asChild>
+            <Button 
+              variant={isFiltered ? "solid" : "outline"} 
+              colorPalette={isFiltered ? "blue" : "gray"}
+              size="md"
+            >
+              <LuFilter /> 
+              Filters
+              {isFiltered && ` (${filteredCount})`}
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Filter Employees</DialogTitle>
+            </DialogHeader>
+            <DialogBody>
+              {/* Передаем функцию закрытия, чтобы модалка захлопнулась при нажатии "Show Results" */}
+              <Filters onClose={() => setIsDialogOpen(false)} />
+            </DialogBody>
+            <DialogCloseTrigger />
+          </DialogContent>
+        </DialogRoot>
+      </HStack>
 
       <Box mt="4">
         <Employees />
