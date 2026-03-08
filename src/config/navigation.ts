@@ -2,7 +2,7 @@
 
 export const ROUTES = {
   HOME: "/",
-  LOGIN: "/login", // Добавили маршрут для логина
+  LOGIN: "/login",
   ADD_EMPLOYEE: "/add-employee",
   STATS_AGE: "/statistics/age",
   STATS_SALARY: "/statistics/salary",

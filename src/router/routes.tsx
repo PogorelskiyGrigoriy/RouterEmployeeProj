@@ -3,7 +3,7 @@ import { ROUTES } from "@/config/navigation";
 import { ProtectedRoute } from "@/components/ProtectedRoute"; // Наш охранник
 import LayoutPage from "@/pages/LayoutPage";
 import HomePage from "@/pages/HomePage";
-import LoginPage from "@/pages/LoginPage"; // Добавили страницу логина
+import LoginPage from "@/pages/LoginPage";
 import AddEmployeePage from "@/pages/AddEmployeePage";
 import AgeStatisticsPage from "@/pages/AgeStatisticsPage";
 import SalaryStatisticsPage from "@/pages/SalaryStatisticsPage";

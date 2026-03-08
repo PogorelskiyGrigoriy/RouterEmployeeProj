@@ -1,6 +1,6 @@
-// src/hooks/useLogin.ts
+
 import { useMutation } from '@tanstack/react-query';
-import { useNavigate, useLocation } from 'react-router-dom'; // Добавили useLocation
+import { useNavigate, useLocation } from 'react-router-dom';
 import authService from '@/services/AuthServiceImplementation';
 import { useAuthStore } from '@/store/useAuthStore';
 import { ROUTES } from '@/config/navigation';

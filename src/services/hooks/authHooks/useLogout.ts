@@ -1,7 +1,3 @@
-/**
- * @module useLogout
- * Хук для выхода пользователя из системы.
- */
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import authService from '@/services/AuthServiceImplementation';
