@@ -24,10 +24,6 @@ const DUMMY_LOGIN_USERS: Record<string, DummyUser> = {
     }
 };
 
-/**
- * Имитация задержки ответа сервера.
- * @param ms - количество миллисекунд задержки.
- */
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
 class AuthServiceDummy implements AuthService {

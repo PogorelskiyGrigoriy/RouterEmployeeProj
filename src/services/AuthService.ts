@@ -17,8 +17,5 @@ export default interface AuthService {
      */
     login(loginData: LoginData): Promise<UserData>;
 
-    /**
-     * Выполняет выход пользователя из системы.
-     */
     logout(): Promise<void>;
 }
