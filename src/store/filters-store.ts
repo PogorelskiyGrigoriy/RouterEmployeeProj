@@ -1,26 +1,13 @@
 import { create } from "zustand";
 import employeesConfig from "@/config/employees-config";
-import type { Department } from "@/models/Departments";
+import type { EmployeeFilters } from "@/models/Filters"; // Используем общий интерфейс
 
-// 1. Создаем тип здесь. Он расширяет базовый Department, добавляя "All"
-export type DepartmentFilterValue = Department | "All";
-
-// 2. Описываем структуру только данных
-interface FiltersState {
-    department: DepartmentFilterValue;
-    minSalary: number;
-    maxSalary: number;
-    minAge: number;
-    maxAge: number;
-}
-
-// 3. Описываем стор целиком (данные + методы)
-interface FiltersStore extends FiltersState {
-    setFilters: (filters: Partial<FiltersState>) => void;
+interface FiltersStore extends EmployeeFilters {
+    setFilters: (filters: Partial<EmployeeFilters>) => void;
     resetFilters: () => void;
 }
 
-const initialFilters: FiltersState = {
+const initialFilters: EmployeeFilters = {
     department: "All",
     minSalary: employeesConfig.salary.min,
     maxSalary: employeesConfig.salary.max,
@@ -30,7 +17,6 @@ const initialFilters: FiltersState = {
 
 export const useFilters = create<FiltersStore>((set) => ({
     ...initialFilters,
-    // Универсальный сеттер, который принимает объект
     setFilters: (updates) => set((state) => ({ ...state, ...updates })),
     resetFilters: () => set(initialFilters),
 }));

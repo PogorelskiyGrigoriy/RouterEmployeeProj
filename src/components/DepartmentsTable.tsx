@@ -2,7 +2,7 @@
 
 import { Table } from '@chakra-ui/react'
 import { CountBadge, CurrencyText, AgeText } from './ui/DataDisplay'
-import type { DepartmentInfo } from '@/models/DepartmentInfo'
+import type { DepartmentInfo } from '@/models/Departments'
 
 const DepartmentsTable = ({ departmentsInfo }: { departmentsInfo: DepartmentInfo[] }) => (
   <Table.Root variant="line" size="md" showColumnBorder shadow="sm" borderRadius="lg">

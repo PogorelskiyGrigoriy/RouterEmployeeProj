@@ -1,5 +1,4 @@
-import type { Employee } from "@/models/Employee";
-import type { EmployeeUpdater } from "@/models/EmployeeUpdater";
+import type { Employee, EmployeeUpdater } from "@/models/Employee"; // Импорт из одного файла
 import apiClient from "@/services/ApiClientImplementation";
 import useEmployeesMutation from "./useEmployeesMutation";
 

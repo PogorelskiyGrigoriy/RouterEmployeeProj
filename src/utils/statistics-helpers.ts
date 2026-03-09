@@ -1,13 +1,13 @@
 // src/utils/statistics-helpers.ts
 import { range, countBy } from "lodash"
-import type { GroupingConfig } from "@/models/GroupingConfig"
+import type { GroupingConfig } from "@/config/employees-config"
 
 /**
  * Группирует массив данных по числовым интервалам
  */
 export const getBinnedData = <T>(
   items: T[],
-  config: GroupingConfig, // Используем общий интерфейс
+  config: GroupingConfig, 
   valueExtractor: (item: T) => number,
   formatters: {
     xKey: (v: number) => string

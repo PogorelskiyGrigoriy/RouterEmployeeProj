@@ -1,11 +1,13 @@
+// src/services/hooks/useDepartmentStats.ts
 import { useMemo } from "react";
 import { groupBy, meanBy } from "lodash";
 import useEmployees from "./useEmployees";
 import employeesConfig from "@/config/employees-config";
-import type { DepartmentInfo } from "@/models/DepartmentInfo";
+import type { DepartmentInfo } from "@/models/Departments"; // Импорт из нового места
 import { calculateAge } from "@/utils/dateUtils";
 
 export const useDepartmentStats = () => {
+  // Хук автоматически получит отфильтрованных сотрудников!
   const { employees, isLoading } = useEmployees();
 
   const departmentsInfo = useMemo(() => {

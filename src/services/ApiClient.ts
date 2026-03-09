@@ -1,22 +1,11 @@
-//ApiClient.ts
-
-import type { Employee, NewEmployee } from "@/models/Employee";
+// src/services/ApiClient.ts
+import type { Employee, NewEmployee, EmployeeUpdater } from "@/models/Employee";
 import type { AxiosRequestConfig } from "axios";
-import type { EmployeeUpdater } from "@/models/EmployeeUpdater";
-
-// 1. Определяем тип фильтров здесь (или импортируем из моделей)
-export interface EmployeeFilters {
-  department?: string;
-  minSalary?: number;
-  maxSalary?: number;
-  minAge?: number;
-  maxAge?: number;
-}
+import type { EmployeeFilters } from "@/models/Filters"; // Импортируем общее
 
 export interface ApiClient {
-  // 2. Обновляем сигнатуру: первым аргументом теперь идут фильтры
+  // Теперь всё строго по контракту
   getEmployees(filters?: EmployeeFilters, config?: AxiosRequestConfig): Promise<Employee[]>;
-  
   addEmployee(e: NewEmployee): Promise<Employee>;
   deleteEmployee(id: string): Promise<void>;
   updateEmployee(updater: EmployeeUpdater): Promise<Employee>;

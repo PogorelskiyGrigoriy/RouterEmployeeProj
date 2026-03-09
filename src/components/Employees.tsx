@@ -1,4 +1,4 @@
-import { useFilteredEmployees } from "@/services/hooks/useFilteredEmployees"; // МЕНЯЕМ ХУК
+import { useFilteredEmployees } from "@/services/hooks/useFilteredEmployees"; 
 import { Table, Spinner, Box, Center, Text, VStack } from "@chakra-ui/react";
 import { CurrencyText, DateText, EmployeeIdentity, DeptBadge } from "./ui/DataDisplay";
 import { calculateAge } from "@/utils/dateUtils";

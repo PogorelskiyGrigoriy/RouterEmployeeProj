@@ -1,9 +1,9 @@
-// ApiClientImplementation.ts
+// src/services/ApiClientImplementation.ts
 import api from "@/api/axiosInstance";
 import type { AxiosRequestConfig } from "axios";
-import type { ApiClient, EmployeeFilters } from "./ApiClient"; 
-import type { Employee, NewEmployee } from "@/models/Employee";
-import type { EmployeeUpdater } from "@/models/EmployeeUpdater";
+import type { ApiClient } from "./ApiClient"; 
+import type { EmployeeFilters } from "@/models/Filters"; 
+import type { Employee, NewEmployee, EmployeeUpdater } from "@/models/Employee"; 
 import { getLimitDate } from "@/utils/dateUtils"; 
 
 const ENDPOINTS = {
@@ -21,7 +21,7 @@ class ApiClientJsonServer implements ApiClient {
       if (filters.minSalary !== undefined) params.salary_gte = filters.minSalary;
       if (filters.maxSalary !== undefined) params.salary_lte = filters.maxSalary;
 
-      // Используем утилиту для перевода возраста в даты для json-server
+      // Перевод возраста в даты ISO для json-server
       if (filters.minAge !== undefined) {
         params.birthDate_lte = getLimitDate(filters.minAge);
       }
@@ -48,6 +48,7 @@ class ApiClientJsonServer implements ApiClient {
   }
 
   async updateEmployee({ id, fields }: EmployeeUpdater): Promise<Employee> {
+    // Используем PATCH, чтобы обновить только переданные поля (Partial)
     const { data } = await api.patch<Employee>(`${ENDPOINTS.EMPLOYEES}/${id}`, fields);
     return data;
   }
