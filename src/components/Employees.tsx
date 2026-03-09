@@ -1,5 +1,6 @@
 import { useFilteredEmployees } from "@/services/hooks/useFilteredEmployees"; 
 import { useSortStore } from "@/store/sort-store"; 
+import { useAuthStore } from "@/store/useAuthStore"; 
 import { Table, Spinner, Box, Center, Text, VStack, HStack } from "@chakra-ui/react";
 import { CurrencyText, DateText, EmployeeIdentity, DeptBadge } from "./ui/DataDisplay";
 import { calculateAge } from "@/utils/dateUtils";
@@ -8,13 +9,9 @@ import type { Employee } from "@/models/Employee";
 import { DeleteEmployeeAction } from "./DeleteEmployeeAction"; 
 
 /**
- * Вспомогательный компонент для заголовка с сортировкой
+ * Вспомогательный компонент заголовка
  */
-const SortableColumn = ({ 
-  field, 
-  children, 
-  textAlign = "start" 
-}: { 
+const SortableColumn = ({ field, children, textAlign = "start" }: { 
   field: keyof Employee; 
   children: React.ReactNode;
   textAlign?: "start" | "end" | "center";
@@ -27,9 +24,7 @@ const SortableColumn = ({
       onClick={() => toggleSort(field)} 
       cursor="pointer"
       _hover={{ bg: "blackAlpha.100" }}
-      userSelect="none"
       textAlign={textAlign}
-      transition="background 0.2s"
     >
       <HStack gap="1" justifyContent={textAlign === "end" ? "flex-end" : "flex-start"}>
         <Text fontWeight="bold">{children}</Text>
@@ -45,6 +40,11 @@ const SortableColumn = ({
 
 const Employees = () => {
   const { employees, isLoading, error, filteredCount } = useFilteredEmployees();
+  
+  // Достаем пользователя из Zustand. 
+  // Используем селектор для оптимизации (компонент перерисуется только при изменении user)
+  const user = useAuthStore((state) => state.user);
+  const isAdmin = user?.role === "ADMIN";
 
   if (isLoading) return <Center h="200px"><Spinner size="xl" color="blue.500" /></Center>;
   if (error) return <Center h="200px"><Text color="red.500">Error: {error.message}</Text></Center>;
@@ -55,7 +55,6 @@ const Employees = () => {
         <VStack gap="2">
           <LuSearchX size="40px" style={{ opacity: 0.5 }} />
           <Text fontWeight="bold">No employees found</Text>
-          <Text fontSize="sm" color="fg.muted">Try adjusting your filters or sort order.</Text>
         </VStack>
       </Center>
     );
@@ -68,27 +67,23 @@ const Employees = () => {
           <Table.Row bg="bg.subtle">
             <SortableColumn field="fullName">Employee</SortableColumn>
             <Table.ColumnHeader fontWeight="bold">Department</Table.ColumnHeader>
-            
             <Table.ColumnHeader display={{ base: "none", md: "table-cell" }}>
                <SortableColumn field="birthDate">Date of Birth (Age)</SortableColumn>
             </Table.ColumnHeader>
-
             <SortableColumn field="salary" textAlign="end">Salary</SortableColumn>
             
-            {/* 1. Новая колонка для действий */}
-            <Table.ColumnHeader textAlign="end" fontWeight="bold" minW="80px">
-              Actions
-            </Table.ColumnHeader>
+            {/* Условный рендеринг заголовка действий */}
+            {isAdmin && (
+              <Table.ColumnHeader textAlign="end" fontWeight="bold" minW="80px">
+                Actions
+              </Table.ColumnHeader>
+            )}
           </Table.Row>
         </Table.Header>
 
         <Table.Body>
           {employees.map((empl) => (
-            <Table.Row 
-              key={empl.id} 
-              _hover={{ bg: "blackAlpha.50" }} 
-              transition="background 0.2s"
-            >
+            <Table.Row key={empl.id} _hover={{ bg: "blackAlpha.50" }}>
               <Table.Cell>
                 <EmployeeIdentity name={empl.fullName} avatar={empl.avatar} />
               </Table.Cell>
@@ -107,10 +102,12 @@ const Employees = () => {
                 <CurrencyText value={empl.salary} />
               </Table.Cell>
               
-              {/* 2. Ячейка с кнопкой удаления */}
-              <Table.Cell textAlign="end">
-                <DeleteEmployeeAction id={empl.id} name={empl.fullName} />
-              </Table.Cell>
+              {/* Условный рендеринг кнопки удаления */}
+              {isAdmin && (
+                <Table.Cell textAlign="end">
+                  <DeleteEmployeeAction id={empl.id} name={empl.fullName} />
+                </Table.Cell>
+              )}
             </Table.Row>
           ))}
         </Table.Body>

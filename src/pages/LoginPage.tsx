@@ -8,7 +8,8 @@ import {
   Input,
   Stack,
   Text,
-  Alert
+  Alert,
+  VStack
 } from "@chakra-ui/react";
 import { Field } from "@/components/ui/field";
 import { useLogin } from "@/services/hooks/authHooks/useLogin";
@@ -88,9 +89,14 @@ const LoginPage = () => {
         </Fieldset.Root>
       </form>
 
-      <Text mt="4" fontSize="xs" color="gray.500" textAlign="center">
-        Hint: admin@tel-ran.com / admin1234
-      </Text>
+      <VStack mt="4" gap="1">
+        <Text fontSize="xs" color="gray.500" textAlign="center">
+          Admin: admin@tel-ran.com / admin1234
+        </Text>
+        <Text fontSize="xs" color="gray.500" textAlign="center">
+          User: user@tel-ran.com / user1234
+        </Text>
+      </VStack>
     </Box>
   );
 };
