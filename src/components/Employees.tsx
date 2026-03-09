@@ -1,10 +1,11 @@
 import { useFilteredEmployees } from "@/services/hooks/useFilteredEmployees"; 
-import { useSortStore } from "@/store/sort-store"; // Импортируем наш стор
+import { useSortStore } from "@/store/sort-store"; 
 import { Table, Spinner, Box, Center, Text, VStack, HStack } from "@chakra-ui/react";
 import { CurrencyText, DateText, EmployeeIdentity, DeptBadge } from "./ui/DataDisplay";
 import { calculateAge } from "@/utils/dateUtils";
 import { LuSearchX, LuArrowUp, LuArrowDown, LuArrowUpDown } from "react-icons/lu"; 
 import type { Employee } from "@/models/Employee";
+import { DeleteEmployeeAction } from "./DeleteEmployeeAction"; 
 
 /**
  * Вспомогательный компонент для заголовка с сортировкой
@@ -65,16 +66,19 @@ const Employees = () => {
       <Table.Root size={{ base: "sm", md: "md" }} variant="line" stickyHeader>
         <Table.Header>
           <Table.Row bg="bg.subtle">
-            {/* Используем наш новый компонент для каждой сортируемой колонки */}
             <SortableColumn field="fullName">Employee</SortableColumn>
             <Table.ColumnHeader fontWeight="bold">Department</Table.ColumnHeader>
             
             <Table.ColumnHeader display={{ base: "none", md: "table-cell" }}>
-               {/* Оборачиваем только те, где нужна сортировка. Для даты используем birthDate */}
                <SortableColumn field="birthDate">Date of Birth (Age)</SortableColumn>
             </Table.ColumnHeader>
 
             <SortableColumn field="salary" textAlign="end">Salary</SortableColumn>
+            
+            {/* 1. Новая колонка для действий */}
+            <Table.ColumnHeader textAlign="end" fontWeight="bold" minW="80px">
+              Actions
+            </Table.ColumnHeader>
           </Table.Row>
         </Table.Header>
 
@@ -101,6 +105,11 @@ const Employees = () => {
               </Table.Cell>
               <Table.Cell textAlign="end">
                 <CurrencyText value={empl.salary} />
+              </Table.Cell>
+              
+              {/* 2. Ячейка с кнопкой удаления */}
+              <Table.Cell textAlign="end">
+                <DeleteEmployeeAction id={empl.id} name={empl.fullName} />
               </Table.Cell>
             </Table.Row>
           ))}

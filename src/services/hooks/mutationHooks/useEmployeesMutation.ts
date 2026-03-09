@@ -4,7 +4,7 @@ import { useMutation, useQueryClient, type UseMutationResult } from "@tanstack/r
 export default function useEmployeesMutation<T, R>(
   mutateFn: (variables: T) => Promise<R>,
   // Добавляем возможность передать свою логику успеха
-  customOnSuccess?: (data: R, variables: T) => void 
+  customOnSuccess?: (data: R, variables: T) => void
 ): UseMutationResult<R, Error, T> {
   const client = useQueryClient();
 
@@ -16,7 +16,10 @@ export default function useEmployeesMutation<T, R>(
         customOnSuccess(data, variables);
       } else {
         // 2. Иначе — стандартный безопасный сброс кэша
-        client.invalidateQueries({ queryKey: ["employees"] });
+        client.invalidateQueries({
+          queryKey: ["employees"],
+          exact: false // Это заставит обновиться ВСЕ ключи, начинающиеся с "employees"
+        });
       }
     },
     onError: (error) => {
