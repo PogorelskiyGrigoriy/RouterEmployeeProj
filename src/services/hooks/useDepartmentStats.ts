@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { groupBy, meanBy } from "lodash";
 import useEmployees from "./useEmployees";
 import employeesConfig from "@/config/employees-config";
-import type { DepartmentInfo } from "@/models/Departments"; // Импорт из нового места
+import type { DepartmentInfo } from "@/models/Departments";
 import { calculateAge } from "@/utils/dateUtils";
 
 export const useDepartmentStats = () => {

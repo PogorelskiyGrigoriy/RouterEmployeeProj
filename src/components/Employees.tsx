@@ -1,24 +1,60 @@
 import { useFilteredEmployees } from "@/services/hooks/useFilteredEmployees"; 
-import { Table, Spinner, Box, Center, Text, VStack } from "@chakra-ui/react";
+import { useSortStore } from "@/store/sort-store"; // Импортируем наш стор
+import { Table, Spinner, Box, Center, Text, VStack, HStack } from "@chakra-ui/react";
 import { CurrencyText, DateText, EmployeeIdentity, DeptBadge } from "./ui/DataDisplay";
 import { calculateAge } from "@/utils/dateUtils";
-import { LuSearchX } from "react-icons/lu"; // Иконка для пустого результата
+import { LuSearchX, LuArrowUp, LuArrowDown, LuArrowUpDown } from "react-icons/lu"; 
+import type { Employee } from "@/models/Employee";
+
+/**
+ * Вспомогательный компонент для заголовка с сортировкой
+ */
+const SortableColumn = ({ 
+  field, 
+  children, 
+  textAlign = "start" 
+}: { 
+  field: keyof Employee; 
+  children: React.ReactNode;
+  textAlign?: "start" | "end" | "center";
+}) => {
+  const { sort, toggleSort } = useSortStore();
+  const isSorted = sort.key === field;
+
+  return (
+    <Table.ColumnHeader 
+      onClick={() => toggleSort(field)} 
+      cursor="pointer"
+      _hover={{ bg: "blackAlpha.100" }}
+      userSelect="none"
+      textAlign={textAlign}
+      transition="background 0.2s"
+    >
+      <HStack gap="1" justifyContent={textAlign === "end" ? "flex-end" : "flex-start"}>
+        <Text fontWeight="bold">{children}</Text>
+        <Box color={isSorted ? "blue.500" : "fg.muted"}>
+          {isSorted && sort.order === "asc" && <LuArrowUp size="14" />}
+          {isSorted && sort.order === "desc" && <LuArrowDown size="14" />}
+          {!isSorted && <LuArrowUpDown size="14" style={{ opacity: 0.3 }} />}
+        </Box>
+      </HStack>
+    </Table.ColumnHeader>
+  );
+};
 
 const Employees = () => {
-  // Используем наш новый "умный" хук
   const { employees, isLoading, error, filteredCount } = useFilteredEmployees();
 
   if (isLoading) return <Center h="200px"><Spinner size="xl" color="blue.500" /></Center>;
   if (error) return <Center h="200px"><Text color="red.500">Error: {error.message}</Text></Center>;
 
-  // Обработка пустого результата фильтрации
   if (filteredCount === 0) {
     return (
       <Center h="300px" borderWidth="1px" borderRadius="lg" borderStyle="dashed" bg="bg.subtle">
         <VStack gap="2">
           <LuSearchX size="40px" style={{ opacity: 0.5 }} />
           <Text fontWeight="bold">No employees found</Text>
-          <Text fontSize="sm" color="fg.muted">Try adjusting your filters to see more results.</Text>
+          <Text fontSize="sm" color="fg.muted">Try adjusting your filters or sort order.</Text>
         </VStack>
       </Center>
     );
@@ -29,12 +65,16 @@ const Employees = () => {
       <Table.Root size={{ base: "sm", md: "md" }} variant="line" stickyHeader>
         <Table.Header>
           <Table.Row bg="bg.subtle">
-            <Table.ColumnHeader>Employee</Table.ColumnHeader>
-            <Table.ColumnHeader>Department</Table.ColumnHeader>
+            {/* Используем наш новый компонент для каждой сортируемой колонки */}
+            <SortableColumn field="fullName">Employee</SortableColumn>
+            <Table.ColumnHeader fontWeight="bold">Department</Table.ColumnHeader>
+            
             <Table.ColumnHeader display={{ base: "none", md: "table-cell" }}>
-              Date of Birth (Age)
+               {/* Оборачиваем только те, где нужна сортировка. Для даты используем birthDate */}
+               <SortableColumn field="birthDate">Date of Birth (Age)</SortableColumn>
             </Table.ColumnHeader>
-            <Table.ColumnHeader textAlign="end">Salary</Table.ColumnHeader>
+
+            <SortableColumn field="salary" textAlign="end">Salary</SortableColumn>
           </Table.Row>
         </Table.Header>
 
@@ -67,7 +107,6 @@ const Employees = () => {
         </Table.Body>
       </Table.Root>
       
-      {/* Маленький футер с информацией о кол-ве */}
       <Box p="2" borderTopWidth="1px" bg="bg.muted">
         <Text fontSize="xs" color="fg.subtle" textAlign="right">
           Showing {filteredCount} employees
