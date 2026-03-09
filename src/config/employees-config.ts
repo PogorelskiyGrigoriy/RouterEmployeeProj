@@ -1,8 +1,14 @@
-//employees-config.ts
+import { DEPARTMENTS, type Department } from "@/models/Departments";
 
-import type { Department } from "@/models/Departments";
-import type { GroupingConfig } from "@/models/GroupingConfig";
-import { DEPARTMENTS } from "@/models/Departments";
+// Переносим интерфейс сюда. Он становится "внутренним" для конфига.
+export interface GroupingConfig {
+  min: number;
+  max: number;
+  interval: number;
+  unit?: string;
+  currency?: string;
+  label: string;
+}
 
 interface EmployeesConfig {
   salary: GroupingConfig;

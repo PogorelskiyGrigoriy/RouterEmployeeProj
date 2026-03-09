@@ -1,18 +1,40 @@
-//ApiClientImplementation.ts
-
+// ApiClientImplementation.ts
 import api from "@/api/axiosInstance";
 import type { AxiosRequestConfig } from "axios";
-import type { ApiClient } from "./ApiClient";
+import type { ApiClient, EmployeeFilters } from "./ApiClient"; 
 import type { Employee, NewEmployee } from "@/models/Employee";
 import type { EmployeeUpdater } from "@/models/EmployeeUpdater";
+import { getLimitDate } from "@/utils/dateUtils"; 
 
 const ENDPOINTS = {
   EMPLOYEES: "/employees",
 } as const;
 
 class ApiClientJsonServer implements ApiClient {
-  async getEmployees(config?: AxiosRequestConfig): Promise<Employee[]> {
-    const { data } = await api.get<Employee[]>(ENDPOINTS.EMPLOYEES, config);
+  async getEmployees(filters?: EmployeeFilters, config?: AxiosRequestConfig): Promise<Employee[]> {
+    const params: Record<string, any> = { ...config?.params };
+
+    if (filters) {
+      if (filters.department && filters.department !== "All") {
+        params.department = filters.department;
+      }
+      if (filters.minSalary !== undefined) params.salary_gte = filters.minSalary;
+      if (filters.maxSalary !== undefined) params.salary_lte = filters.maxSalary;
+
+      // Используем утилиту для перевода возраста в даты для json-server
+      if (filters.minAge !== undefined) {
+        params.birthDate_lte = getLimitDate(filters.minAge);
+      }
+      if (filters.maxAge !== undefined) {
+        params.birthDate_gte = getLimitDate(filters.maxAge);
+      }
+    }
+
+    const { data } = await api.get<Employee[]>(ENDPOINTS.EMPLOYEES, { 
+      ...config, 
+      params 
+    });
+    
     return data;
   }
 

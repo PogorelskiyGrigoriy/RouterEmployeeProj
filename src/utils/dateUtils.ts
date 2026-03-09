@@ -35,3 +35,11 @@ export const getLimitDate = (yearsBack: number): string => {
   const limitDate = subYears(startOfToday(), yearsBack);
   return format(limitDate, "yyyy-MM-dd");
 };
+
+/**
+ * Превращает возраст в дату "X лет назад"
+ * Пример: ageToDate(20) -> 2006-03-09
+ */
+export const ageToDate = (age: number): string => {
+  return format(subYears(startOfToday(), age), "yyyy-MM-dd");
+};
