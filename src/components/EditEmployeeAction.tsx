@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react";
-import { IconButton } from "@chakra-ui/react";
+import { IconButton, Box } from "@chakra-ui/react";
 import { LuPencil } from "react-icons/lu";
 import { 
   DrawerBackdrop, 
@@ -39,18 +39,42 @@ export const EditEmployeeAction = ({ employee }: { employee: Employee }) => {
   };
 
   return (
-    <DrawerRoot open={isOpen} onOpenChange={(e) => setIsOpen(e.open)} size="md">
+    <DrawerRoot 
+      open={isOpen} 
+      onOpenChange={(e) => setIsOpen(e.open)} 
+      // Адаптивное расположение: снизу на мобилках, справа на ПК
+      placement={{ base: "bottom", md: "end" }}
+      // Адаптивный размер: md на мобилках, xs (узкий) на ПК
+      size={{ base: "md", md: "xs" }}
+    >
       <DrawerBackdrop />
       <DrawerTrigger asChild>
         <IconButton variant="ghost" colorPalette="blue" size="sm" aria-label="Edit employee">
           <LuPencil />
         </IconButton>
       </DrawerTrigger>
-      <DrawerContent>
+      
+      <DrawerContent 
+        // Скругления сверху для мобильного вида "шторки"
+        borderTopRadius={{ base: "2xl", md: "none" }}
+        // Ограничение высоты на мобильных, чтобы видеть контекст таблицы
+        maxH={{ base: "85vh", md: "100vh" }}
+      >
+        {/* Декоративная полоска-индикатор для мобилок (Drag handle) */}
+        <Box 
+          display={{ base: "block", md: "none" }} 
+          width="40px" 
+          height="4px" 
+          bg="gray.300" 
+          borderRadius="full" 
+          margin="12px auto 0" 
+        />
+
         <DrawerHeader>
           <DrawerTitle>Edit Employee Profile</DrawerTitle>
         </DrawerHeader>
-        <DrawerBody>
+
+        <DrawerBody pb="8">
           <EmployeeForm 
             employee={employee} 
             onSubmit={handleUpdate} 
@@ -58,6 +82,7 @@ export const EditEmployeeAction = ({ employee }: { employee: Employee }) => {
             onCancel={() => setIsOpen(false)}
           />
         </DrawerBody>
+        
         <DrawerCloseTrigger />
       </DrawerContent>
     </DrawerRoot>
