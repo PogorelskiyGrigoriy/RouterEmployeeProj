@@ -1,4 +1,3 @@
-// useAddEmployee.ts
 import type { Employee, NewEmployee } from "@/models/Employee"; 
 import apiClient from "@/services/ApiClientImplementation";
 import useEmployeesMutation from "./useEmployeesMutation";

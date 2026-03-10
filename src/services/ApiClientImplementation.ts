@@ -1,10 +1,9 @@
-// src/services/ApiClientImplementation.ts
 import api from "@/api/axiosInstance";
 import type { AxiosRequestConfig } from "axios";
 import type { ApiClient } from "./ApiClient"; 
 import type { EmployeeFilters } from "@/models/Filters"; 
 import type { Employee, NewEmployee, EmployeeUpdater } from "@/models/Employee"; 
-import type { SortState } from "@/store/sort-store"; // Импортируем тип
+import type { SortState } from "@/store/sort-store"; 
 import { getLimitDate } from "@/utils/dateUtils"; 
 
 const ENDPOINTS = {
@@ -19,7 +18,7 @@ class ApiClientJsonServer implements ApiClient {
   ): Promise<Employee[]> {
     const params: Record<string, any> = { ...config?.params };
 
-    // 1. Обработка фильтров (ваш текущий код)
+    // Обработка фильтров
     if (filters) {
       if (filters.department && filters.department !== "All") {
         params.department = filters.department;
@@ -35,7 +34,7 @@ class ApiClientJsonServer implements ApiClient {
       }
     }
 
-    // 2. Обработка сортировки для json-server
+    // Обработка сортировки для json-server
     // Если в сторе есть ключ и направление не null
     if (sort?.key && sort?.order) {
       params._sort = sort.key;

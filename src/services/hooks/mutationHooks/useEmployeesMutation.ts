@@ -1,26 +1,22 @@
-// useEmployeesMutation.ts
-import { useMutation, useQueryClient, type UseMutationResult } from "@tanstack/react-query";
+import { useMutation, useQueryClient, type UseMutationResult, type UseMutationOptions } from "@tanstack/react-query";
 
 export default function useEmployeesMutation<T, R>(
   mutateFn: (variables: T) => Promise<R>,
-  // Добавляем возможность передать свою логику успеха
-  customOnSuccess?: (data: R, variables: T) => void
+  options?: UseMutationOptions<R, Error, T>
 ): UseMutationResult<R, Error, T> {
   const client = useQueryClient();
 
   return useMutation({
+    ...options,
     mutationFn: mutateFn,
-    onSuccess: (data, variables) => {
-      // 1. Если передана своя логика — выполняем её
-      if (customOnSuccess) {
-        customOnSuccess(data, variables);
-      } else {
-        // 2. Иначе — стандартный безопасный сброс кэша
-        client.invalidateQueries({
-          queryKey: ["employees"],
-          exact: false // Это заставит обновиться ВСЕ ключи, начинающиеся с "employees"
-        });
-      }
+    onSuccess: (...args) => {
+      // выполняем обязательную логику (инвалидация)
+      client.invalidateQueries({
+        queryKey: ["employees"],
+        exact: false
+      });
+
+      options?.onSuccess?.(...args);
     },
     onError: (error) => {
       console.error("Mutation failed:", error.message);
