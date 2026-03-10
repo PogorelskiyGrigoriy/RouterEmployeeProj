@@ -1,5 +1,4 @@
 "use client";
-// StatisticsSelector.tsx
 
 import { Button } from "@chakra-ui/react";
 import { 
@@ -11,7 +10,7 @@ import {
 import { useNavigate, useLocation } from "react-router-dom";
 import { STATS_NAV_LINKS } from "@/config/navigation";
 import { LuChevronDown } from "react-icons/lu";
-import { useAuthStore } from "@/store/useAuthStore"; // Импортируем стор
+import { useAuthStore } from "@/store/useAuthStore"; 
 
 const StatisticsSelector = () => {
   const navigate = useNavigate();

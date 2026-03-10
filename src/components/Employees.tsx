@@ -6,7 +6,8 @@ import { CurrencyText, DateText, EmployeeIdentity, DeptBadge } from "./ui/DataDi
 import { calculateAge } from "@/utils/dateUtils";
 import { LuSearchX, LuArrowUp, LuArrowDown, LuArrowUpDown } from "react-icons/lu"; 
 import type { Employee } from "@/models/Employee";
-import { DeleteEmployeeAction } from "./DeleteEmployeeAction"; 
+import { DeleteEmployeeAction } from "./DeleteEmployeeAction";
+import { EditEmployeeAction } from "./EditEmployeeAction"; 
 
 /**
  * Вспомогательный компонент заголовка
@@ -102,14 +103,16 @@ const Employees = () => {
                 <CurrencyText value={empl.salary} />
               </Table.Cell>
               
-              {/* Условный рендеринг кнопки удаления */}
+              {/* Условный рендеринг кнопки удаления и редактирования */}
               {isAdmin && (
                 <Table.Cell textAlign="end">
+                  <EditEmployeeAction employee={empl} />
                   <DeleteEmployeeAction id={empl.id} name={empl.fullName} />
                 </Table.Cell>
               )}
             </Table.Row>
           ))}
+          
         </Table.Body>
       </Table.Root>
       

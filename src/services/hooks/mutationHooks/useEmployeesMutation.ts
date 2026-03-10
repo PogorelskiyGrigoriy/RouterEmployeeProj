@@ -11,10 +11,7 @@ export default function useEmployeesMutation<T, R>(
     mutationFn: mutateFn,
     onSuccess: (...args) => {
       // выполняем обязательную логику (инвалидация)
-      client.invalidateQueries({
-        queryKey: ["employees"],
-        exact: false
-      });
+      client.invalidateQueries({ queryKey: ["employees"] });
 
       options?.onSuccess?.(...args);
     },

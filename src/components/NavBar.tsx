@@ -87,7 +87,7 @@ const Navbar = () => {
           </Box>
           
           <Box hideBelow="md">
-            <Text fontSize="sm">
+            <Text fontSize="sm" color="gray.700">
               Logged as: <b>{user.username}</b> ({user.role})
             </Text>
           </Box>

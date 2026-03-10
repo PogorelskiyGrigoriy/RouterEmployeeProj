@@ -5,7 +5,7 @@ import type { UserRole } from "@/models/AuthData";
 
 interface Props {
   children: React.ReactNode;
-  allowedRoles?: UserRole[]; // Используем строгий тип вместо string[]
+  allowedRoles?: UserRole[];
 }
 
 export const ProtectedRoute = ({ children, allowedRoles }: Props) => {
