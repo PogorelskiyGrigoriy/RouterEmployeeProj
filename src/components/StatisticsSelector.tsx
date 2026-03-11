@@ -57,7 +57,7 @@ export const StatisticsSelector = () => {
             borderColor: "blue.400",
           }}
         >
-          {activeStat ? activeStat.label : "Select View"} 
+          {activeStat ? activeStat.label : "Statistics"} 
           <Icon 
             as={LuChevronDown} 
             ms="2" 

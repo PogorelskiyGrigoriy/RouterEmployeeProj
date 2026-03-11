@@ -31,11 +31,15 @@ import {
 import { Employees } from "@/components/Employees";
 import { Filters } from "@/components/Filters";
 import { ActiveFilters } from "@/components/ActiveFilters";
-import { useFilteredEmployees } from "@/services/hooks/useFilteredEmployees";
+// ИСПРАВЛЕНО: Переход на использование useEmployees
+import { useEmployees } from "@/services/hooks/useEmployees";
 
 const HomePage = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const { filteredCount, totalCount } = useFilteredEmployees();
+  
+  // ИСПРАВЛЕНО: Теперь и здесь используем useEmployees
+  // React Query автоматически дедуплицирует запросы этого компонента и Employees.tsx
+  const { filteredCount, totalCount } = useEmployees();
 
   // Highlight button if any filters are active
   const isFiltered = filteredCount !== totalCount;

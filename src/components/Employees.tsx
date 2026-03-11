@@ -5,7 +5,8 @@ import { CurrencyText, DateText, EmployeeIdentity, DeptBadge } from "./ui/DataDi
 import { DeleteEmployeeAction } from "./DeleteEmployeeAction";
 import { EditEmployeeAction } from "./EditEmployeeAction";
 
-import { useFilteredEmployees } from "@/services/hooks/useFilteredEmployees";
+// ИСПРАВЛЕНО: Импортируем только useEmployees
+import { useEmployees } from "@/services/hooks/useEmployees";
 import { useSortStore } from "@/store/sort-store";
 import { useAuthStore } from "@/store/useAuthStore";
 
@@ -53,9 +54,9 @@ const SortableColumn = ({ field, children, textAlign = "start" }: SortableProps)
  * Main component to display and manage the employee list
  */
 export const Employees = () => {
-  const { employees, isLoading, error, filteredCount } = useFilteredEmployees();
+  // ИСПРАВЛЕНО: Теперь берем всё из useEmployees
+  const { employees, isLoading, error, filteredCount } = useEmployees();
   
-  // Select user role from auth store
   const user = useAuthStore((state) => state.user);
   const isAdmin = user?.role === "ADMIN";
 
@@ -92,15 +93,11 @@ export const Employees = () => {
         <Table.Header>
           <Table.Row bg="bg.subtle">
             <SortableColumn field="fullName">Employee</SortableColumn>
-            
             <Table.ColumnHeader fontWeight="bold">Department</Table.ColumnHeader>
-            
             <Table.ColumnHeader display={{ base: "none", md: "table-cell" }}>
               <SortableColumn field="birthDate">Date of Birth (Age)</SortableColumn>
             </Table.ColumnHeader>
-            
             <SortableColumn field="salary" textAlign="end">Salary</SortableColumn>
-            
             {isAdmin && (
               <Table.ColumnHeader textAlign="end" fontWeight="bold" minW="80px">
                 Actions
@@ -115,11 +112,9 @@ export const Employees = () => {
               <Table.Cell>
                 <EmployeeIdentity name={empl.fullName} avatar={empl.avatar} />
               </Table.Cell>
-
               <Table.Cell>
                 <DeptBadge>{empl.department}</DeptBadge>
               </Table.Cell>
-
               <Table.Cell display={{ base: "none", md: "table-cell" }}>
                 <Box>
                   <DateText dateString={empl.birthDate} />
@@ -128,11 +123,9 @@ export const Employees = () => {
                   </Text>
                 </Box>
               </Table.Cell>
-
               <Table.Cell textAlign="end">
                 <CurrencyText value={empl.salary} />
               </Table.Cell>
-              
               {!!isAdmin && (
                 <Table.Cell textAlign="end">
                   <EditEmployeeAction employee={empl} />
