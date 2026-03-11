@@ -16,9 +16,9 @@ import type { Employee } from "@/models/Employee";
  * Props for the sortable header cell
  */
 interface SortableProps {
-  readonly field: keyof Employee;
-  readonly children: React.ReactNode;
-  readonly textAlign?: "start" | "end" | "center";
+  field: keyof Employee;
+  children: React.ReactNode;
+  textAlign?: "start" | "end" | "center";
 }
 
 /**
