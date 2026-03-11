@@ -1,27 +1,24 @@
 import { create } from "zustand";
 import type { Employee } from "@/models/Employee";
 
-/** * Слой типов (Domain Types)
+/**
+ * Domain Types for sorting logic.
  */
 export type SortOrder = "asc" | "desc" | null;
 
 export interface SortState {
-  key: keyof Employee | null;
-  order: SortOrder;
+  readonly key: keyof Employee | null;
+  readonly order: SortOrder;
 }
 
-/** * Описываем только методы (Actions)
- */
 interface SortActions {
   toggleSort: (key: keyof Employee) => void;
   setOrder: (key: keyof Employee, order: SortOrder) => void;
   resetSort: () => void;
 }
 
-/** * Финальный интерфейс стора (State + Actions)
- */
 interface SortStore extends SortActions {
-  sort: SortState;
+  readonly sort: SortState;
 }
 
 const initialState: SortState = {
@@ -29,30 +26,33 @@ const initialState: SortState = {
   order: null,
 };
 
-/** * Логика переходов (State Machine)
- * Вынесена отдельно, чтобы не загромождать стор
+/**
+ * State Machine Logic
+ * Defines the rotation: None -> Ascending -> Descending -> None
  */
-const getNextOrder = (currentKey: keyof Employee | null, nextKey: keyof Employee, currentOrder: SortOrder): SortOrder => {
+const getNextOrder = (
+  currentKey: keyof Employee | null, 
+  nextKey: keyof Employee, 
+  currentOrder: SortOrder
+): SortOrder => {
   if (currentKey !== nextKey) return "asc";
   
+  // Mapping transitions for predictable UI behavior
   const transitions: Record<string, SortOrder> = {
     "null": "asc",
     "asc": "desc",
     "desc": null,
   };
   
-  return transitions[String(currentOrder)];
+  return transitions[String(currentOrder)] ?? "asc";
 };
 
-
-
-/** * Реализация стора
+/**
+ * Global store for managing employee sorting state.
  */
 export const useSortStore = create<SortStore>((set) => ({
-  // Данные
   sort: initialState,
 
-  // Умное переключение (наш вариант)
   toggleSort: (key) =>
     set((state) => {
       const nextOrder = getNextOrder(state.sort.key, key, state.sort.order);
@@ -62,12 +62,10 @@ export const useSortStore = create<SortStore>((set) => ({
       };
     }),
 
-  // Прямая установка (из варианта преподавателя)
   setOrder: (key, order) =>
     set({
       sort: order ? { key, order } : initialState,
     }),
 
-  // Сброс
   resetSort: () => set({ sort: initialState }),
 }));

@@ -1,8 +1,12 @@
-"use client"
+/**
+ * @module EditEmployeeAction
+ * Drawer-based action to modify employee information.
+ */
 
 import { useState } from "react";
 import { IconButton, Box } from "@chakra-ui/react";
 import { LuPencil } from "react-icons/lu";
+
 import { 
   DrawerBackdrop, 
   DrawerBody, 
@@ -14,22 +18,35 @@ import {
   DrawerTrigger 
 } from "@/components/ui/drawer"; 
 import { EmployeeForm } from "./EmployeeForm";
+
 import { useUpdateEmployee } from "@/services/hooks/mutationHooks/useUpdateEmployee";
 import { toaster } from "@/components/ui/toaster-config";
 import type { Employee, NewEmployee } from "@/models/Employee";
 
-export const EditEmployeeAction = ({ employee }: { employee: Employee }) => {
+interface Props {
+  employee: Employee; // Убрали readonly
+}
+
+export const EditEmployeeAction = ({ employee }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
   const { mutate, isPending } = useUpdateEmployee();
 
-  const handleUpdate = (data: NewEmployee) => {
+  /**
+   * Updates employee data and closes the drawer on success
+   */
+  const handleUpdate = (formData: NewEmployee) => {
+    // Согласно EmployeeUpdatePayload, структура должна быть: { id, changes }
     mutate(
-      { id: employee.id, fields: data },
+      { 
+        id: employee.id, 
+        changes: formData // Передаем данные в поле 'changes'
+      }, 
       {
         onSuccess: () => {
           toaster.create({
-            title: "Employee updated",
-            description: `${data.fullName} has been successfully modified.`,
+            title: "Changes saved",
+            // Используем fullName из модели NewEmployee
+            description: `${formData.fullName} profile updated.`,
             type: "success",
           });
           setIsOpen(false);
@@ -42,36 +59,35 @@ export const EditEmployeeAction = ({ employee }: { employee: Employee }) => {
     <DrawerRoot 
       open={isOpen} 
       onOpenChange={(e) => setIsOpen(e.open)} 
-      // Адаптивное расположение: снизу на мобилках, справа на ПК
       placement={{ base: "bottom", md: "end" }}
-      // Адаптивный размер: md на мобилках, xs (узкий) на ПК
-      size={{ base: "md", md: "xs" }}
+      size={{ base: "full", md: "xs" }}
     >
       <DrawerBackdrop />
+      
       <DrawerTrigger asChild>
-        <IconButton variant="ghost" colorPalette="blue" size="sm" aria-label="Edit employee">
+        <IconButton 
+          variant="ghost" 
+          colorPalette="blue" 
+          size="sm" 
+          aria-label="Edit employee"
+          disabled={isPending}
+        >
           <LuPencil />
         </IconButton>
       </DrawerTrigger>
       
       <DrawerContent 
-        // Скругления сверху для мобильного вида "шторки"
         borderTopRadius={{ base: "2xl", md: "none" }}
-        // Ограничение высоты на мобильных, чтобы видеть контекст таблицы
-        maxH={{ base: "85vh", md: "100vh" }}
+        maxH={{ base: "90vh", md: "100vh" }}
       >
-        {/* Декоративная полоска-индикатор для мобилок (Drag handle) */}
         <Box 
           display={{ base: "block", md: "none" }} 
-          width="40px" 
-          height="4px" 
-          bg="gray.300" 
-          borderRadius="full" 
-          margin="12px auto 0" 
+          w="10" h="1" bg="border" borderRadius="full" 
+          mx="auto" mt="3" 
         />
 
         <DrawerHeader>
-          <DrawerTitle>Edit Employee Profile</DrawerTitle>
+          <DrawerTitle>Edit Profile</DrawerTitle>
         </DrawerHeader>
 
         <DrawerBody pb="8">

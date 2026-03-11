@@ -1,22 +1,40 @@
-import { create } from "zustand";
-import employeesConfig from "@/config/employees-config";
-import type { EmployeeFilters } from "@/models/Filters"; // Используем общий интерфейс
+/**
+ * @module useFilters
+ * Global state for employee filtering criteria.
+ */
 
-interface FiltersStore extends EmployeeFilters {
-    setFilters: (filters: Partial<EmployeeFilters>) => void;
-    resetFilters: () => void;
+import { create } from "zustand";
+import { EMPLOYEES_CONFIG } from "@/config/employees-config";
+import type { EmployeeFilters } from "@/models/Filters";
+
+interface FiltersActions {
+  setFilters: (updates: Partial<EmployeeFilters>) => void;
+  resetFilters: () => void;
+}
+
+interface FiltersStore extends FiltersActions {
+  readonly filters: EmployeeFilters;
 }
 
 const initialFilters: EmployeeFilters = {
-    department: "All",
-    minSalary: employeesConfig.salary.min,
-    maxSalary: employeesConfig.salary.max,
-    minAge: employeesConfig.age.min,
-    maxAge: employeesConfig.age.max,
+  department: "All",
+  minSalary: EMPLOYEES_CONFIG.salary.min,
+  maxSalary: EMPLOYEES_CONFIG.salary.max,
+  minAge: EMPLOYEES_CONFIG.age.min,
+  maxAge: EMPLOYEES_CONFIG.age.max,
 };
 
+/**
+ * Hook for managing search and filter state.
+ * Centralizes defaults from EMPLOYEES_CONFIG.
+ */
 export const useFilters = create<FiltersStore>((set) => ({
-    ...initialFilters,
-    setFilters: (updates) => set((state) => ({ ...state, ...updates })),
-    resetFilters: () => set(initialFilters),
+  filters: initialFilters,
+
+  setFilters: (updates) => 
+    set((state) => ({ 
+      filters: { ...state.filters, ...updates } 
+    })),
+
+  resetFilters: () => set({ filters: initialFilters }),
 }));

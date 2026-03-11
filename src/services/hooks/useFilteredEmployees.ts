@@ -1,43 +1,45 @@
+/**
+ * @module useFilteredEmployees
+ * Middleware hook that provides extra client-side filtering on top of server data.
+ */
+
 import { useMemo } from "react";
-import useEmployees from "./useEmployees";
+import { useEmployees } from "./useEmployees";
 import { useFilters } from "@/store/filters-store";
 import { calculateAge } from "@/utils/dateUtils";
 
 /**
- * Хук-посредник для фильтрации списка сотрудников.
- * Работает в связке с useEmployees, который берет данные с сервера (уже отсортированные),
- * и дофильтровывает их на клиенте.
+ * Combines server-side fetched data with client-side filter logic.
+ * Useful for scenarios where the API filter might be less granular 
+ * or for immediate UI updates without network lag.
  */
 export const useFilteredEmployees = () => {
-  // useEmployees внутри себя подписан на useSortStore и useFilters (для API)
+  // 1. Data Source: Fetches already sorted/filtered data from API
   const { employees: allEmployees, isLoading, error, ...rest } = useEmployees();
   
-  // Данные фильтрации из Zustand для клиентской "дофильтрации"
-  const { department, minSalary, maxSalary, minAge, maxAge } = useFilters();
+  // 2. Selectors: Only get the values to avoid re-renders from actions
+  const filters = useFilters((state) => state.filters);
+  const { department, minSalary, maxSalary, minAge, maxAge } = filters;
 
   const filteredEmployees = useMemo(() => {
     if (!allEmployees.length) return [];
 
     return allEmployees.filter((emp) => {
-      // 1. Фильтр по департаменту
-      const matchesDepartment = department === "All" || emp.department === department;
-      if (!matchesDepartment) return false;
+      // 1. Department match
+      const isDeptMatch = department === "All" || emp.department === department;
+      if (!isDeptMatch) return false;
 
-      // 2. Фильтр по зарплате
-      if (emp.salary < minSalary || emp.salary > maxSalary) {
-        return false;
-      }
+      // 2. Salary range match
+      const isSalaryMatch = emp.salary >= minSalary && emp.salary <= maxSalary;
+      if (!isSalaryMatch) return false;
 
-      // 3. Фильтр по возрасту
+      // 3. Age range match
       const currentAge = calculateAge(emp.birthDate);
-      if (currentAge < minAge || currentAge > maxAge) {
-        return false;
-      }
+      const isAgeMatch = currentAge >= minAge && currentAge <= maxAge;
+      if (!isAgeMatch) return false;
 
       return true;
     });
-    // Зависимости: когда меняются данные с сервера (allEmployees) 
-    // или любой фильтр — пересчитываем список.
   }, [allEmployees, department, minSalary, maxSalary, minAge, maxAge]);
 
   return {

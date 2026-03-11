@@ -1,9 +1,18 @@
-import type { Employee, NewEmployee } from "@/models/Employee"; 
-import apiClient from "@/services/ApiClientImplementation";
-import useEmployeesMutation from "./useEmployeesMutation";
+/**
+ * @module useAddEmployee
+ * Mutation hook for creating a new employee record.
+ */
 
+import type { Employee, NewEmployee } from "@/models/Employee"; 
+import { apiClient } from "@/services/ApiClientImplementation";
+import { useEmployeesMutation } from "./useEmployeesMutation";
+
+/**
+ * Hook to add a new employee.
+ * Sends data without ID, receives full Employee object from server.
+ * Cache invalidation is handled automatically by useEmployeesMutation.
+ */
 export const useAddEmployee = () => {
-  // Вход: NewEmployee (без id), Выход: Employee (с id от сервера)
   return useEmployeesMutation<NewEmployee, Employee>(
     (newEmp) => apiClient.addEmployee(newEmp)
   );

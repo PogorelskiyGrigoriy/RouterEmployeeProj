@@ -1,92 +1,101 @@
-"use client"
+/**
+ * @module ActiveFilters
+ * Displays currently applied filters as removable chips.
+ */
 
-import { HStack, Badge, Text, IconButton } from "@chakra-ui/react";
-import { useFilters } from "@/store/filters-store";
-import employeesConfig from "@/config/employees-config";
+import { Badge, HStack, IconButton, Text, Button } from "@chakra-ui/react";
 import { LuX } from "react-icons/lu";
+import { useFilters } from "@/store/filters-store";
+import { EMPLOYEES_CONFIG } from "@/config/employees-config";
 
-const ActiveFilters = () => {
-    const { 
-        department, minSalary, maxSalary, minAge, maxAge, 
-        setFilters, resetFilters 
-    } = useFilters();
-    const config = employeesConfig;
+/**
+ * INTERNAL UI COMPONENT: FilterChip
+ * Encapsulates the visual logic of a single filter tag.
+ */
+const FilterChip = ({ 
+  label, 
+  value, 
+  onClear, 
+  colorPalette 
+}: { 
+  label: string; 
+  value: string | number; 
+  onClear: () => void; 
+  colorPalette: string;
+}) => (
+  <Badge colorPalette={colorPalette} variant="surface" size="lg" borderRadius="full" px="3" py="1">
+    <Text as="span" fontWeight="medium">{label}:</Text> {value}
+    <IconButton
+      aria-label={`Clear ${label}`}
+      variant="ghost"
+      size="xs"
+      onClick={onClear}
+      ml="1"
+      height="16px"
+      minWidth="16px"
+    >
+      <LuX />
+    </IconButton>
+  </Badge>
+);
 
-    // Проверяем, что фильтры отличаются от дефолтных
-    const isDefaultSalary = minSalary === config.salary.min && maxSalary === config.salary.max;
-    const isDefaultAge = minAge === config.age.min && maxAge === config.age.max;
-    const isDefaultDept = department === "All";
+export const ActiveFilters = () => {
+  // 1. Selector-based state access
+  const filters = useFilters((state) => state.filters);
+  const { setFilters, resetFilters } = useFilters();
+  
+  const { department, minSalary, maxSalary, minAge, maxAge } = filters;
+  const { salary: salConf, age: ageConf } = EMPLOYEES_CONFIG;
 
-    if (isDefaultDept && isDefaultSalary && isDefaultAge) return null;
+  // 2. Computed Defaults
+  const isDefaultSalary = minSalary === salConf.min && maxSalary === salConf.max;
+  const isDefaultAge = minAge === ageConf.min && maxAge === ageConf.max;
+  const isDefaultDept = department === "All";
 
-    return (
-        <HStack gap="2" wrap="wrap" mb="4">
-            <Text fontSize="xs" fontWeight="bold" color="fg.muted" mr="2">
-                Active Filters:
-            </Text>
+  if (isDefaultDept && isDefaultSalary && isDefaultAge) return null;
 
-            {/* Чипс Департамента */}
-            {!isDefaultDept && (
-                <Badge colorPalette="blue" variant="surface" size="lg" borderRadius="full" px="3">
-                    Dept: {department}
-                    <IconButton
-                        aria-label="Clear department"
-                        variant="ghost"
-                        size="xs"
-                        onClick={() => setFilters({ department: "All" })}
-                        ml="1"
-                    >
-                        <LuX />
-                    </IconButton>
-                </Badge>
-            )}
+  return (
+    <HStack gap="2" wrap="wrap" mb="4" alignItems="center">
+      <Text fontSize="xs" fontWeight="bold" color="fg.muted" textTransform="uppercase" letterSpacing="wider">
+        Active Filters:
+      </Text>
 
-            {/* Чипс Зарплаты */}
-            {!isDefaultSalary && (
-                <Badge colorPalette="green" variant="surface" size="lg" borderRadius="full" px="3">
-                    Salary: {minSalary} - {maxSalary}
-                    <IconButton
-                        aria-label="Clear salary"
-                        variant="ghost"
-                        size="xs"
-                        onClick={() => setFilters({ minSalary: config.salary.min, maxSalary: config.salary.max })}
-                        ml="1"
-                    >
-                        <LuX />
-                    </IconButton>
-                </Badge>
-            )}
+      {!isDefaultDept && (
+        <FilterChip 
+          label="Dept" 
+          value={department} 
+          colorPalette="blue" 
+          onClear={() => setFilters({ department: "All" })} 
+        />
+      )}
 
-            {/* Чипс Возраста */}
-            {!isDefaultAge && (
-                <Badge colorPalette="purple" variant="surface" size="lg" borderRadius="full" px="3">
-                    Age: {minAge} - {maxAge}
-                    <IconButton
-                        aria-label="Clear age"
-                        variant="ghost"
-                        size="xs"
-                        onClick={() => setFilters({ minAge: config.age.min, maxAge: config.age.max })}
-                        ml="1"
-                    >
-                        <LuX />
-                    </IconButton>
-                </Badge>
-            )}
+      {!isDefaultSalary && (
+        <FilterChip 
+          label="Salary" 
+          value={`${minSalary} - ${maxSalary}`} 
+          colorPalette="green" 
+          onClear={() => setFilters({ minSalary: salConf.min, maxSalary: salConf.max })} 
+        />
+      )}
 
-            <Button 
-                variant="plain" 
-                size="xs" 
-                color="blue.500" 
-                onClick={resetFilters}
-                _hover={{ textDecoration: "underline" }}
-            >
-                Clear all
-            </Button>
-        </HStack>
-    );
+      {!isDefaultAge && (
+        <FilterChip 
+          label="Age" 
+          value={`${minAge} - ${maxAge}`} 
+          colorPalette="purple" 
+          onClear={() => setFilters({ minAge: ageConf.min, maxAge: ageConf.max })} 
+        />
+      )}
+
+      <Button 
+        variant="plain" 
+        size="xs" 
+        color="blue.500" 
+        onClick={resetFilters}
+        _hover={{ textDecoration: "underline", color: "blue.600" }}
+      >
+        Clear all
+      </Button>
+    </HStack>
+  );
 };
-
-// Вспомогательный компонент Button для Clear All, если он не импортирован
-import { Button } from "@chakra-ui/react";
-
-export default ActiveFilters;

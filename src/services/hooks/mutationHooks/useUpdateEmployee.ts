@@ -1,9 +1,19 @@
-import type { Employee, EmployeeUpdater } from "@/models/Employee"; // Импорт из одного файла
-import apiClient from "@/services/ApiClientImplementation";
-import useEmployeesMutation from "./useEmployeesMutation";
+/**
+ * @module useUpdateEmployee
+ * Mutation hook for updating an existing employee record.
+ */
 
+import type { Employee, EmployeeUpdatePayload } from "@/models/Employee"; 
+import { apiClient } from "@/services/ApiClientImplementation";
+import { useEmployeesMutation } from "./useEmployeesMutation";
+
+/**
+ * Hook to update employee details.
+ * Takes EmployeeUpdatePayload (ID + partial data) and returns updated Employee.
+ * Automatically triggers cache invalidation for the employee list.
+ */
 export const useUpdateEmployee = () => {
-  return useEmployeesMutation<EmployeeUpdater, Employee>(
+  return useEmployeesMutation<EmployeeUpdatePayload, Employee>(
     (updater) => apiClient.updateEmployee(updater)
   );
 };

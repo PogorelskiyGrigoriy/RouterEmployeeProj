@@ -1,6 +1,11 @@
-import { IconButton } from "@chakra-ui/react";
+/**
+ * @module DeleteEmployeeAction
+ * A confirmation dialog for deleting an employee.
+ */
+
+import { useState } from "react";
+import { IconButton, Button } from "@chakra-ui/react";
 import { LuTrash2 } from "react-icons/lu";
-import { useDeleteEmployee } from "@/services/hooks/mutationHooks/useDeleteEmployee";
 import {
   DialogActionTrigger,
   DialogBody,
@@ -12,38 +17,70 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@chakra-ui/react";
 
-export const DeleteEmployeeAction = ({ id, name }: { id: string, name: string }) => {
+import { useDeleteEmployee } from "@/services/hooks/mutationHooks/useDeleteEmployee";
+
+interface Props {
+  id: string;
+  name: string;
+}
+
+export const DeleteEmployeeAction = ({ id, name }: Props) => {
+  const [open, setOpen] = useState(false);
+  
+  // 1. Используем onSuccess для закрытия диалога
   const { mutate: deleteEmp, isPending } = useDeleteEmployee();
 
+  const handleDelete = () => {
+    deleteEmp(id, {
+      onSuccess: () => setOpen(false),
+    });
+  };
+
   return (
-    <DialogRoot role="alertdialog" placement="center">
+    <DialogRoot 
+      role="alertdialog" 
+      placement="center" 
+      open={open} 
+      onOpenChange={(e) => setOpen(e.open)}
+    >
       <DialogTrigger asChild>
-        <IconButton variant="ghost" colorPalette="red" size="sm" disabled={isPending}>
+        <IconButton 
+          variant="ghost" 
+          colorPalette="red" 
+          size="sm" 
+          disabled={isPending}
+          aria-label="Delete employee"
+        >
           <LuTrash2 />
         </IconButton>
       </DialogTrigger>
+      
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Подтвердите удаление</DialogTitle>
+          <DialogTitle>Confirm Deletion</DialogTitle>
         </DialogHeader>
-        <DialogBody>
-          Вы уверены, что хотите удалить сотрудника <strong>{name}</strong>? 
-          Это действие нельзя будет отменить.
+        
+        <DialogBody color="fg.muted">
+          Are you sure you want to delete <strong>{name}</strong>? 
+          This action cannot be undone.
         </DialogBody>
-        <DialogFooter>
+        
+        <DialogFooter mt="4">
           <DialogActionTrigger asChild>
-            <Button variant="outline">Отмена</Button>
+            <Button variant="outline" disabled={isPending}>
+              Cancel
+            </Button>
           </DialogActionTrigger>
           <Button 
             colorPalette="red" 
             loading={isPending} 
-            onClick={() => deleteEmp(id)}
+            onClick={handleDelete}
           >
-            Удалить
+            Delete Employee
           </Button>
         </DialogFooter>
+        
         <DialogCloseTrigger />
       </DialogContent>
     </DialogRoot>

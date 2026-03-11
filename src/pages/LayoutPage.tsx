@@ -1,25 +1,40 @@
-// LayoutPage.tsx
+/**
+ * @module LayoutPage
+ * Root layout component that provides a consistent structure across the app.
+ */
+
+"use client";
 
 import { Box, VStack } from "@chakra-ui/react";
 import { Outlet } from "react-router-dom";
-import Navbar from "../components/NavBar";
+import { Navbar } from "@/components/NavBar";
 
-const LayoutPage = () => {
+export const LayoutPage = () => {
   return (
-    // minH="100vh" гарантирует футер внизу, но не дает лишнего места
-    <VStack align="stretch" gap="0" minH="100vh" bg="bg.canvas">
+    <VStack 
+      align="stretch" 
+      gap="0" 
+      minH="100vh" 
+      bg="bg.canvas" 
+      overflowX="hidden"
+    >
+      {/* Top navigation - Sticky by default inside its component */}
       <Navbar />
 
+      {/* Main Content Area */}
       <Box 
-        // Уменьшаем отступы на мобилках до минимума (base: 2)
-        px={{ base: "2", md: "6" }} 
-        py={{ base: "4", md: "6" }}
-        w="100%"
-        maxW="100vw"
-        flex="1" // Занимает всё оставшееся пространство без лишних дыр
+        as="main"
+        px={{ base: "4", md: "8" }} // Чуть больше отступа на мобилках для "воздуха"
+        py={{ base: "6", md: "8" }}
+        w="full"
+        flex="1" // Заставляет контент растягиваться, прижимая футер (если он будет) вниз
+        display="flex"
+        flexDirection="column"
       >
         <Outlet />
       </Box>
+
+      {/* Здесь можно добавить Footer, если потребуется в будущем */}
     </VStack>
   );
 };

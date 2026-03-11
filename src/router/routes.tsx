@@ -1,6 +1,14 @@
+/**
+ * @module Router
+ * Central routing configuration with nested layouts and role-based protection.
+ */
+
 import { createBrowserRouter } from "react-router-dom";
+
 import { ROUTES } from "@/config/navigation";
-import { ProtectedRoute } from "@/components/ProtectedRoute"; // Наш охранник
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+
+// Pages
 import LayoutPage from "@/pages/LayoutPage";
 import HomePage from "@/pages/HomePage";
 import LoginPage from "@/pages/LoginPage";
@@ -9,17 +17,22 @@ import AgeStatisticsPage from "@/pages/AgeStatisticsPage";
 import SalaryStatisticsPage from "@/pages/SalaryStatisticsPage";
 import DepartmentStatisticPage from "@/pages/DepartmentStatisticPage";
 
-const router = createBrowserRouter([
+
+
+/**
+ * Application router instance.
+ * Defines public and private sectors of the app.
+ */
+export const appRouter = createBrowserRouter([
   {
-    // Публичный роут: доступен всегда
+    // Public Route
     path: ROUTES.LOGIN,
     element: <LoginPage />,
   },
   {
+    // Protected Sector (All children require authentication)
     path: "/",
     element: (
-      // Оборачиваем весь Layout: если юзер не залогинен, 
-      // он не увидит ни одну внутреннюю страницу
       <ProtectedRoute>
         <LayoutPage />
       </ProtectedRoute>
@@ -32,7 +45,6 @@ const router = createBrowserRouter([
       { 
         path: ROUTES.ADD_EMPLOYEE, 
         element: (
-          // Дополнительная проверка: только для ADMIN
           <ProtectedRoute allowedRoles={["ADMIN"]}>
             <AddEmployeePage />
           </ProtectedRoute>
@@ -53,5 +65,3 @@ const router = createBrowserRouter([
     ],
   },
 ]);
-
-export default router;

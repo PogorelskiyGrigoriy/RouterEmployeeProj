@@ -1,62 +1,64 @@
 /**
  * @module AuthServiceImplementation
- * Реализация сервиса авторизации с использованием заглушки (Stub).
+ * Mock implementation of AuthService for development and testing.
  */
 
-import type { LoginData, UserData, UserRole } from "../models/AuthData";
-import type AuthService from "./AuthService";
+import type { LoginData, UserData, UserRole } from "@/models/AuthData";
+import type { AuthService } from "./AuthService";
 
-/** Локальный интерфейс для хранения пароля в нашей базе-заглушке */
+/**
+ * Internal interface for the mock database.
+ * Includes password field which is never exposed to the UI.
+ */
 interface DummyUser extends Omit<UserData, 'id'> {
-    password: string;
+  readonly password: string;
 }
 
 const DUMMY_LOGIN_USERS: Record<string, DummyUser> = {
-    "user@tel-ran.com": {
-        username: "Standard User",
-        password: "user1234",
-        role: "USER"
-    },
-    "admin@tel-ran.com": {
-        username: "Administrator",
-        password: "admin1234",
-        role: "ADMIN"
-    }
+  "user@tel-ran.com": {
+    username: "Standard User",
+    password: "user1234",
+    role: "USER"
+  },
+  "admin@tel-ran.com": {
+    username: "Administrator",
+    password: "admin1234",
+    role: "ADMIN"
+  }
 };
 
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
+/**
+ * Stub service that simulates network latency and basic validation.
+ */
 class AuthServiceDummy implements AuthService {
-    /**
-     * Имитирует запрос к API для входа пользователя.
-     */
-    async login(loginData: LoginData): Promise<UserData> {
-        // 1. Имитируем ожидание ответа от сервера (1 секунда)
-        await delay(1000);
+  /**
+   * Simulates an API call to authenticate a user.
+   */
+  async login({ email, password }: LoginData): Promise<UserData> {
+    await delay(1000);
 
-        const foundUser = DUMMY_LOGIN_USERS[loginData.email];
+    const foundUser = DUMMY_LOGIN_USERS[email];
 
-        // 2. Проверяем наличие пользователя и корректность пароля
-        if (!foundUser || foundUser.password !== loginData.password) {
-            throw new Error("Invalid email or password");
-        }
-
-        // 3. Возвращаем данные пользователя в формате UserData (сгенерировав ID)
-        return {
-            id: crypto.randomUUID(), // Генерация временного ID
-            username: foundUser.username,
-            role: foundUser.role as UserRole
-        };
+    if (!foundUser || foundUser.password !== password) {
+      // In real scenarios, use AxiosError or custom Error classes
+      throw new Error("Invalid email or password");
     }
 
-    /**
-     * Имитирует завершение сессии.
-     */
-    async logout(): Promise<void> {
-        await delay(500);
-        return Promise.resolve();
-    }
+    return {
+      id: crypto.randomUUID(),
+      username: foundUser.username,
+      role: foundUser.role as UserRole
+    };
+  }
+
+  /**
+   * Simulates session termination.
+   */
+  async logout(): Promise<void> {
+    await delay(500);
+  }
 }
 
-const authService = new AuthServiceDummy();
-export default authService;
+export const authService: AuthService = new AuthServiceDummy();

@@ -1,20 +1,34 @@
-"use client"
+/**
+ * @module Filters
+ * Client-side filtering form that updates the global filters store.
+ */
 
 import { VStack, HStack, Input, Button } from "@chakra-ui/react";
 import { useForm } from "react-hook-form";
-import { useFilters } from "@/store/filters-store";
-import { DEPARTMENT_OPTIONS, type EmployeeFilters } from "@/models/Filters";
-import employeesConfig from "@/config/employees-config";
+
 import { Field } from "@/components/ui/field";
 import { NativeSelectField, NativeSelectRoot } from "@/components/ui/native-select";
 
-interface FiltersProps {
+import { useFilters } from "@/store/filters-store";
+import { DEPARTMENT_FILTER_VALUES, type EmployeeFilters } from "@/models/Filters";
+import { EMPLOYEES_CONFIG } from "@/config/employees-config";
+
+interface Props {
   onClose: () => void;
 }
 
-const Filters = ({ onClose }: FiltersProps) => {
-  const { setFilters, resetFilters, ...currentFilters } = useFilters();
-  const config = employeesConfig;
+const DEFAULT_FILTERS: EmployeeFilters = {
+  department: "All",
+  minSalary: EMPLOYEES_CONFIG.salary.min,
+  maxSalary: EMPLOYEES_CONFIG.salary.max,
+  minAge: EMPLOYEES_CONFIG.age.min,
+  maxAge: EMPLOYEES_CONFIG.age.max,
+};
+
+export const Filters = ({ onClose }: Props) => {
+  // Access store using selectors for performance
+  const currentFilters = useFilters((state) => state.filters);
+  const { setFilters, resetFilters } = useFilters();
 
   const { 
     register, 
@@ -27,8 +41,9 @@ const Filters = ({ onClose }: FiltersProps) => {
     defaultValues: currentFilters
   });
 
-  const currentMinSalary = watch("minSalary");
-  const currentMinAge = watch("minAge");
+  // Dynamic watch for range validation
+  const [minSal, minAgeVal] = watch(["minSalary", "minAge"]);
+  const { salary: salConf, age: ageConf } = EMPLOYEES_CONFIG;
 
   const handleApply = (data: EmployeeFilters) => {
     setFilters(data);
@@ -37,45 +52,39 @@ const Filters = ({ onClose }: FiltersProps) => {
 
   const handleReset = () => {
     resetFilters();
-    reset({
-      department: "All",
-      minSalary: config.salary.min,
-      maxSalary: config.salary.max,
-      minAge: config.age.min,
-      maxAge: config.age.max,
-    });
+    reset(DEFAULT_FILTERS);
   };
 
   return (
     <form onSubmit={handleSubmit(handleApply)}>
       <VStack gap="6" align="stretch" py="4">
         
-        {/* 1. Департамент */}
+        {/* Department Selection */}
         <Field label="Department">
           <NativeSelectRoot>
             <NativeSelectField {...register("department")}>
-              {DEPARTMENT_OPTIONS.map((option) => (
-                <option key={option} value={option}>
-                  {option === "All" ? "All Departments" : option}
+              {DEPARTMENT_FILTER_VALUES.map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt === "All" ? "All Departments" : opt}
                 </option>
               ))}
             </NativeSelectField>
           </NativeSelectRoot>
         </Field>
 
-        {/* 2. Зарплата */}
+        {/* Salary Range */}
         <Field 
-          label={`Salary Range (${config.salary.currency})`}
+          label={`Salary (${salConf.currency})`}
           invalid={!!errors.minSalary || !!errors.maxSalary}
           errorText={errors.minSalary?.message || errors.maxSalary?.message}
         >
-          <HStack gap="4" width="full">
+          <HStack gap="3">
             <Input 
               type="number"
               placeholder="Min"
               {...register("minSalary", { 
                 valueAsNumber: true,
-                min: { value: config.salary.min, message: `Min: ${config.salary.min}` }
+                min: { value: salConf.min, message: `Min: ${salConf.min}` }
               })} 
             />
             <Input 
@@ -83,26 +92,26 @@ const Filters = ({ onClose }: FiltersProps) => {
               placeholder="Max"
               {...register("maxSalary", { 
                 valueAsNumber: true,
-                validate: (val) => (val ?? 0) >= (currentMinSalary ?? 0) || "Min > Max",
-                max: { value: config.salary.max, message: `Max: ${config.salary.max}` }
+                validate: (v) => (v ?? 0) >= (minSal ?? 0) || "Invalid range",
+                max: { value: salConf.max, message: `Max: ${salConf.max}` }
               })} 
             />
           </HStack>
         </Field>
 
-        {/* 3. Возраст */}
+        {/* Age Range */}
         <Field 
           label="Age Range"
           invalid={!!errors.minAge || !!errors.maxAge}
           errorText={errors.minAge?.message || errors.maxAge?.message}
         >
-          <HStack gap="4" width="full">
+          <HStack gap="3">
             <Input 
               type="number"
               placeholder="Min"
               {...register("minAge", { 
                 valueAsNumber: true,
-                min: { value: config.age.min, message: `Min age: ${config.age.min}` }
+                min: { value: ageConf.min, message: `Min: ${ageConf.min}` }
               })} 
             />
             <Input 
@@ -110,28 +119,27 @@ const Filters = ({ onClose }: FiltersProps) => {
               placeholder="Max"
               {...register("maxAge", { 
                 valueAsNumber: true,
-                validate: (val) => (val ?? 0) >= (currentMinAge ?? 0) || "Min > Max",
-                max: { value: config.age.max, message: `Max age: ${config.age.max}` }
+                validate: (v) => (v ?? 0) >= (minAgeVal ?? 0) || "Invalid range",
+                max: { value: ageConf.max, message: `Max: ${ageConf.max}` }
               })} 
             />
           </HStack>
         </Field>
 
-        <HStack justify="space-between" mt="4">
-          <Button variant="ghost" colorPalette="red" onClick={handleReset}>
-            Reset All
+        <HStack gap="4" mt="4">
+          <Button variant="ghost" colorPalette="gray" onClick={handleReset} flex="1">
+            Reset
           </Button>
           <Button 
             type="submit" 
             colorPalette="blue" 
             disabled={!isValid}
+            flex="2"
           >
-            Show Results
+            Apply
           </Button>
         </HStack>
       </VStack>
     </form>
   );
 };
-
-export default Filters;

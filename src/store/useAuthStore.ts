@@ -1,6 +1,6 @@
 /**
  * @module useAuthStore
- * Управление глобальным состоянием авторизации пользователя.
+ * Global state management for user authentication using Zustand.
  */
 
 import { create } from 'zustand';
@@ -8,46 +8,40 @@ import { persist } from 'zustand/middleware';
 import type { UserData } from '@/models/AuthData';
 
 /**
- * Интерфейс хранилища авторизации.
+ * State and Actions for Auth Store.
  */
-interface AuthState {
-    /** Данные авторизованного пользователя или null, если вход не выполнен */
-    user: UserData | null;
-    /** Флаг, указывающий, авторизован ли пользователь в данный момент */
-    isAuthenticated: boolean;
-    
-    /** * Устанавливает данные пользователя в состояние при успешном входе.
-     * @param data - Объект данных пользователя, полученный от сервиса авторизации.
-     */
-    setLogin: (data: UserData) => void;
-    
-    /** * Сбрасывает состояние авторизации и очищает данные пользователя (Log out).
-     */
-    setLogout: () => void;
+interface AuthStore {
+  readonly user: UserData | null;
+  readonly isAuthenticated: boolean;
+  
+  /** Updates state on successful login */
+  setLogin: (data: UserData) => void;
+  /** Clears state on logout */
+  setLogout: () => void;
 }
 
 /**
- * Хук для доступа к состоянию авторизации.
- * Использует localStorage для сохранения состояния между сессиями браузера.
+ * Hook to access and manipulate authentication state.
+ * Persists data to localStorage automatically via 'auth-storage' key.
  */
-export const useAuthStore = create<AuthState>()(
-    persist(
-        (set) => ({
-            user: null,
-            isAuthenticated: false,
+export const useAuthStore = create<AuthStore>()(
+  persist(
+    (set) => ({
+      user: null,
+      isAuthenticated: false,
 
-            setLogin: (data) => set({ 
-                user: data, 
-                isAuthenticated: true 
-            }),
+      setLogin: (data) => set({ 
+        user: data, 
+        isAuthenticated: true 
+      }),
 
-            setLogout: () => set({ 
-                user: null, 
-                isAuthenticated: false 
-            }),
-        }),
-        {
-            name: 'auth-storage', // Уникальный ключ в localStorage
-        }
-    )
+      setLogout: () => set({ 
+        user: null, 
+        isAuthenticated: false 
+      }),
+    }),
+    {
+      name: 'auth-storage', // Key used in localStorage
+    }
+  )
 );

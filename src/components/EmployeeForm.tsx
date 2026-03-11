@@ -1,13 +1,19 @@
-"use client"
+/**
+ * @module EmployeeForm
+ * Universal form for creating and updating employee records.
+ */
 
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
 import { Stack, Input, Button, HStack } from "@chakra-ui/react";
+
 import { Field } from "@/components/ui/field";
 import { NativeSelectField, NativeSelectRoot } from "@/components/ui/native-select";
-import { useForm } from "react-hook-form";
-import { useEffect } from "react";
+
 import type { Employee, NewEmployee } from "@/models/Employee";
-import type { Department } from "@/models/Departments"; 
-import employeesConfig from "@/config/employees-config";
+import type { Department } from "@/models/Departments";
+
+import { EMPLOYEES_CONFIG } from "@/config/employees-config";
 import { calculateAge, getLimitDate } from "@/utils/dateUtils";
 
 interface Props {
@@ -17,44 +23,50 @@ interface Props {
   onCancel?: () => void;
 }
 
+const DEFAULT_VALUES: NewEmployee = {
+  fullName: "",
+  department: "" as Department,
+  salary: EMPLOYEES_CONFIG.salary.min,
+  birthDate: "",
+};
+
+const NAME_PATTERN = {
+  value: /^[a-zA-Zа-яА-ЯёЁ\s-]+$/,
+  message: "Only letters and hyphens allowed"
+};
+
 export const EmployeeForm = ({ onSubmit, isLoading, employee, onCancel }: Props) => {
   const isEditMode = !!employee;
-
-  // Создаем объект дефолтных значений на основе конфига
-  const defaultValues: NewEmployee = {
-    fullName: "",
-    department: "" as Department, // Приводим к типу, чтобы TS не ругался на ""
-    salary: employeesConfig.salary.min,
-    birthDate: "",
-  };
+  const { salary, age } = EMPLOYEES_CONFIG;
 
   const { 
     register, 
     handleSubmit, 
     reset,
-    formState: { errors, isValid } 
+    formState: { errors, isValid, isDirty } 
   } = useForm<NewEmployee>({
     mode: "onChange",
-    defaultValues: employee || defaultValues
+    defaultValues: employee || DEFAULT_VALUES
   });
 
-  // Эффект для синхронизации при открытии формы (важно для Drawer)
+  // Sync state when switching between different employees in the same drawer
   useEffect(() => {
-    if (employee) {
-      reset(employee);
-    } else {
-      reset(defaultValues);
-    }
+    reset(employee || DEFAULT_VALUES);
   }, [employee, reset]);
 
-  const handleReset = () => {
-    reset(isEditMode ? employee : defaultValues);
+  const handleSecondaryAction = () => {
+    if (isEditMode) {
+      onCancel?.();
+    } else {
+      reset(DEFAULT_VALUES);
+    }
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Stack gap="5">
         
+        {/* Full Name */}
         <Field 
           label="Full Name" 
           invalid={!!errors.fullName} 
@@ -63,13 +75,14 @@ export const EmployeeForm = ({ onSubmit, isLoading, employee, onCancel }: Props)
           <Input 
             {...register("fullName", { 
               required: "Name is required",
-              minLength: { value: 3, message: "At least 3 characters" },
-              pattern: { value: /^[a-zA-Zа-яА-ЯёЁ\s-]+$/, message: "Only letters and hyphens allowed" }
+              minLength: { value: 3, message: "Min 3 chars" },
+              pattern: NAME_PATTERN
             })} 
-            placeholder="John Doe"
+            placeholder="e.g. Jane Smith"
           />
         </Field>
 
+        {/* Department */}
         <Field 
           label="Department" 
           invalid={!!errors.department} 
@@ -77,18 +90,19 @@ export const EmployeeForm = ({ onSubmit, isLoading, employee, onCancel }: Props)
         >
           <NativeSelectRoot>
             <NativeSelectField 
-              {...register("department", { required: "Select a department" })}
+              {...register("department", { required: "Select department" })}
             >
-              <option value="">Select department...</option>
-              {employeesConfig.departments.map(d => (
-                <option key={d} value={d}>{d}</option>
+              <option value="">Select...</option>
+              {EMPLOYEES_CONFIG.departments.map(dept => (
+                <option key={dept} value={dept}>{dept}</option>
               ))}
             </NativeSelectField>
           </NativeSelectRoot>
         </Field>
 
+        {/* Salary */}
         <Field 
-          label={`Salary ($ ${employeesConfig.salary.min} - ${employeesConfig.salary.max})`} 
+          label={`Salary (${salary.currency}${salary.min} - ${salary.max})`} 
           invalid={!!errors.salary} 
           errorText={errors.salary?.message}
         >
@@ -97,47 +111,53 @@ export const EmployeeForm = ({ onSubmit, isLoading, employee, onCancel }: Props)
             {...register("salary", { 
               valueAsNumber: true,
               required: "Salary is required",
-              min: { value: employeesConfig.salary.min, message: `Min: ${employeesConfig.salary.min}` },
-              max: { value: employeesConfig.salary.max, message: `Max: ${employeesConfig.salary.max}` }
+              min: { value: salary.min, message: `Min: ${salary.min}` },
+              max: { value: salary.max, message: `Max: ${salary.max}` }
             })} 
           />
         </Field>
 
+        {/* Birth Date */}
         <Field 
-          label={`Birth Date (Min age: ${employeesConfig.age.min})`} 
+          label={`Birth Date (Age ${age.min}+)`} 
           invalid={!!errors.birthDate} 
           errorText={errors.birthDate?.message}
+          helperText={isEditMode ? "Birth date cannot be changed" : undefined}
         >
           <Input 
             type="date" 
-            readOnly={isEditMode}
-            variant={isEditMode ? "subtle" : "outline"}
-            min={getLimitDate(employeesConfig.age.max)} 
-            max={getLimitDate(employeesConfig.age.min)}
+            disabled={isEditMode}
+            opacity={isEditMode ? 0.6 : 1}
+            min={getLimitDate(age.max)} 
+            max={getLimitDate(age.min)}
             {...register("birthDate", { 
-              required: "Date is required",
-              validate: (value) => {
-                const age = calculateAge(value);
-                if (age < employeesConfig.age.min) return `Too young (min ${employeesConfig.age.min})`;
-                if (age > employeesConfig.age.max) return `Too old (max ${employeesConfig.age.max})`;
-                return true;
+              required: "Required",
+              validate: (val) => {
+                const currentAge = calculateAge(val);
+                return (currentAge >= age.min && currentAge <= age.max) || 
+                       `Age must be ${age.min}-${age.max}`;
               }
             })} 
           />
         </Field>
 
         <HStack gap="4" mt="4">
-          <Button variant="outline" onClick={isEditMode ? onCancel : handleReset} flex="1">
-            {isEditMode ? "Cancel" : "Reset"}
+          <Button 
+            variant="ghost" 
+            onClick={handleSecondaryAction} 
+            flex="1"
+            disabled={isLoading}
+          >
+            {isEditMode ? "Cancel" : "Clear"}
           </Button>
           <Button 
             type="submit" 
             loading={isLoading} 
-            disabled={!isValid}
+            disabled={!isValid || (isEditMode && !isDirty)}
             colorPalette="blue"
             flex="1"
           >
-            {isEditMode ? "OK" : "Save"}
+            {isEditMode ? "Update" : "Create"}
           </Button>
         </HStack>
       </Stack>

@@ -1,20 +1,35 @@
 /**
  * @module AuthData
- * Модели данных для системы аутентификации и авторизации.
+ * Core data models for Authentication and Authorization systems.
  */
 
 /**
- * Данные, передаваемые пользователем при попытке входа.
+ * Credentials provided by the user during the login process.
  */
-export type LoginData = {
-    email: string;
-    password: string;
+export interface LoginData {
+  readonly email: string;
+  readonly password: string;
 }
 
+/**
+ * Valid system roles for Access Control Lists (ACL).
+ */
 export type UserRole = 'ADMIN' | 'USER';
 
-export type UserData = {
-    id: string;
-    username: string;
-    role: UserRole;
+/**
+ * Profile data for a successfully authenticated user.
+ */
+export interface UserData {
+  readonly id: string;
+  readonly username: string;
+  readonly role: UserRole;
+}
+
+/**
+ * Extended state for the Authentication Store.
+ */
+export interface AuthState {
+  readonly user: UserData | null;
+  readonly isAuthenticated: boolean;
+  readonly isLoading: boolean;
 }

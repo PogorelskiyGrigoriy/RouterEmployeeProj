@@ -1,5 +1,13 @@
-// src/config/navigation.ts
+/**
+ * @module NavigationConfig
+ * Defines application routes and role-based access for navigation links.
+ */
 
+import type { UserRole } from "@/models/AuthData";
+
+/**
+ * Single source of truth for all application routes.
+ */
 export const ROUTES = {
   HOME: "/",
   LOGIN: "/login",
@@ -10,13 +18,15 @@ export const ROUTES = {
 } as const;
 
 export interface NavItemConfig {
-  to: string;
-  label: string;
-  roles: string[]; // Массив ролей, которым разрешен этот пункт
+  readonly to: string;
+  readonly label: string;
+  readonly roles: UserRole[]; 
 }
 
-// Ссылки, которые будут видны сразу в Navbar
-export const MAIN_NAV_LINKS: NavItemConfig[] = [
+/**
+ * Primary links displayed directly in the Navbar.
+ */
+export const MAIN_NAV_LINKS: readonly NavItemConfig[] = [
   { 
     to: ROUTES.HOME, 
     label: "Home", 
@@ -25,13 +35,14 @@ export const MAIN_NAV_LINKS: NavItemConfig[] = [
   { 
     to: ROUTES.ADD_EMPLOYEE, 
     label: "Add Employee", 
-    roles: ["ADMIN"] // Видит только админ
+    roles: ["ADMIN"] 
   },
-];
+] as const;
 
-// Ссылки для выпадающего списка (Статистика)
-// Обычно статистика доступна всем авторизованным пользователям
-export const STATS_NAV_LINKS: NavItemConfig[] = [
+/**
+ * Secondary links grouped under the Statistics dropdown.
+ */
+export const STATS_NAV_LINKS: readonly NavItemConfig[] = [
   { 
     to: ROUTES.STATS_AGE, 
     label: "Age Stats", 
@@ -47,4 +58,4 @@ export const STATS_NAV_LINKS: NavItemConfig[] = [
     label: "Dept Stats", 
     roles: ["USER", "ADMIN"] 
   },
-];
+] as const;

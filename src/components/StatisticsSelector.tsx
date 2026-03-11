@@ -1,81 +1,90 @@
+/**
+ * @module StatisticsSelector
+ * Role-based dropdown for switching between different statistics dashboards.
+ */
+
 "use client";
 
-import { Button } from "@chakra-ui/react";
+import { useMemo } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { Button, Icon } from "@chakra-ui/react";
+import { LuChevronDown } from "react-icons/lu";
+
 import { 
   MenuContent, 
   MenuItem, 
   MenuRoot, 
   MenuTrigger 
 } from "@/components/ui/menu"; 
-import { useNavigate, useLocation } from "react-router-dom";
-import { STATS_NAV_LINKS } from "@/config/navigation";
-import { LuChevronDown } from "react-icons/lu";
-import { useAuthStore } from "@/store/useAuthStore"; 
 
-const StatisticsSelector = () => {
+import { STATS_NAV_LINKS } from "@/config/navigation";
+import { useAuthStore } from "@/store/useAuthStore";
+
+export const StatisticsSelector = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, isAuthenticated } = useAuthStore(); // Достаем данные юзера
 
-  // 1. Фильтруем ссылки на основе роли пользователя
-  // Это гарантирует, что юзер не увидит в меню то, на что у него нет прав
-  const allowedStats = STATS_NAV_LINKS.filter(link => 
-    isAuthenticated && user ? link.roles.includes(user.role) : false
-  );
+  const user = useAuthStore((state) => state.user);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
-  // 2. Определяем активный пункт среди РАЗРЕШЕННЫХ ссылок
-  const activeStat = allowedStats.find(link => link.to === location.pathname);
-  const buttonLabel = activeStat ? activeStat.label : "Statistics";
+  // 1. Filter views based on user permissions
+  const allowedStats = useMemo(() => {
+    if (!isAuthenticated || !user) return [];
+    return STATS_NAV_LINKS.filter(link => link.roles.includes(user.role));
+  }, [isAuthenticated, user]);
 
-  // Если для данной роли нет доступных графиков, вообще не рендерим селектор
+  // 2. Determine currently active statistic view
+  const activeStat = useMemo(() => {
+    return allowedStats.find(link => link.to === location.pathname);
+  }, [allowedStats, location.pathname]);
+
   if (allowedStats.length === 0) return null;
 
   return (
-    <MenuRoot>
+    <MenuRoot positioning={{ placement: "bottom-end" }}>
       <MenuTrigger asChild>
         <Button 
           variant="outline" 
           size="sm"
-          bg="white" 
-          color={activeStat ? "blue.600" : "gray.700"}
-          borderColor={activeStat ? "blue.500" : "gray.300"}
-          borderWidth="1px"
+          bg="bg.panel" 
+          borderColor={activeStat ? "blue.500" : "border.emphasized"}
+          color={activeStat ? "blue.600" : "fg.emphasized"}
+          fontWeight={activeStat ? "bold" : "medium"}
           px="4"
           height="36px"
-          fontWeight={activeStat ? "bold" : "medium"}
-          boxShadow="sm"
           _hover={{ 
             bg: "blue.50", 
             borderColor: "blue.400",
-            color: "blue.700"
           }}
-          _active={{
-            bg: "blue.100"
-          }}
-          transition="all 0.2s"
         >
-          {buttonLabel} 
-          <LuChevronDown style={{ 
-            marginLeft: '8px', 
-            transition: 'transform 0.2s',
-            color: activeStat ? "inherit" : "gray.400" 
-          }} />
+          {activeStat ? activeStat.label : "Select View"} 
+          <Icon 
+            as={LuChevronDown} 
+            ms="2" 
+            transition="transform 0.2s"
+            color={activeStat ? "blue.500" : "fg.muted"} 
+          />
         </Button>
       </MenuTrigger>
-      <MenuContent>
-        {/* Рендерим только те пункты, которые прошли фильтрацию по ролям */}
-        {allowedStats.map((item) => (
-          <MenuItem 
-            key={item.to} 
-            value={item.to}
-            onClick={() => navigate(item.to)}
-          >
-            {item.label}
-          </MenuItem>
-        ))}
+      
+      <MenuContent minW="180px">
+        {allowedStats.map((item) => {
+          const isSelected = item.to === location.pathname;
+          
+          return (
+            <MenuItem 
+              key={item.to} 
+              value={item.to}
+              onClick={() => navigate(item.to)}
+              color={isSelected ? "blue.600" : "inherit"}
+              fontWeight={isSelected ? "bold" : "normal"}
+              cursor="pointer"
+            >
+              {item.label}
+            </MenuItem>
+          );
+        })}
       </MenuContent>
     </MenuRoot>
   );
 };
-
-export default StatisticsSelector;

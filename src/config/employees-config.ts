@@ -1,22 +1,30 @@
-import { DEPARTMENTS, type Department } from "@/models/Departments";
+/**
+ * @module EmployeesConfig
+ * Centralized configuration for employee-related calculations and UI constraints.
+ */
 
-// Переносим интерфейс сюда. Он становится "внутренним" для конфига.
+import { DEPARTMENTS_LIST, type Department } from "@/models/Departments";
+
 export interface GroupingConfig {
-  min: number;
-  max: number;
-  interval: number;
-  unit?: string;
-  currency?: string;
-  label: string;
+  readonly min: number;
+  readonly max: number;
+  readonly interval: number;
+  readonly unit?: string;
+  readonly currency?: string;
+  readonly label: string;
 }
 
 interface EmployeesConfig {
-  salary: GroupingConfig;
-  age: GroupingConfig;
-  departments: Department[]; 
+  readonly salary: GroupingConfig;
+  readonly age: GroupingConfig;
+  readonly departments: readonly Department[]; 
 }
 
-const employeesConfig: EmployeesConfig = {
+/**
+ * Global configuration object for employees domain.
+ * Use 'as const' to ensure deep immutability of configuration values.
+ */
+export const EMPLOYEES_CONFIG: EmployeesConfig = {
   salary: {
     min: 5000,
     max: 50000,
@@ -31,7 +39,5 @@ const employeesConfig: EmployeesConfig = {
     interval: 5,
     label: 'Age'
   },
-  departments: DEPARTMENTS,
-};
-
-export default employeesConfig;
+  departments: DEPARTMENTS_LIST,
+} as const;

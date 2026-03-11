@@ -1,5 +1,12 @@
+/**
+ * @module Navbar
+ * Sticky header providing navigation and user session controls.
+ */
+
 "use client";
 
+import { useMemo } from "react";
+import { NavLink } from "react-router-dom";
 import { 
   HStack, 
   Link as ChakraLink, 
@@ -8,65 +15,66 @@ import {
   Button, 
   Text,
   Separator,
+  Stack,
 } from "@chakra-ui/react";
-import { NavLink } from "react-router-dom";
-import { MAIN_NAV_LINKS, ROUTES } from "@/config/navigation";
+
+import { StatisticsSelector } from "./StatisticsSelector";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useLogout } from "@/services/hooks/authHooks/useLogout";
-import StatisticsSelector from "./StatisticsSelector";
+import { MAIN_NAV_LINKS, ROUTES } from "@/config/navigation";
 
-const Navbar = () => {
-  const { user, isAuthenticated } = useAuthStore();
-  
-  // Используем мутацию для выхода
+export const Navbar = () => {
+  const user = useAuthStore((state) => state.user);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const { mutate: logout, isPending } = useLogout();
 
-  const handleLogout = () => {
-    logout();
-  };
-
-  // Фильтруем ссылки: показываем только те, роли которых совпадают с ролью юзера
-  const visibleLinks = MAIN_NAV_LINKS.filter((link) =>
-    isAuthenticated && user ? link.roles.includes(user.role) : false
-  );
+  const visibleLinks = useMemo(() => {
+    if (!isAuthenticated || !user) return [];
+    return MAIN_NAV_LINKS.filter((link) => link.roles.includes(user.role));
+  }, [isAuthenticated, user]);
 
   return (
     <HStack 
       as="nav" 
-      wrap="nowrap" 
       justify="space-between" 
-      p={{ base: "2", md: "4" }} 
-      bg="white" 
-      borderBottom="1px solid" 
-      borderColor="gray.200"
+      px={{ base: "4", md: "6" }} 
+      py="3"
+      bg="bg.panel" 
+      borderBottomWidth="1px" 
+      borderColor="border.subtle"
       position="sticky"
       top="0"
-      zIndex="10"
+      zIndex="sticky"
     >
-      <HStack gap={{ base: "3", md: "6" }}>
-        {/* 1. Если НЕ авторизован: ссылка на Login */}
+      <HStack gap={{ base: "4", md: "8" }}>
         {!isAuthenticated ? (
-          <ChakraLink asChild variant="plain" color="blue.600" fontWeight="600">
-            <NavLink to={ROUTES.LOGIN}>Login</NavLink>
+          <ChakraLink asChild variant="plain" fontWeight="bold" color="blue.600">
+            <NavLink to={ROUTES.LOGIN}>Sign In</NavLink>
           </ChakraLink>
         ) : (
-          /* 2. Если АВТОРИЗОВАН: системные ссылки */
           visibleLinks.map((link) => (
             <ChakraLink 
               key={link.to} 
               asChild 
-              variant="plain" 
-              color="gray.700" 
-              fontSize={{ base: "xs", md: "sm" }}
-              _hover={{ color: "blue.600" }}
-              css={{ 
-                "&.active": { 
-                  fontWeight: "700", 
-                  color: "blue.700",
-                  borderBottom: "2px solid", 
-                  borderColor: "blue.700", 
-                  pb: "1" 
-                } 
+              variant="plain"
+              fontSize="sm"
+              fontWeight="medium"
+              // Используем css prop для безопасной стилизации активного класса NavLink
+              css={{
+                "&.active": {
+                  color: "blue.600",
+                  fontWeight: "bold",
+                  position: "relative",
+                  _after: {
+                    content: '""',
+                    position: "absolute",
+                    bottom: "-12px", // Выравниваем под чертой навбара
+                    left: 0,
+                    width: "100%",
+                    height: "2px",
+                    bg: "blue.600",
+                  }
+                }
               }}
             >
               <NavLink to={link.to}>{link.label}</NavLink>
@@ -77,42 +85,35 @@ const Navbar = () => {
 
       <Spacer />
 
-      {/* Правая часть: данные пользователя */}
       {isAuthenticated && user && (
-        <HStack gap={{ base: "2", md: "4" }}>
-          {/* Адаптивное отображение имени (мобилки/десктоп) */}
-          <Box textAlign="right" hideFrom="md">
-             <Text fontSize="xs" fontWeight="bold" lineHeight="1">{user.username}</Text>
-             <Text fontSize="2xs" color="gray.500">{user.role}</Text>
-          </Box>
-          
-          <Box hideBelow="md">
-            <Text fontSize="sm" color="gray.700">
-              Logged as: <b>{user.username}</b> ({user.role})
-            </Text>
-          </Box>
-
-          <Separator orientation="vertical" height="24px" />
-
-          {/* Селектор статистики */}
-          <Box maxW={{ base: "120px", md: "auto" }}>
+        <HStack gap={{ base: "3", md: "5" }}>
+          <Box maxW={{ base: "100px", md: "200px" }}>
             <StatisticsSelector />
           </Box>
 
-          {/* Кнопка Logout с индикацией загрузки */}
+          <Separator orientation="vertical" height="20px" />
+
+          <Stack gap="0" align="flex-end" hideBelow="sm">
+            <Text fontSize="xs" fontWeight="bold" lineHeight="tight">
+              {user.username}
+            </Text>
+            <Text fontSize="10px" color="fg.muted" textTransform="uppercase">
+              {user.role}
+            </Text>
+          </Stack>
+
           <Button 
-            size="sm" 
-            variant="ghost" 
+            size="xs" 
+            variant="subtle" 
             colorPalette="red" 
-            onClick={handleLogout}
-            disabled={isPending}
+            onClick={() => logout()}
+            loading={isPending}
+            px="3"
           >
-            {isPending ? "Exiting..." : "Logout"}
+            Logout
           </Button>
         </HStack>
       )}
     </HStack>
   );
 };
-
-export default Navbar;

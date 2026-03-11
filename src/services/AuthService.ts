@@ -1,21 +1,30 @@
 /**
  * @module AuthService
- * Интерфейс для сервиса аутентификации.
+ * Abstract interface for authentication provider.
  */
 
-import type { LoginData, UserData } from "../models/AuthData";
+import type { LoginData, UserData } from "@/models/AuthData";
 
 /**
- * Описывает обязательные методы для любого сервиса авторизации (Stub или Real API).
+ * Defines mandatory methods for authentication logic.
+ * Supports both Mock and Real API implementations.
  */
-export default interface AuthService {
-    /**
-     * Выполняет проверку учетных данных пользователя.
-     * @param loginData - Объект с email и паролем.
-     * @returns {Promise<UserData>} - Данные пользователя при успешном входе.
-     * @throws {AxiosError} - Ошибка при неверных данных.
-     */
-    login(loginData: LoginData): Promise<UserData>;
+export interface AuthService {
+  /**
+   * Validates user credentials.
+   * @param credentials - Login and password payload.
+   * @returns User profile data on success.
+   */
+  login(credentials: LoginData): Promise<UserData>;
 
-    logout(): Promise<void>;
+  /**
+   * Terminates the current session.
+   */
+  logout(): Promise<void>;
+
+  /**
+   * [Optional but recommended] 
+   * Validates the existing session token on app initialization.
+   */
+  getCurrentUser?(): Promise<UserData | null>;
 }

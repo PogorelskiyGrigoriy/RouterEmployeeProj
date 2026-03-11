@@ -1,16 +1,25 @@
-//StatsInterface.ts
+/**
+ * @module StatsInterface
+ * Models for data visualization and chart components.
+ */
 
+/**
+ * Single data point for any chart.
+ */
 export interface StatsDataItem {
-  xValue: string | number;
-  yValue: number;
-  tooltipValue: string;
+  readonly xValue: string | number;
+  readonly yValue: number;
+  readonly tooltipValue: string;
 }
 
+/**
+ * Configuration props for the StatisticsChart component.
+ */
 export interface StatsChartProps {
-  title: string;
-  data: StatsDataItem[];
-  dataKeyX?: keyof StatsDataItem; // Теперь ключи ограничены только полями StatsDataItem
-  dataKeyY?: keyof StatsDataItem;
-  tooltipLabelKey?: keyof StatsDataItem;
-  labelY?: string;
+  readonly title: string;
+  readonly data: readonly StatsDataItem[];
+  readonly dataKeyX?: keyof StatsDataItem;
+  readonly dataKeyY?: keyof StatsDataItem;
+  readonly tooltipLabelKey?: keyof StatsDataItem;
+  readonly labelY?: string;
 }
