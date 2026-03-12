@@ -1,52 +1,20 @@
-import { Box, Center, HStack, Spinner, Table, Text, VStack } from "@chakra-ui/react";
-import { LuSearchX, LuArrowUp, LuArrowDown, LuArrowUpDown } from "react-icons/lu";
+import { Box, Center, Spinner, Table, Text, VStack } from "@chakra-ui/react";
+import { LuSearchX } from "react-icons/lu";
 
 import { EmployeeCard } from "./EmployeeCard";
-import { EmployeeRow } from "./EmployeeRow"; // Новый импорт
+import { EmployeeRow } from "./EmployeeRow";
 import { MobileSortActions } from "./MobileSortActions";
+import { SortableColumn } from "./ui/SortableColumn";
 
 import { useEmployees } from "@/services/hooks/useEmployees";
-import { useSortStore } from "@/store/sort-store";
 import { useAuthStore } from "@/store/useAuthStore";
-import type { Employee } from "@/models/Employee";
-
-interface SortableProps {
-  field: keyof Employee;
-  children: React.ReactNode;
-  textAlign?: "start" | "end" | "center";
-  width?: string;
-}
-
-const SortableColumn = ({ field, children, textAlign = "start", width }: SortableProps) => {
-  const { sort, toggleSort } = useSortStore();
-  const isSorted = sort.key === field;
-  const handleToggle = () => toggleSort(field);
-
-  return (
-    <Table.ColumnHeader
-      onClick={handleToggle}
-      cursor="pointer"
-      _hover={{ bg: "blackAlpha.100" }}
-      textAlign={textAlign}
-      width={width}
-    >
-      <HStack gap="1" justifyContent={textAlign === "end" ? "flex-end" : "flex-start"}>
-        <Text fontWeight="bold">{children}</Text>
-        <Box color={isSorted ? "blue.500" : "fg.muted"} flexShrink={0}>
-          {isSorted && sort.order === "asc" && <LuArrowUp size="14" />}
-          {isSorted && sort.order === "desc" && <LuArrowDown size="14" />}
-          {!isSorted && <LuArrowUpDown size="14" style={{ opacity: 0.3 }} />}
-        </Box>
-      </HStack>
-    </Table.ColumnHeader>
-  );
-};
 
 export const Employees = () => {
   const { employees, isLoading, error, filteredCount } = useEmployees();
   const user = useAuthStore((state) => state.user);
   const isAdmin = user?.role === "ADMIN";
 
+  // --- (Loading, Error, Empty) ---
   if (isLoading) return (
     <Center h="200px"><Spinner size="xl" color="blue.500" /></Center>
   );
@@ -76,7 +44,7 @@ export const Employees = () => {
         </VStack>
       </Box>
 
-      {/* ДЕКСТОПНЫЙ ВИД */}
+      {/* ДЕКСТОПНЫЙ ВИД (Таблица) */}
       <Box 
         display={{ base: "none", md: "block" }}
         borderWidth="1px" 
@@ -94,7 +62,7 @@ export const Employees = () => {
                 Department
               </Table.ColumnHeader>
               
-              <Table.ColumnHeader display={{ base: "none", lg: "table-cell" }} whiteSpace="nowrap">
+              <Table.ColumnHeader display={{ base: "none", lg: "table-cell" }}>
                 <SortableColumn field="birthDate">Birth Date</SortableColumn>
               </Table.ColumnHeader>
               
@@ -120,6 +88,7 @@ export const Employees = () => {
         </Table.Root>
       </Box>
 
+      {/* ФУТЕР СПИСКА */}
       <Box p="3" mt="2">
         <Text fontSize="xs" color="fg.subtle" textAlign="right">
           Showing {filteredCount} employees
