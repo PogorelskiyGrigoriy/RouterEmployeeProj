@@ -6,9 +6,8 @@ export const nameSchema = z.string()
   .regex(/^[a-zA-Zа-яА-ЯёЁ\s-]+$/, "Only letters and hyphens allowed");
 
   // Правило для Email
-export const emailSchema = z.string()
-  .min(1, "Email is required")
-  .email("Invalid email address");
+export const emailSchema = z.email({ message: "Invalid email address" })
+  .min(1, { message: "Email is required" });
 
 // Правило для пароля (минимум 6 символов, как в твоем LoginForm)
 export const passwordSchema = z.string()

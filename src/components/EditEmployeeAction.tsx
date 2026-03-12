@@ -21,7 +21,7 @@ import { EmployeeForm } from "./EmployeeForm";
 
 import { useUpdateEmployee } from "@/services/hooks/mutationHooks/useUpdateEmployee";
 import { toaster } from "@/components/ui/toaster-config";
-import type { Employee, NewEmployee } from "@/models/Employee";
+import type { Employee, NewEmployee } from "@/schemas/employee.schema";
 
 interface Props {
   employee: Employee;

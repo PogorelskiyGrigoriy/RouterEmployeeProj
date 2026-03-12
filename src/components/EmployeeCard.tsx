@@ -3,7 +3,7 @@ import { EmployeeIdentity } from "./ui/DataDisplay";
 import { DeleteEmployeeAction } from "./DeleteEmployeeAction";
 import { EditEmployeeAction } from "./EditEmployeeAction";
 import { EmployeeDetailsDialog } from "./EmployeeDetailsDialog";
-import type { Employee } from "@/models/Employee";
+import type { Employee } from "@/schemas/employee.schema";
 import { useRef } from "react";
 
 interface EmployeeCardProps {

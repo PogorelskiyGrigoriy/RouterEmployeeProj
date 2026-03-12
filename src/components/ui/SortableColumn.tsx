@@ -6,7 +6,7 @@
 import { Box, HStack, Text, Table } from "@chakra-ui/react";
 import { LuArrowUp, LuArrowDown, LuArrowUpDown } from "react-icons/lu";
 import { useSortStore } from "@/store/sort-store";
-import type { Employee } from "@/models/Employee";
+import type { Employee } from "@/schemas/employee.schema";
 
 interface SortableColumnProps {
   field: keyof Employee;

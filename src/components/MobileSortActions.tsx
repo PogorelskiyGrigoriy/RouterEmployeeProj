@@ -1,7 +1,7 @@
 import { HStack, MenuRoot, MenuTrigger, MenuContent, MenuItem, Button, Text } from "@chakra-ui/react";
 import { LuArrowDownAZ, LuArrowDownWideNarrow, LuCalendarDays, LuArrowUp, LuArrowDown, LuArrowUpDown } from "react-icons/lu";
 import { useSortStore } from "@/store/sort-store";
-import type { Employee } from "@/models/Employee";
+import type { Employee } from "@/schemas/employee.schema";
 
 export const MobileSortActions = () => {
   const { sort, toggleSort } = useSortStore();

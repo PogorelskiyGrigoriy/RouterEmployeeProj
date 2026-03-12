@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { EmployeeForm } from "@/components/EmployeeForm";
 import { useAddEmployee } from "@/services/hooks/mutationHooks/useAddEmployee";
 import { toaster } from "@/components/ui/toaster-config"; 
-import type { NewEmployee } from "@/models/Employee";
+import type { NewEmployee } from "@/schemas/employee.schema";
 import { ROUTES } from "@/config/navigation";
 import { CloseButton } from "@/components/ui/close-button";
 

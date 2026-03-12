@@ -3,7 +3,7 @@
  * Mutation hook for creating a new employee record.
  */
 
-import type { Employee, NewEmployee } from "@/models/Employee"; 
+import type { Employee, NewEmployee } from "@/schemas/employee.schema"; 
 import { apiClient } from "@/services/ApiClientImplementation";
 import { useEmployeesMutation } from "./useEmployeesMutation";
 

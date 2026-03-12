@@ -8,7 +8,7 @@ import type {
   Employee, 
   NewEmployee, 
   EmployeeUpdatePayload 
-} from "@/models/Employee";
+} from "@/schemas/employee.schema";
 import type { EmployeeFilters } from "@/models/Filters";
 import type { SortState } from "@/store/sort-store";
 

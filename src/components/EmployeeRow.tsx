@@ -3,7 +3,7 @@ import { CurrencyText, DateText, EmployeeIdentity, DeptBadge } from "./ui/DataDi
 import { DeleteEmployeeAction } from "./DeleteEmployeeAction";
 import { EditEmployeeAction } from "./EditEmployeeAction";
 import { calculateAge } from "@/utils/dateUtils";
-import type { Employee } from "@/models/Employee";
+import type { Employee } from "@/schemas/employee.schema";
 
 interface EmployeeRowProps {
   employee: Employee;

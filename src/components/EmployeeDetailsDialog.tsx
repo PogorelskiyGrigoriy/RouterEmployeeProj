@@ -11,7 +11,7 @@ import { IconButton, VStack, HStack, Text, Separator, Box } from "@chakra-ui/rea
 import { LuChevronRight, LuBriefcase, LuCalendar, LuWallet } from "react-icons/lu";
 import { EmployeeIdentity, CurrencyText, DateText, DeptBadge } from "./ui/DataDisplay";
 import { calculateAge } from "@/utils/dateUtils";
-import type { Employee } from "@/models/Employee";
+import type { Employee } from "@/schemas/employee.schema";
 
 interface Props {
   employee: Employee;

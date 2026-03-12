@@ -3,7 +3,7 @@
  * Mutation hook for updating an existing employee record.
  */
 
-import type { Employee, EmployeeUpdatePayload } from "@/models/Employee"; 
+import type { Employee, EmployeeUpdatePayload } from "@/schemas/employee.schema"; 
 import { apiClient } from "@/services/ApiClientImplementation";
 import { useEmployeesMutation } from "./useEmployeesMutation";
 

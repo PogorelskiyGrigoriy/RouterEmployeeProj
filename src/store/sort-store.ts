@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { Employee } from "@/models/Employee";
+import type { Employee } from "@/schemas/employee.schema";
 
 /**
  * Domain Types for sorting logic.

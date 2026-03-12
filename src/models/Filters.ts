@@ -3,7 +3,7 @@
  * Models and constants for filtering employee data in the UI.
  */
 
-import { DEPARTMENTS_LIST, type Department } from "./Departments";
+import { DEPARTMENTS_LIST, type Department } from "@/schemas/department.schema";
 
 /**
  * Filter value for department selection, including the 'All' wildcard.

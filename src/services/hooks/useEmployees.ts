@@ -11,7 +11,7 @@ import { useFilters } from "@/store/filters-store";
 import { useSortStore } from "@/store/sort-store";
 import { useAuthStore } from "@/store/useAuthStore";
 import { calculateAge } from "@/utils/dateUtils";
-import type { Employee } from "@/models/Employee";
+import type { Employee } from "@/schemas/employee.schema";
 
 export const useEmployees = () => {
   // 1. Получаем состояние из сторов

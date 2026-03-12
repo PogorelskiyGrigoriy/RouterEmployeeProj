@@ -10,7 +10,7 @@ import { Stack, Input, Button, HStack } from "@chakra-ui/react";
 import { Field } from "@/components/ui/field";
 import { DepartmentSelect } from "@/components/shared/DepartmentSelect";
 
-import type { Employee, NewEmployee } from "@/models/Employee";
+import type { Employee, NewEmployee } from "@/schemas/employee.schema";
 import type { Department } from "@/schemas/department.schema";
 
 import { EMPLOYEES_CONFIG } from "@/config/employees-config";

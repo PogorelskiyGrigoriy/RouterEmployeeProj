@@ -2,7 +2,7 @@ import { api } from "@/api/axiosInstance";
 import type { AxiosRequestConfig } from "axios";
 import type { ApiClient } from "./ApiClient"; 
 import type { EmployeeFilters } from "@/models/Filters"; 
-import type { Employee, NewEmployee, EmployeeUpdatePayload } from "@/models/Employee"; 
+import type { Employee, NewEmployee, EmployeeUpdatePayload } from "@/schemas/employee.schema"; 
 import type { SortState } from "@/store/sort-store"; 
 import { getLimitDate } from "@/utils/dateUtils"; 
 
