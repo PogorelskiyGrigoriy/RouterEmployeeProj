@@ -3,7 +3,7 @@
  * Abstract interface for authentication provider.
  */
 
-import type { LoginData, UserData } from "@/models/AuthData";
+import type { LoginData, UserData } from "@/schemas/auth.schema";
 
 /**
  * Defines mandatory methods for authentication logic.

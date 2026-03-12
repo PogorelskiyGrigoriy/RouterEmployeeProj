@@ -5,7 +5,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { UserData } from '@/models/AuthData';
+import type { UserData } from '@/schemas/auth.schema';
 
 /**
  * State and Actions for Auth Store.

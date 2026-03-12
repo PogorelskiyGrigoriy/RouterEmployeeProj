@@ -21,7 +21,7 @@ import {
 
 import { Field } from "@/components/ui/field";
 import { useLogin } from "@/services/hooks/authHooks/useLogin";
-import type { LoginData } from "@/models/AuthData";
+import type { LoginData } from "@/schemas/auth.schema";
 
 const LoginPage = () => {
   // 1. Logic & Hooks

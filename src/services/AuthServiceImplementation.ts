@@ -3,7 +3,7 @@
  * Mock implementation of AuthService for development and testing.
  */
 
-import type { LoginData, UserData, UserRole } from "@/models/AuthData";
+import type { LoginData, UserData, UserRole } from "@/schemas/auth.schema";
 import type { AuthService } from "./AuthService";
 
 /**

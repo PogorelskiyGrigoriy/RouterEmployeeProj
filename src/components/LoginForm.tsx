@@ -11,7 +11,7 @@ import { useEffect } from "react";
 
 import { Field } from "@/components/ui/field";
 import { useLogin } from "@/services/hooks/authHooks/useLogin";
-import type { LoginData } from "@/models/AuthData";
+import type { LoginData } from "@/schemas/auth.schema";
 
 export const LoginForm = () => {
   const { mutate, isPending, isError, error, reset: resetMutation } = useLogin();

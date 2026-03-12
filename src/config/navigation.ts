@@ -3,7 +3,7 @@
  * Defines application routes and role-based access for navigation links.
  */
 
-import type { UserRole } from "@/models/AuthData";
+import type { UserRole } from "@/schemas/auth.schema";
 
 /**
  * Single source of truth for all application routes.

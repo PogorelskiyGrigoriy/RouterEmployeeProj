@@ -9,7 +9,7 @@ import { EMPLOYEES_CONFIG } from "@/config/employees-config";
 import { getBinnedData } from "@/utils/statistics-helpers";
 import { calculateAge } from "@/utils/dateUtils";
 import { countBy } from "lodash";
-import type { StatsDataItem } from "@/schemas/StatsInterface.schema";
+import type { StatsDataItem } from "@/schemas/statsInterface.schema";
 
 /**
  * Hook to transform employee data into various analytical formats.

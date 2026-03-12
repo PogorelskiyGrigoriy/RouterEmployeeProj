@@ -8,7 +8,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { authService } from '@/services/AuthServiceImplementation';
 import { useAuthStore } from '@/store/useAuthStore';
 import { ROUTES } from '@/config/navigation';
-import type { LoginData, UserData } from '@/models/AuthData';
+import type { LoginData, UserData } from '@/schemas/auth.schema';
 import { toaster } from "@/components/ui/toaster-config";
 
 /**
