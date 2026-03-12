@@ -8,7 +8,6 @@ import { createBrowserRouter } from "react-router-dom";
 import { ROUTES } from "@/config/navigation";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
-// Pages
 import LayoutPage from "@/pages/LayoutPage";
 import { HomePage } from "@/pages/HomePage";
 import LoginPage from "@/pages/LoginPage";
@@ -16,7 +15,8 @@ import AddEmployeePage from "@/pages/AddEmployeePage";
 import AgeStatisticsPage from "@/pages/AgeStatisticsPage";
 import SalaryStatisticsPage from "@/pages/SalaryStatisticsPage";
 import DepartmentStatisticPage from "@/pages/DepartmentStatisticPage";
-//import { ErrorPage } from "@/pages/ErrorPage"
+
+// import { ErrorPage } from "@/pages/ErrorPage"
 
 
 
@@ -38,7 +38,9 @@ export const appRouter = createBrowserRouter([
         <LayoutPage />
       </ProtectedRoute>
     ),
+
     //errorElement: <ErrorPage />,
+    
     children: [
       { 
         index: true, 

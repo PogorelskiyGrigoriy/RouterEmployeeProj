@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form";
 import { Stack, Input, Button, HStack } from "@chakra-ui/react";
 
 import { Field } from "@/components/ui/field";
-import { NativeSelectField, NativeSelectRoot } from "@/components/ui/native-select";
+import { DepartmentSelect } from "@/components/shared/DepartmentSelect";
 
 import type { Employee, NewEmployee } from "@/models/Employee";
 import type { Department } from "@/models/Departments";
@@ -49,7 +49,7 @@ export const EmployeeForm = ({ onSubmit, isLoading, employee, onCancel }: Props)
     defaultValues: employee || DEFAULT_VALUES
   });
 
-  // Sync state when switching between different employees in the same drawer
+  // Sync state when switching between different employees (e.g. in a Drawer)
   useEffect(() => {
     reset(employee || DEFAULT_VALUES);
   }, [employee, reset]);
@@ -61,6 +61,8 @@ export const EmployeeForm = ({ onSubmit, isLoading, employee, onCancel }: Props)
       reset(DEFAULT_VALUES);
     }
   };
+
+  const isSubmitDisabled = !isValid || (isEditMode && !isDirty);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -82,23 +84,12 @@ export const EmployeeForm = ({ onSubmit, isLoading, employee, onCancel }: Props)
           />
         </Field>
 
-        {/* Department */}
-        <Field 
-          label="Department" 
-          invalid={!!errors.department} 
+        {/* Department - Использование кастомного компонента */}
+        <DepartmentSelect 
+          variant="form"
+          registration={register("department", { required: "Select department" })}
           errorText={errors.department?.message}
-        >
-          <NativeSelectRoot>
-            <NativeSelectField 
-              {...register("department", { required: "Select department" })}
-            >
-              <option value="">Select...</option>
-              {EMPLOYEES_CONFIG.departments.map(dept => (
-                <option key={dept} value={dept}>{dept}</option>
-              ))}
-            </NativeSelectField>
-          </NativeSelectRoot>
-        </Field>
+        />
 
         {/* Salary */}
         <Field 
@@ -153,7 +144,7 @@ export const EmployeeForm = ({ onSubmit, isLoading, employee, onCancel }: Props)
           <Button 
             type="submit" 
             loading={isLoading} 
-            disabled={!isValid || (isEditMode && !isDirty)}
+            disabled={isSubmitDisabled}
             colorPalette="blue"
             flex="1"
           >

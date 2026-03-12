@@ -7,10 +7,10 @@ import { VStack, HStack, Input, Button } from "@chakra-ui/react";
 import { useForm } from "react-hook-form";
 
 import { Field } from "@/components/ui/field";
-import { NativeSelectField, NativeSelectRoot } from "@/components/ui/native-select";
+import { DepartmentSelect } from "@/components/shared/DepartmentSelect";
 
 import { useFilters } from "@/store/filters-store";
-import { DEPARTMENT_FILTER_VALUES, type EmployeeFilters } from "@/models/Filters";
+import { type EmployeeFilters } from "@/models/Filters";
 import { EMPLOYEES_CONFIG } from "@/config/employees-config";
 
 interface Props {
@@ -59,18 +59,11 @@ export const Filters = ({ onClose }: Props) => {
     <form onSubmit={handleSubmit(handleApply)}>
       <VStack gap="6" align="stretch" py="4">
         
-        {/* Department Selection */}
-        <Field label="Department">
-          <NativeSelectRoot>
-            <NativeSelectField {...register("department")}>
-              {DEPARTMENT_FILTER_VALUES.map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt === "All" ? "All Departments" : opt}
-                </option>
-              ))}
-            </NativeSelectField>
-          </NativeSelectRoot>
-        </Field>
+        {/* Department Selection - Используем наш кастомный селект */}
+        <DepartmentSelect 
+          variant="filter"
+          registration={register("department")} 
+        />
 
         {/* Salary Range */}
         <Field 
