@@ -5,6 +5,7 @@ import { CurrencyText, DateText, EmployeeIdentity, DeptBadge } from "./ui/DataDi
 import { DeleteEmployeeAction } from "./DeleteEmployeeAction";
 import { EditEmployeeAction } from "./EditEmployeeAction";
 import { EmployeeCard } from "./EmployeeCard";
+import { MobileSortActions } from "./MobileSortActions";
 
 import { useEmployees } from "@/services/hooks/useEmployees";
 import { useSortStore } from "@/store/sort-store";
@@ -70,15 +71,14 @@ export const Employees = () => {
   return (
     <Box>
       {/* МОБИЛЬНЫЙ ВИД */}
-      <VStack 
-        display={{ base: "flex", md: "none" }} 
-        gap="3" 
-        align="stretch"
-      >
-        {employees.map((empl) => (
-          <EmployeeCard key={empl.id} employee={empl} isAdmin={isAdmin} />
-        ))}
-      </VStack>
+      <Box display={{ base: "block", md: "none" }} mb="4">
+        <MobileSortActions /> {/* Добавили кнопки сортировки */}
+        <VStack gap="3" align="stretch">
+          {employees.map((empl) => (
+            <EmployeeCard key={empl.id} employee={empl} isAdmin={isAdmin} />
+          ))}
+        </VStack>
+      </Box>
 
       {/* ДЕКСТОПНЫЙ ВИД */}
       <Box 
