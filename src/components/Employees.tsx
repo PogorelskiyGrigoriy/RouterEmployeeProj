@@ -5,7 +5,6 @@ import { CurrencyText, DateText, EmployeeIdentity, DeptBadge } from "./ui/DataDi
 import { DeleteEmployeeAction } from "./DeleteEmployeeAction";
 import { EditEmployeeAction } from "./EditEmployeeAction";
 
-// ИСПРАВЛЕНО: Импортируем только useEmployees
 import { useEmployees } from "@/services/hooks/useEmployees";
 import { useSortStore } from "@/store/sort-store";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -14,18 +13,27 @@ import { calculateAge } from "@/utils/dateUtils";
 import type { Employee } from "@/models/Employee";
 
 /**
- * Props for the sortable header cell
+ * Стили для липкой колонки.
+ * Мы убрали maxW, чтобы колонка могла растягиваться и быть "жадной".
  */
+const stickyColumnStyles = {
+  position: "sticky",
+  left: 0,
+  zIndex: 1,
+  bg: "bg.panel",
+  minW: "160px",
+  whiteSpace: "nowrap",
+};
+
 interface SortableProps {
   field: keyof Employee;
   children: React.ReactNode;
   textAlign?: "start" | "end" | "center";
+  css?: any;
+  width?: string;
 }
 
-/**
- * Internal component for rendering sortable table headers
- */
-const SortableColumn = ({ field, children, textAlign = "start" }: SortableProps) => {
+const SortableColumn = ({ field, children, textAlign = "start", css, width }: SortableProps) => {
   const { sort, toggleSort } = useSortStore();
   const isSorted = sort.key === field;
 
@@ -37,10 +45,12 @@ const SortableColumn = ({ field, children, textAlign = "start" }: SortableProps)
       cursor="pointer"
       _hover={{ bg: "blackAlpha.100" }}
       textAlign={textAlign}
+      css={css}
+      width={width}
     >
       <HStack gap="1" justifyContent={textAlign === "end" ? "flex-end" : "flex-start"}>
         <Text fontWeight="bold">{children}</Text>
-        <Box color={isSorted ? "blue.500" : "fg.muted"}>
+        <Box color={isSorted ? "blue.500" : "fg.muted"} flexShrink={0}>
           {isSorted && sort.order === "asc" && <LuArrowUp size="14" />}
           {isSorted && sort.order === "desc" && <LuArrowDown size="14" />}
           {!isSorted && <LuArrowUpDown size="14" style={{ opacity: 0.3 }} />}
@@ -50,13 +60,8 @@ const SortableColumn = ({ field, children, textAlign = "start" }: SortableProps)
   );
 };
 
-/**
- * Main component to display and manage the employee list
- */
 export const Employees = () => {
-  // ИСПРАВЛЕНО: Теперь берем всё из useEmployees
   const { employees, isLoading, error, filteredCount } = useEmployees();
-  
   const user = useAuthStore((state) => state.user);
   const isAdmin = user?.role === "ADMIN";
 
@@ -89,17 +94,34 @@ export const Employees = () => {
 
   return (
     <Box borderWidth="1px" borderRadius="lg" overflowX="auto" boxShadow="sm" bg="bg.panel">
+      {/* Убрали minW="800px", теперь таблица адаптивно сжимается, пока влезает контент */}
       <Table.Root size={{ base: "sm", md: "md" }} variant="line" stickyHeader>
         <Table.Header>
           <Table.Row bg="bg.subtle">
-            <SortableColumn field="fullName">Employee</SortableColumn>
-            <Table.ColumnHeader fontWeight="bold">Department</Table.ColumnHeader>
-            <Table.ColumnHeader display={{ base: "none", md: "table-cell" }}>
-              <SortableColumn field="birthDate">Date of Birth (Age)</SortableColumn>
+            {/* "Жадная" колонка: забирает всё свободное место */}
+            <SortableColumn 
+              field="fullName" 
+              css={{ ...stickyColumnStyles, bg: "bg.subtle", zIndex: 2 }}
+              width="full"
+            >
+              Employee
+            </SortableColumn>
+            
+            <Table.ColumnHeader fontWeight="bold" whiteSpace="nowrap">
+              Department
             </Table.ColumnHeader>
-            <SortableColumn field="salary" textAlign="end">Salary</SortableColumn>
+            
+            {/* Короткий заголовок Birth Date убирает лишние отступы */}
+            <Table.ColumnHeader display={{ base: "none", md: "table-cell" }} whiteSpace="nowrap">
+              <SortableColumn field="birthDate">Birth Date</SortableColumn>
+            </Table.ColumnHeader>
+
+            <SortableColumn field="salary" textAlign="end">
+              Salary
+            </SortableColumn>
+
             {isAdmin && (
-              <Table.ColumnHeader textAlign="end" fontWeight="bold" minW="80px">
+              <Table.ColumnHeader textAlign="end" fontWeight="bold" whiteSpace="nowrap">
                 Actions
               </Table.ColumnHeader>
             )}
@@ -109,27 +131,33 @@ export const Employees = () => {
         <Table.Body>
           {employees.map((empl) => (
             <Table.Row key={empl.id} _hover={{ bg: "blackAlpha.50" }}>
-              <Table.Cell>
+              <Table.Cell css={stickyColumnStyles} width="full">
                 <EmployeeIdentity name={empl.fullName} avatar={empl.avatar} />
               </Table.Cell>
-              <Table.Cell>
+              
+              <Table.Cell whiteSpace="nowrap">
                 <DeptBadge>{empl.department}</DeptBadge>
               </Table.Cell>
-              <Table.Cell display={{ base: "none", md: "table-cell" }}>
-                <Box>
+
+              <Table.Cell display={{ base: "none", md: "table-cell" }} whiteSpace="nowrap">
+                <VStack align="start" gap="0">
                   <DateText dateString={empl.birthDate} />
                   <Text fontSize="xs" color="fg.muted">
                     {calculateAge(empl.birthDate)} years old
                   </Text>
-                </Box>
+                </VStack>
               </Table.Cell>
-              <Table.Cell textAlign="end">
+
+              <Table.Cell textAlign="end" whiteSpace="nowrap">
                 <CurrencyText value={empl.salary} />
               </Table.Cell>
+
               {!!isAdmin && (
-                <Table.Cell textAlign="end">
-                  <EditEmployeeAction employee={empl} />
-                  <DeleteEmployeeAction id={empl.id} name={empl.fullName} />
+                <Table.Cell textAlign="end" whiteSpace="nowrap">
+                  <HStack gap="2" justifyContent="flex-end">
+                    <EditEmployeeAction employee={empl} />
+                    <DeleteEmployeeAction id={empl.id} name={empl.fullName} />
+                  </HStack>
                 </Table.Cell>
               )}
             </Table.Row>
