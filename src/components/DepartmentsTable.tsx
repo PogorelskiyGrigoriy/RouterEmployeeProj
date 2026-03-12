@@ -5,7 +5,7 @@
 
 import { Table } from "@chakra-ui/react";
 import { CountBadge, CurrencyText, AgeText } from "./ui/DataDisplay";
-import type { DepartmentInfo } from "@/models/Departments";
+import type { DepartmentInfo } from "@/schemas/department.schema";
 
 interface Props {
   departmentsInfo: DepartmentInfo[];

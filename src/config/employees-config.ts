@@ -3,7 +3,7 @@
  * Centralized configuration for employee-related calculations and UI constraints.
  */
 
-import { DEPARTMENTS_LIST, type Department } from "@/models/Departments";
+import { DEPARTMENTS_LIST, type Department } from "@/schemas/department.schema";
 
 export interface GroupingConfig {
   readonly min: number;

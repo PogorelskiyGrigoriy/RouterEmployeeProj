@@ -3,7 +3,7 @@
  * Core domain models for employee data and state transitions.
  */
 
-import type { Department } from "./Departments";
+import type { Department } from "@/schemas/department.schema";
 
 /**
  * Main Employee entity.

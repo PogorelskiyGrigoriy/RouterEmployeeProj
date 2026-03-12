@@ -11,7 +11,7 @@ import { Field } from "@/components/ui/field";
 import { DepartmentSelect } from "@/components/shared/DepartmentSelect";
 
 import type { Employee, NewEmployee } from "@/models/Employee";
-import type { Department } from "@/models/Departments";
+import type { Department } from "@/schemas/department.schema";
 
 import { EMPLOYEES_CONFIG } from "@/config/employees-config";
 import { calculateAge, getLimitDate } from "@/utils/dateUtils";

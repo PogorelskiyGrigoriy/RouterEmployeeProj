@@ -7,7 +7,7 @@ import { useMemo } from "react";
 import { groupBy, meanBy } from "lodash";
 import { useEmployees } from "./useEmployees"; // Именованный импорт
 import { EMPLOYEES_CONFIG } from "@/config/employees-config";
-import type { DepartmentInfo } from "@/models/Departments";
+import type { DepartmentInfo } from "@/schemas/department.schema";
 import { calculateAge } from "@/utils/dateUtils";
 
 /**

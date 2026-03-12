@@ -1,7 +1,7 @@
 import { NativeSelectField, NativeSelectRoot } from "@/components/ui/native-select";
 import { Field } from "@/components/ui/field";
 import type { UseFormRegisterReturn } from "react-hook-form";
-import { DEPARTMENTS_LIST } from "@/models/Departments";
+import { DEPARTMENTS_LIST } from "@/schemas/department.schema";
 
 interface DepartmentSelectProps {
   variant?: "form" | "filter";
