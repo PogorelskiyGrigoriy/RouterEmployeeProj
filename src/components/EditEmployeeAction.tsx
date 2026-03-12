@@ -24,7 +24,7 @@ import { toaster } from "@/components/ui/toaster-config";
 import type { Employee, NewEmployee } from "@/models/Employee";
 
 interface Props {
-  employee: Employee; // Убрали readonly
+  employee: Employee;
 }
 
 export const EditEmployeeAction = ({ employee }: Props) => {
@@ -35,17 +35,15 @@ export const EditEmployeeAction = ({ employee }: Props) => {
    * Updates employee data and closes the drawer on success
    */
   const handleUpdate = (formData: NewEmployee) => {
-    // Согласно EmployeeUpdatePayload, структура должна быть: { id, changes }
     mutate(
       { 
         id: employee.id, 
-        changes: formData // Передаем данные в поле 'changes'
+        changes: formData
       }, 
       {
         onSuccess: () => {
           toaster.create({
             title: "Changes saved",
-            // Используем fullName из модели NewEmployee
             description: `${formData.fullName} profile updated.`,
             type: "success",
           });

@@ -15,8 +15,7 @@ import AddEmployeePage from "@/pages/AddEmployeePage";
 import AgeStatisticsPage from "@/pages/AgeStatisticsPage";
 import SalaryStatisticsPage from "@/pages/SalaryStatisticsPage";
 import DepartmentStatisticPage from "@/pages/DepartmentStatisticPage";
-
-// import { ErrorPage } from "@/pages/ErrorPage"
+import ErrorPage from "@/pages/ErrorPage"
 
 
 
@@ -39,8 +38,8 @@ export const appRouter = createBrowserRouter([
       </ProtectedRoute>
     ),
 
-    //errorElement: <ErrorPage />,
-    
+    errorElement: <ErrorPage />,
+
     children: [
       { 
         index: true, 
