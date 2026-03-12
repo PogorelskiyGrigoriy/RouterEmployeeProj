@@ -5,7 +5,7 @@
 
 import { create } from "zustand";
 import { EMPLOYEES_CONFIG } from "@/config/employees-config";
-import type { EmployeeFilters } from "@/models/Filters";
+import type { EmployeeFilters } from "@/schemas/filter.schema";
 
 interface FiltersActions {
   setFilters: (updates: Partial<EmployeeFilters>) => void;

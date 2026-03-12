@@ -10,7 +10,7 @@ import { Field } from "@/components/ui/field";
 import { DepartmentSelect } from "@/components/shared/DepartmentSelect";
 
 import { useFilters } from "@/store/filters-store";
-import { type EmployeeFilters } from "@/models/Filters";
+import { type EmployeeFilters } from "@/schemas/filter.schema";
 import { EMPLOYEES_CONFIG } from "@/config/employees-config";
 
 interface Props {

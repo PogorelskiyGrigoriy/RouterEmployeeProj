@@ -9,7 +9,7 @@ import type {
   NewEmployee, 
   EmployeeUpdatePayload 
 } from "@/schemas/employee.schema";
-import type { EmployeeFilters } from "@/models/Filters";
+import type { EmployeeFilters } from "@/schemas/filter.schema";
 import type { SortState } from "@/store/sort-store";
 
 /**
