@@ -1,8 +1,3 @@
-/**
- * @module AddEmployeePage
- * Page for onboarding new employees into the system.
- */
-
 "use client"
 
 import { Container, Heading, Box, Stack } from "@chakra-ui/react";
@@ -13,14 +8,15 @@ import { useAddEmployee } from "@/services/hooks/mutationHooks/useAddEmployee";
 import { toaster } from "@/components/ui/toaster-config"; 
 import type { NewEmployee } from "@/models/Employee";
 import { ROUTES } from "@/config/navigation";
+import { CloseButton } from "@/components/ui/close-button";
 
 const AddEmployeePage = () => {
   const navigate = useNavigate();
   const { mutate, isPending } = useAddEmployee();
 
-  /**
-   * Submits the new employee data to the API
-   */
+  // 1. Объявляем функцию здесь
+  const handleClose = () => navigate(ROUTES.HOME);
+
   const handleAdd = (data: NewEmployee) => {
     mutate(data, {
       onSuccess: (newEmployee) => {
@@ -30,8 +26,8 @@ const AddEmployeePage = () => {
           type: "success",
         });
 
-        // Redirect to the main employee list
-        navigate(ROUTES.HOME);
+        // 2. Используем функцию для редиректа
+        handleClose();
       },
       onError: (error) => {
         toaster.create({
@@ -44,7 +40,18 @@ const AddEmployeePage = () => {
   };
 
   return (
-    <Container maxW="lg" py={{ base: "6", md: "12" }}>
+    // 3. Добавляем position="relative", чтобы крестик позиционировался относительно контейнера
+    <Container maxW="lg" py={{ base: "6", md: "12" }} position="relative">
+      <CloseButton 
+        position="absolute" 
+        top={{ base: "2", md: "4" }} 
+        right={{ base: "2", md: "4" }} 
+        onClick={handleClose}
+        aria-label="Close and return to home"
+        borderRadius="full"
+        _hover={{ bg: "bg.emphasized" }}
+      />
+
       <Stack gap="8">
         <Box textAlign="center">
           <Heading size="3xl" letterSpacing="tight">
@@ -66,7 +73,7 @@ const AddEmployeePage = () => {
           <EmployeeForm 
             onSubmit={handleAdd} 
             isLoading={isPending} 
-            onCancel={() => navigate(ROUTES.HOME)}
+            onCancel={handleClose} // Используем ту же функцию
           />
         </Box>
       </Stack>
