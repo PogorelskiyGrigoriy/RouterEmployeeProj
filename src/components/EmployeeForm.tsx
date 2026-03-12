@@ -84,7 +84,7 @@ export const EmployeeForm = ({ onSubmit, isLoading, employee, onCancel }: Props)
           />
         </Field>
 
-        {/* Department - Использование кастомного компонента */}
+        {/* Department - custom comnonent*/}
         <DepartmentSelect 
           variant="form"
           registration={register("department", { required: "Select department" })}

@@ -1,17 +1,13 @@
 import { Box, Center, HStack, Spinner, Table, Text, VStack } from "@chakra-ui/react";
 import { LuSearchX, LuArrowUp, LuArrowDown, LuArrowUpDown } from "react-icons/lu";
 
-import { CurrencyText, DateText, EmployeeIdentity, DeptBadge } from "./ui/DataDisplay";
-import { DeleteEmployeeAction } from "./DeleteEmployeeAction";
-import { EditEmployeeAction } from "./EditEmployeeAction";
 import { EmployeeCard } from "./EmployeeCard";
+import { EmployeeRow } from "./EmployeeRow"; // Новый импорт
 import { MobileSortActions } from "./MobileSortActions";
 
 import { useEmployees } from "@/services/hooks/useEmployees";
 import { useSortStore } from "@/store/sort-store";
 import { useAuthStore } from "@/store/useAuthStore";
-
-import { calculateAge } from "@/utils/dateUtils";
 import type { Employee } from "@/models/Employee";
 
 interface SortableProps {
@@ -72,7 +68,7 @@ export const Employees = () => {
     <Box>
       {/* МОБИЛЬНЫЙ ВИД */}
       <Box display={{ base: "block", md: "none" }} mb="4">
-        <MobileSortActions /> {/* Добавили кнопки сортировки */}
+        <MobileSortActions />
         <VStack gap="3" align="stretch">
           {employees.map((empl) => (
             <EmployeeCard key={empl.id} employee={empl} isAdmin={isAdmin} />
@@ -92,9 +88,7 @@ export const Employees = () => {
         <Table.Root size="md" variant="line" stickyHeader>
           <Table.Header>
             <Table.Row bg="bg.subtle">
-              <SortableColumn field="fullName" width="full">
-                Employee
-              </SortableColumn>
+              <SortableColumn field="fullName" width="full">Employee</SortableColumn>
               
               <Table.ColumnHeader fontWeight="bold" whiteSpace="nowrap">
                 Department
@@ -104,9 +98,7 @@ export const Employees = () => {
                 <SortableColumn field="birthDate">Birth Date</SortableColumn>
               </Table.ColumnHeader>
               
-              <SortableColumn field="salary" textAlign="end">
-                Salary
-              </SortableColumn>
+              <SortableColumn field="salary" textAlign="end">Salary</SortableColumn>
               
               {isAdmin && (
                 <Table.ColumnHeader textAlign="end" fontWeight="bold" whiteSpace="nowrap">
@@ -118,37 +110,11 @@ export const Employees = () => {
 
           <Table.Body>
             {employees.map((empl) => (
-              <Table.Row key={empl.id} _hover={{ bg: "blackAlpha.50" }}>
-                <Table.Cell width="full">
-                  <EmployeeIdentity name={empl.fullName} avatar={empl.avatar} />
-                </Table.Cell>
-                
-                <Table.Cell whiteSpace="nowrap">
-                  <DeptBadge>{empl.department}</DeptBadge>
-                </Table.Cell>
-                
-                <Table.Cell display={{ base: "none", lg: "table-cell" }} whiteSpace="nowrap">
-                  <VStack align="start" gap="0">
-                    <DateText dateString={empl.birthDate} />
-                    <Text fontSize="xs" color="fg.muted">
-                      {calculateAge(empl.birthDate)} years old
-                    </Text>
-                  </VStack>
-                </Table.Cell>
-                
-                <Table.Cell textAlign="end" whiteSpace="nowrap">
-                  <CurrencyText value={empl.salary} />
-                </Table.Cell>
-                
-                {!!isAdmin && (
-                  <Table.Cell textAlign="end" whiteSpace="nowrap">
-                    <HStack gap="2" justifyContent="flex-end">
-                      <EditEmployeeAction employee={empl} />
-                      <DeleteEmployeeAction id={empl.id} name={empl.fullName} />
-                    </HStack>
-                  </Table.Cell>
-                )}
-              </Table.Row>
+              <EmployeeRow 
+                key={empl.id} 
+                employee={empl} 
+                isAdmin={isAdmin} 
+              />
             ))}
           </Table.Body>
         </Table.Root>
