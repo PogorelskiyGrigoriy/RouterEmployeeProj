@@ -31,21 +31,21 @@ import {
 import { Employees } from "@/components/Employees";
 import { Filters } from "@/components/Filters";
 import { ActiveFilters } from "@/components/ActiveFilters";
-// ИСПРАВЛЕНО: Переход на использование useEmployees
 import { useEmployees } from "@/services/hooks/useEmployees";
 
-const HomePage = () => {
+export const HomePage = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   
-  // ИСПРАВЛЕНО: Теперь и здесь используем useEmployees
-  // React Query автоматически дедуплицирует запросы этого компонента и Employees.tsx
   const { filteredCount, totalCount } = useEmployees();
 
   // Highlight button if any filters are active
   const isFiltered = filteredCount !== totalCount;
 
   return (
-    <Container maxW="6xl" py={{ base: "6", md: "10" }}>
+    <Container maxW="6xl"
+     py={{ base: "6", md: "10" }}
+     px={{ base: "4", md: "8" }}
+     >
       <VStack align="stretch" gap="8">
         
         {/* Header Section */}
@@ -125,5 +125,3 @@ const HomePage = () => {
     </Container>
   );
 };
-
-export default HomePage;

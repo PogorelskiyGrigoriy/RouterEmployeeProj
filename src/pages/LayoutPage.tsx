@@ -16,7 +16,6 @@ export const LayoutPage = () => {
       gap="0" 
       minH="100vh" 
       bg="bg.canvas" 
-      overflowX="hidden"
     >
       {/* Top navigation - Sticky by default inside its component */}
       <Navbar />
@@ -24,8 +23,6 @@ export const LayoutPage = () => {
       {/* Main Content Area */}
       <Box 
         as="main"
-        px={{ base: "4", md: "8" }} // Чуть больше отступа на мобилках для "воздуха"
-        py={{ base: "6", md: "8" }}
         w="full"
         flex="1" // Заставляет контент растягиваться, прижимая футер (если он будет) вниз
         display="flex"
