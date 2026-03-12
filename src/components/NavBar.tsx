@@ -16,6 +16,7 @@ import {
   Text,
   Separator,
   Stack,
+  Container,
 } from "@chakra-ui/react";
 
 import { StatisticsSelector } from "./StatisticsSelector";
@@ -34,86 +35,90 @@ export const Navbar = () => {
   }, [isAuthenticated, user]);
 
   return (
-    <HStack 
+    <Box 
       as="nav" 
-      justify="space-between" 
-      px={{ base: "4", md: "6" }} 
-      py="3"
       bg="bg.panel" 
       borderBottomWidth="1px" 
       borderColor="border.subtle"
       position="sticky"
       top="0"
       zIndex="sticky"
+      w="full"
     >
-      <HStack gap={{ base: "4", md: "8" }}>
-        {!isAuthenticated ? (
-          <ChakraLink asChild variant="plain" fontWeight="bold" color="blue.600">
-            <NavLink to={ROUTES.LOGIN}>Sign In</NavLink>
-          </ChakraLink>
-        ) : (
-          visibleLinks.map((link) => (
-            <ChakraLink 
-              key={link.to} 
-              asChild 
-              variant="plain"
-              fontSize="sm"
-              fontWeight="medium"
-              // Используем css prop для безопасной стилизации активного класса NavLink
-              css={{
-                "&.active": {
-                  color: "blue.600",
-                  fontWeight: "bold",
-                  position: "relative",
-                  _after: {
-                    content: '""',
-                    position: "absolute",
-                    bottom: "-12px", // Выравниваем под чертой навбара
-                    left: 0,
-                    width: "100%",
-                    height: "2px",
-                    bg: "blue.600",
-                  }
-                }
-              }}
-            >
-              <NavLink to={link.to}>{link.label}</NavLink>
-            </ChakraLink>
-          ))
-        )}
-      </HStack>
+      <Container maxW="6xl" px={{ base: "4", md: "8" }}> 
+        <HStack justify="space-between" py="3">
+          
+          {/* Левая часть: Ссылки */}
+          <HStack gap={{ base: "4", md: "8" }}>
+            {!isAuthenticated ? (
+              <ChakraLink asChild variant="plain" fontWeight="bold" color="blue.600">
+                <NavLink to={ROUTES.LOGIN}>Sign In</NavLink>
+              </ChakraLink>
+            ) : (
+              visibleLinks.map((link) => (
+                <ChakraLink 
+                  key={link.to} 
+                  asChild 
+                  variant="plain"
+                  fontSize="sm"
+                  fontWeight="medium"
+                  css={{
+                    "&.active": {
+                      color: "blue.600",
+                      fontWeight: "bold",
+                      position: "relative",
+                      _after: {
+                        content: '""',
+                        position: "absolute",
+                        bottom: "-14px", // Чуть ниже, чтобы лечь на границу
+                        left: 0,
+                        width: "100%",
+                        height: "2px",
+                        bg: "blue.600",
+                      }
+                    }
+                  }}
+                >
+                  <NavLink to={link.to}>{link.label}</NavLink>
+                </ChakraLink>
+              ))
+            )}
+          </HStack>
 
-      <Spacer />
+          <Spacer />
 
-      {isAuthenticated && user && (
-        <HStack gap={{ base: "3", md: "5" }}>
-          <Box maxW={{ base: "100px", md: "200px" }}>
-            <StatisticsSelector />
-          </Box>
+          {/* Правая часть: Юзер и Выход */}
+          {isAuthenticated && user && (
+            <HStack gap={{ base: "3", md: "5" }}>
+              <Box maxW={{ base: "100px", md: "200px" }}>
+                <StatisticsSelector />
+              </Box>
 
-          <Separator orientation="vertical" height="20px" />
+              <Separator orientation="vertical" height="20px" />
 
-          <Stack gap="0" align="flex-end" hideBelow="sm">
-            <Text fontSize="xs" fontWeight="bold" lineHeight="tight">
-              {user.username}
-            </Text>
-            <Text fontSize="10px" color="fg.muted" textTransform="uppercase">
-              {user.role}
-            </Text>
-          </Stack>
+              <Stack gap="0" align="flex-end" hideBelow="sm">
+                <Text fontSize="xs" fontWeight="bold" lineHeight="tight">
+                  {user.username}
+                </Text>
+                <Text fontSize="10px" color="fg.muted" textTransform="uppercase">
+                  {user.role}
+                </Text>
+              </Stack>
 
-          <Button 
-            size="xs" 
-            variant="subtle" 
-            colorPalette="red" 
-            onClick={() => logout()}
-            loading={isPending}
-            px="3"
-          >
-            Logout
-          </Button>
+              <Button 
+                size="xs" 
+                variant="subtle" 
+                colorPalette="red" 
+                onClick={() => logout()}
+                loading={isPending}
+                px="3"
+              >
+                Logout
+              </Button>
+            </HStack>
+          )}
         </HStack>
-      )}
-    </HStack>
+      </Container>
+    </Box>
   );
 };
