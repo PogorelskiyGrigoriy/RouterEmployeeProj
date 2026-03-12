@@ -17,7 +17,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-import type { StatsChartProps } from "@/models/StatsInterface";
+import type { StatsChartProps } from "@/schemas/StatsInterface.schema";
 
 const CHART_MARGIN = { top: 10, right: 10, left: -20, bottom: 0 } as const;
 

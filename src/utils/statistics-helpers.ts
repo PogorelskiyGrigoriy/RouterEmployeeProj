@@ -5,7 +5,7 @@
 
 import { range, countBy } from "lodash";
 import type { GroupingConfig } from "@/config/employees-config";
-import type { StatsDataItem } from "@/models/StatsInterface";
+import type { StatsDataItem } from "@/schemas/StatsInterface.schema";
 
 /**
  * Groups an array of items into numerical intervals (bins).
