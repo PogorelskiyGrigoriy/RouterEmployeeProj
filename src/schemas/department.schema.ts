@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 /**
- * 1. Single Source of Truth
+ * 1. Constant source of truth for department names
  */
 export const DEPARTMENTS_LIST = [
   "QA", 
@@ -12,28 +12,27 @@ export const DEPARTMENTS_LIST = [
 ] as const;
 
 /**
- * 2. Схемы
- * Чтобы избежать ошибки "No overload matches this call", 
- * передаем кастомное сообщение просто как строку вторым аргументом.
+ * 2. Base department schema with custom error message
  */
 export const departmentSchema = z.enum(DEPARTMENTS_LIST, "Select a valid department");
 
-export const departmentFilterSchema = z.union([
-  departmentSchema, 
-  z.literal("All")
-]);
+/**
+ * 3. Filter-specific constants and schemas including "All" wildcard
+ */
+export const DEPARTMENT_FILTER_LIST = ["All", ...DEPARTMENTS_LIST] as const;
+export const departmentFilterSchema = z.enum(DEPARTMENT_FILTER_LIST);
 
 /**
- * 3. Генерируемые типы
+ * 4. Inferred types for internal use and state management
  */
 export type Department = z.infer<typeof departmentSchema>;
+export type DepartmentFilterValue = z.infer<typeof departmentFilterSchema>;
 
 /**
- * 4. Statistics Model
+ * 5. Data model for department-based statistics/analytics
  */
 export const departmentInfoSchema = z.object({
-  // .catch("Unknown") сделает схему устойчивой к неверным данным с сервера
-  department: z.union([departmentSchema]),
+  department: departmentSchema,
   numEmployees: z.number(),
   avgSalary: z.number(),
   avgAge: z.number(),
