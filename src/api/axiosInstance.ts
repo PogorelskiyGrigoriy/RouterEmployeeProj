@@ -1,15 +1,12 @@
 import axios, { AxiosError } from 'axios';
 
-/**
- * Constants
- * Configuration for the API base URL and common headers
- */
 const BASE_URL = 'http://localhost:4000';
-const TIMEOUT = 10000; // Added a standard timeout for safety
+const TIMEOUT = 10000;
 
 /**
- * Instance Creation
- * Exported as a named constant for consistent auto-imports
+ * Shared axios instance. 
+ * Note: We don't define response types here because 
+ * Zod schemas will handle validation and typing at the service level.
  */
 export const api = axios.create({
   baseURL: BASE_URL,
@@ -20,17 +17,19 @@ export const api = axios.create({
 });
 
 /**
- * Interceptors
- * Global error handling for all API requests
+ * Global response interceptor for network-level error handling.
  */
 api.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
-    // Determine the error message from server response or default axios message
+    // Basic error structure extract
+    const status = error.response?.status;
     const message = error.response?.data || error.message;
     
-    console.error(`[API Error]: ${message}`);
+    // Detailed logging for debugging network issues
+    console.error(`[Network Error] ${status ? `Status: ${status}` : ''}:`, message);
     
+    // We pass the error down to be caught by the ApiClient (Strict/Soft modes)
     return Promise.reject(error);
   }
 );
