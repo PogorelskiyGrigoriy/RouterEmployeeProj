@@ -1,8 +1,3 @@
-/**
- * @module EmployeesConfig
- * Centralized configuration for employee-related calculations and UI constraints.
- */
-
 import { DEPARTMENTS_LIST, type Department } from "@/schemas/department.schema";
 
 export interface GroupingConfig {
@@ -21,8 +16,7 @@ interface EmployeesConfig {
 }
 
 /**
- * Global configuration object for employees domain.
- * Use 'as const' to ensure deep immutability of configuration values.
+ * Global configuration for employee business rules and UI limits.
  */
 export const EMPLOYEES_CONFIG: EmployeesConfig = {
   salary: {

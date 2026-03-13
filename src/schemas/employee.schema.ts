@@ -1,39 +1,44 @@
 import { z } from "zod";
 import { departmentSchema } from "./department.schema";
 import { EMPLOYEES_CONFIG } from "@/config/employees-config";
-import { nameSchema } from "./common";
+import { nameSchema, dateStringSchema } from "./common";
+import { calculateAge } from "@/utils/dateUtils";
 
-const { salary } = EMPLOYEES_CONFIG;
+const { salary, age } = EMPLOYEES_CONFIG;
 
 /**
- * 1. Базовая схема сотрудника (аналог interface Employee)
- * Мы описываем всё, включая ID.
+ * Core Employee Schema.
+ * Includes age validation via 'refine' based on global config.
  */
 export const employeeSchema = z.object({
   id: z.string(),
   fullName: nameSchema,
   salary: z.coerce.number()
-    .min(salary.min, `Min: ${salary.min}`)
-    .max(salary.max, `Max: ${salary.max}`),
-  birthDate: z.string().min(1, "Birth date is required"), // Валидацию возраста добавим в .refine ниже
+    .min(salary.min, `Min salary: ${salary.min}`)
+    .max(salary.max, `Max salary: ${salary.max}`),
+  
+  // Uses base date validation + age limit check
+  birthDate: dateStringSchema.refine((date) => {
+    const currentAge = calculateAge(date);
+    return currentAge >= age.min && currentAge <= age.max;
+  }, {
+    message: `Age must be between ${age.min} and ${age.max} years old`,
+  }),
+
   department: departmentSchema,
   avatar: z.string().url().nullable().optional(),
 });
 
-/**
- * 2. Тип для существующего сотрудника
- */
 export type Employee = z.infer<typeof employeeSchema>;
 
 /**
- * 3. Схема для создания нового сотрудника (аналог NewEmployee)
- * Мы просто убираем 'id' из базовой схемы.
+ * Schema for creating a new employee (no ID required).
  */
 export const newEmployeeSchema = employeeSchema.omit({ id: true });
 export type NewEmployee = z.infer<typeof newEmployeeSchema>;
 
 /**
- * 4. Схема для обновления (аналог EmployeeUpdatePayload)
+ * Schema for employee update operations.
  */
 export const employeeUpdateSchema = z.object({
   id: z.string(),
@@ -42,12 +47,15 @@ export const employeeUpdateSchema = z.object({
 export type EmployeeUpdatePayload = z.infer<typeof employeeUpdateSchema>;
 
 /**
- * 5. Вспомогательная схема для фильтров (аналог EmployeeFilter)
+ * Extended schema for search and filter functionality.
+ * Supports range filtering for salary and age.
  */
 export const employeeFilterSchema = z.object({
   search: z.string().optional(),
   department: z.union([departmentSchema, z.literal("All")]).optional(),
   minSalary: z.number().optional(),
   maxSalary: z.number().optional(),
+  minAge: z.number().optional(),
+  maxAge: z.number().optional(),
 });
 export type EmployeeFilter = z.infer<typeof employeeFilterSchema>;
