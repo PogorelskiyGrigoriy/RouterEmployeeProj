@@ -1,33 +1,23 @@
 /**
  * @module useFilters
- * Global state for employee filtering criteria.
+ * Global state for employee filtering, using defaults from Zod schema.
  */
 
 import { create } from "zustand";
-import { EMPLOYEES_CONFIG } from "@/config/employees-config";
-import type { EmployeeFilters } from "@/schemas/filter.schema";
+import { employeeFilterSchema, type EmployeeFilter } from "@/schemas/employee.schema";
 
 interface FiltersActions {
-  setFilters: (updates: Partial<EmployeeFilters>) => void;
+  setFilters: (updates: Partial<EmployeeFilter>) => void;
   resetFilters: () => void;
 }
 
 interface FiltersStore extends FiltersActions {
-  readonly filters: EmployeeFilters;
+  readonly filters: EmployeeFilter;
 }
 
-const initialFilters: EmployeeFilters = {
-  department: "All",
-  minSalary: EMPLOYEES_CONFIG.salary.min,
-  maxSalary: EMPLOYEES_CONFIG.salary.max,
-  minAge: EMPLOYEES_CONFIG.age.min,
-  maxAge: EMPLOYEES_CONFIG.age.max,
-};
+// Use Zod to generate initial state with defaults
+const initialFilters = employeeFilterSchema.parse({});
 
-/**
- * Hook for managing search and filter state.
- * Centralizes defaults from EMPLOYEES_CONFIG.
- */
 export const useFilters = create<FiltersStore>((set) => ({
   filters: initialFilters,
 

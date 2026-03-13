@@ -1,6 +1,6 @@
 /**
  * @module useAnalytics
- * Derives chart-ready data from the raw employee list.
+ * Derives chart-ready data from Zod-validated employee records.
  */
 
 import { useMemo } from "react";
@@ -10,21 +10,22 @@ import { getBinnedData } from "@/utils/statistics-helpers";
 import { calculateAge } from "@/utils/dateUtils";
 import { countBy } from "lodash";
 import type { StatsDataItem } from "@/schemas/statsInterface.schema";
+import type { Employee } from "@/schemas/employee.schema";
 
-/**
- * Hook to transform employee data into various analytical formats.
- * @param type - The dimension for analysis (age, salary, or department).
- */
 export const useAnalytics = (type: 'age' | 'salary' | 'department'): StatsDataItem[] => {
   const { employees } = useEmployees();
 
   return useMemo(() => {
-    if (!employees?.length) return [];
+    // If no employees (loading or filtered out), return empty array for the charts
+    if (!employees || employees.length === 0) return [];
 
     switch (type) {
       case 'salary': {
         const config = EMPLOYEES_CONFIG.salary;
-        return getBinnedData(employees, config, (e) => e.salary, {
+        /**
+         * Explicitly typing <Employee> ensures 'e.salary' is recognized by TS
+         */
+        return getBinnedData<Employee>(employees, config, (e) => e.salary, {
           xKey: (v) => `${v / 1000}${config.unit}`,
           tooltip: (v, isLast) => {
             const end = isLast ? config.max : v + config.interval - 1;
@@ -35,10 +36,10 @@ export const useAnalytics = (type: 'age' | 'salary' | 'department'): StatsDataIt
 
       case 'age': {
         const config = EMPLOYEES_CONFIG.age;
-        return getBinnedData(
+        return getBinnedData<Employee>(
           employees, 
           config, 
-          (e) => calculateAge(e.birthDate), // Используем нашу утилиту
+          (e) => calculateAge(e.birthDate), 
           {
             xKey: (v) => {
               const isLast = v + config.interval >= config.max;
@@ -62,7 +63,8 @@ export const useAnalytics = (type: 'age' | 'salary' | 'department'): StatsDataIt
         }));
       }
 
-      default: return [];
+      default:
+        return [];
     }
   }, [employees, type]);
 };

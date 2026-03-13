@@ -1,7 +1,7 @@
 /**
  * @module useEmployees
- * Единый хук для управления данными сотрудников.
- * Объединяет серверную загрузку, фильтрацию на клиенте и расчет статистики.
+ * Reliable data hook. 
+ * Combines server fetching with client-side filtering for 100% UI accuracy.
  */
 
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
@@ -14,67 +14,59 @@ import { calculateAge } from "@/utils/dateUtils";
 import type { Employee } from "@/schemas/employee.schema";
 
 export const useEmployees = () => {
-  // 1. Получаем состояние из сторов
   const filters = useFilters((state) => state.filters);
   const sort = useSortStore((state) => state.sort);
   const isAuthenticated = useAuthStore((state) => !!state.user);
 
-  // 2. Формируем ключ запроса. 
-  // ВАЖНО: Ключ должен включать фильтры и сортировку для кэширования.
+  /**
+   * Keep filters/sort in queryKey so React Query handles caching.
+   * Note: Even if server-side filtering fails, this key ensures 
+   * data is separate for different filter states.
+   */
   const queryKey = ["employees", filters, sort] as const;
 
-  // 3. Основной запрос к API через React Query
   const query = useQuery<readonly Employee[], Error>({
     queryKey,
     queryFn: ({ signal }) => apiClient.getEmployees(filters, sort, { signal }),
-    
-    // Настройки кэширования и плавности UI
-    staleTime: 1000 * 60 * 5, // Данные "свежие" 5 минут
-    placeholderData: keepPreviousData, // Не показываем спиннер при смене фильтров
-    
-    // ПРЕДОХРАНИТЕЛЬ: Запрос идет только если юзер залогинен
+    staleTime: 1000 * 60 * 5,
+    placeholderData: keepPreviousData,
     enabled: isAuthenticated, 
   });
 
   const allEmployeesFromApi = query.data ?? [];
 
   /**
-   * 4. КЛИЕНТСКАЯ ФИЛЬТРАЦИЯ (useMemo)
-   * Подстраховка на случай, если API не поддерживает гранулярную фильтрацию
-   * или для мгновенного обновления UI.
+   * Safe Client-Side Filtering.
+   * This is our "Safety Net" that guarantees the UI matches the sliders.
    */
   const filteredEmployees = useMemo(() => {
     if (!allEmployeesFromApi.length) return [];
 
     return allEmployeesFromApi.filter((emp) => {
-      // Проверка департамента
-      const isDeptMatch = 
-        filters.department === "All" || 
-        emp.department === filters.department;
-      if (!isDeptMatch) return false;
+      // 1. Department
+      if (filters.department !== "All" && emp.department !== filters.department) {
+        return false;
+      }
 
-      // Проверка зарплаты
-      const isSalaryMatch = 
-        emp.salary >= filters.minSalary && 
-        emp.salary <= filters.maxSalary;
-      if (!isSalaryMatch) return false;
+      // 2. Salary (using numbers from Zod-validated store)
+      if (emp.salary < filters.minSalary || emp.salary > filters.maxSalary) {
+        return false;
+      }
 
-      // Проверка возраста
+      // 3. Age (The single source of truth: birthDate -> calculateAge)
       const age = calculateAge(emp.birthDate);
-      const isAgeMatch = 
-        age >= filters.minAge && 
-        age <= filters.maxAge;
-      if (!isAgeMatch) return false;
+      if (age < filters.minAge || age > filters.maxAge) {
+        return false;
+      }
 
       return true;
     });
   }, [allEmployeesFromApi, filters]);
 
-  // 5. Возвращаем расширенный объект данных
   return {
-    ...query, // Состояние загрузки (isLoading, error и т.д.)
-    employees: filteredEmployees, // Отфильтрованный список для таблицы и аналитики
-    totalCount: allEmployeesFromApi.length, // Общее кол-во (из ответа сервера)
-    filteredCount: filteredEmployees.length, // Кол-во после применения фильтров
+    ...query,
+    employees: filteredEmployees,
+    totalCount: allEmployeesFromApi.length,
+    filteredCount: filteredEmployees.length,
   };
 };

@@ -1,3 +1,9 @@
+/**
+ * @module EmployeeRow
+ * Displays a single employee record in a table format.
+ * Integrated with Zod-driven types and unified date utilities.
+ */
+
 import { Table, HStack, VStack, Text } from "@chakra-ui/react";
 import { CurrencyText, DateText, EmployeeIdentity, DeptBadge } from "./ui/DataDisplay";
 import { DeleteEmployeeAction } from "./DeleteEmployeeAction";
@@ -11,34 +17,43 @@ interface EmployeeRowProps {
 }
 
 export const EmployeeRow = ({ employee: empl, isAdmin }: EmployeeRowProps) => {
+  /**
+   * We calculate age on the fly from birthDate (Source of Truth).
+   * This ensures age is always accurate relative to today's date.
+   */
+  const age = calculateAge(empl.birthDate);
+
   return (
-    <Table.Row _hover={{ bg: "blackAlpha.50" }}>
-      {/* Employee Identity */}
+    <Table.Row 
+      _hover={{ bg: "blackAlpha.50" }} 
+      transition="background-color 0.2s"
+    >
+      {/* 1. Employee Identity (Name + Avatar) */}
       <Table.Cell width="full">
         <EmployeeIdentity name={empl.fullName} avatar={empl.avatar} />
       </Table.Cell>
       
-      {/* Department */}
+      {/* 2. Department Badge */}
       <Table.Cell whiteSpace="nowrap">
         <DeptBadge>{empl.department}</DeptBadge>
       </Table.Cell>
       
-      {/* Birth Date (Hidden on mobile/tablet) */}
+      {/* 3. Birth Date & Calculated Age (Hidden on mobile) */}
       <Table.Cell display={{ base: "none", lg: "table-cell" }} whiteSpace="nowrap">
         <VStack align="start" gap="0">
           <DateText dateString={empl.birthDate} />
           <Text fontSize="xs" color="fg.muted">
-            {calculateAge(empl.birthDate)} years old
+            {age} years old
           </Text>
         </VStack>
       </Table.Cell>
       
-      {/* Salary */}
+      {/* 4. Salary Display */}
       <Table.Cell textAlign="end" whiteSpace="nowrap">
         <CurrencyText value={empl.salary} />
       </Table.Cell>
       
-      {/* Admin Actions */}
+      {/* 5. Admin-only Actions (Edit / Delete) */}
       {isAdmin && (
         <Table.Cell textAlign="end" whiteSpace="nowrap">
           <HStack gap="2" justifyContent="flex-end">

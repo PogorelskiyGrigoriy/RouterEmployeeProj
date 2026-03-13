@@ -7,7 +7,7 @@ import {
   type NewEmployee, 
   type EmployeeUpdatePayload 
 } from "@/schemas/employee.schema";
-import type { EmployeeFilters } from "@/schemas/filter.schema";
+import type { EmployeeFilter } from "@/schemas/employee.schema";
 
 import type { SortState } from "@/store/sort-store";
 import { getLimitDate } from "@/utils/dateUtils";
@@ -28,7 +28,7 @@ class ApiClientJsonServer implements ApiClient {
    * Filters out corrupted items instead of failing the whole request.
    */
   async getEmployees(
-    filters?: EmployeeFilters, 
+    filters?: EmployeeFilter, 
     sort?: SortState, 
     config?: AxiosRequestConfig
   ): Promise<Employee[]> {
@@ -85,11 +85,11 @@ class ApiClientJsonServer implements ApiClient {
    * Transforms UI filter/sort state into JSON-Server query parameters.
    */
   private buildParams(
-    filters?: EmployeeFilters, 
-    sort?: SortState, 
-    baseParams?: Record<string, any>
-  ): Record<string, any> {
-    const params: Record<string, any> = { ...baseParams };
+  filters?: EmployeeFilter,
+  sort?: SortState, 
+  baseParams?: Record<string, any>
+): Record<string, any> {
+  const params: Record<string, any> = { ...baseParams };
 
     if (filters) {
       if (filters.department && filters.department !== "All") {

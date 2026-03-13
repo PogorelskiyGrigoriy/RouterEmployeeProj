@@ -1,25 +1,32 @@
 /**
  * @module useDepartmentStats
- * Aggregates employee data into department-level statistics.
+ * Aggregates CURRENTLY FILTERED employee data into department-level statistics.
  */
 
 import { useMemo } from "react";
 import { groupBy, meanBy } from "lodash";
-import { useEmployees } from "./useEmployees"; // Именованный импорт
+import { useEmployees } from "./useEmployees";
 import { EMPLOYEES_CONFIG } from "@/config/employees-config";
 import type { DepartmentInfo } from "@/schemas/department.schema";
 import { calculateAge } from "@/utils/dateUtils";
+import type { Employee } from "@/schemas/employee.schema";
 
-/**
- * Hook to calculate headcounts, average salary, and average age per department.
- */
 export const useDepartmentStats = () => {
-  // 1. Data Source: Automatically reflects filtered results
-  const { employees, isLoading } = useEmployees();
+  // Data Source: reacts to changes in filters automatically via useEmployees
+  const { employees, isLoading, error } = useEmployees();
 
   const departmentsInfo = useMemo(() => {
-    // If no employees, still return empty stats for all departments defined in config
-    const grouped = groupBy(employees, 'department');
+    if (!employees.length) {
+      // Return zeroed stats for all departments if no data matches filters
+      return EMPLOYEES_CONFIG.departments.map(dept => ({
+        department: dept,
+        numEmployees: 0,
+        avgSalary: 0,
+        avgAge: 0
+      }));
+    }
+
+    const grouped = groupBy(employees, (e: Employee) => e.department);
 
     return EMPLOYEES_CONFIG.departments.map((dept): DepartmentInfo => {
       const deptEmployees = grouped[dept] || [];
@@ -28,16 +35,15 @@ export const useDepartmentStats = () => {
       return {
         department: dept,
         numEmployees: count,
-        // Using Math.round for cleaner UI presentation
         avgSalary: count > 0 
-          ? Math.round(meanBy(deptEmployees, 'salary')) 
+          ? Math.round(meanBy(deptEmployees, (e: Employee) => e.salary)) 
           : 0,
         avgAge: count > 0 
-          ? Math.round(meanBy(deptEmployees, e => calculateAge(e.birthDate)))
+          ? Math.round(meanBy(deptEmployees, (e: Employee) => calculateAge(e.birthDate)))
           : 0
       };
     });
   }, [employees]);
 
-  return { departmentsInfo, isLoading };
+  return { departmentsInfo, isLoading, error };
 };

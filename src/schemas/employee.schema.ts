@@ -47,15 +47,14 @@ export const employeeUpdateSchema = z.object({
 export type EmployeeUpdatePayload = z.infer<typeof employeeUpdateSchema>;
 
 /**
- * Extended schema for search and filter functionality.
- * Supports range filtering for salary and age.
+ * Filter schema with strict defaults for the Store and UI.
  */
 export const employeeFilterSchema = z.object({
-  search: z.string().optional(),
-  department: z.union([departmentSchema, z.literal("All")]).optional(),
-  minSalary: z.number().optional(),
-  maxSalary: z.number().optional(),
-  minAge: z.number().optional(),
-  maxAge: z.number().optional(),
+  department: z.union([departmentSchema, z.literal("All")]).default("All"),
+  minSalary: z.coerce.number().default(EMPLOYEES_CONFIG.salary.min),
+  maxSalary: z.coerce.number().default(EMPLOYEES_CONFIG.salary.max),
+  minAge: z.coerce.number().default(EMPLOYEES_CONFIG.age.min),
+  maxAge: z.coerce.number().default(EMPLOYEES_CONFIG.age.max),
 });
+
 export type EmployeeFilter = z.infer<typeof employeeFilterSchema>;

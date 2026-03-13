@@ -10,14 +10,14 @@ import { Field } from "@/components/ui/field";
 import { DepartmentSelect } from "@/components/shared/DepartmentSelect";
 
 import { useFilters } from "@/store/filters-store";
-import { type EmployeeFilters } from "@/schemas/filter.schema";
+import { type EmployeeFilter } from "@/schemas/employee.schema";
 import { EMPLOYEES_CONFIG } from "@/config/employees-config";
 
 interface Props {
   onClose: () => void;
 }
 
-const DEFAULT_FILTERS: EmployeeFilters = {
+const DEFAULT_FILTERS: EmployeeFilter = {
   department: "All",
   minSalary: EMPLOYEES_CONFIG.salary.min,
   maxSalary: EMPLOYEES_CONFIG.salary.max,
@@ -36,7 +36,7 @@ export const Filters = ({ onClose }: Props) => {
     reset,
     watch,
     formState: { errors, isValid } 
-  } = useForm<EmployeeFilters>({
+  } = useForm<EmployeeFilter>({
     mode: "onChange",
     defaultValues: currentFilters
   });
@@ -45,7 +45,7 @@ export const Filters = ({ onClose }: Props) => {
   const [minSal, minAgeVal] = watch(["minSalary", "minAge"]);
   const { salary: salConf, age: ageConf } = EMPLOYEES_CONFIG;
 
-  const handleApply = (data: EmployeeFilters) => {
+  const handleApply = (data: EmployeeFilter) => {
     setFilters(data);
     onClose();
   };

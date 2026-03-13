@@ -1,6 +1,7 @@
 /**
  * @module SortableColumn
- * A reusable table header component with sorting logic.
+ * Reusable header component that integrates with useSortStore.
+ * Optimized with selectors to prevent unnecessary re-renders.
  */
 
 import { Box, HStack, Text, Table } from "@chakra-ui/react";
@@ -21,8 +22,16 @@ export const SortableColumn = ({
   textAlign = "start", 
   width 
 }: SortableColumnProps) => {
-  const { sort, toggleSort } = useSortStore();
-  const isSorted = sort.key === field;
+  /**
+   * Performance Optimization:
+   * We use specific selectors so this header only re-renders 
+   * when its own key or the global order changes.
+   */
+  const currentSortKey = useSortStore((state) => state.sort.key);
+  const currentOrder = useSortStore((state) => state.sort.order);
+  const toggleSort = useSortStore((state) => state.toggleSort);
+
+  const isSorted = currentSortKey === field;
   
   const handleToggle = () => toggleSort(field);
 
@@ -30,17 +39,32 @@ export const SortableColumn = ({
     <Table.ColumnHeader
       onClick={handleToggle}
       cursor="pointer"
-      _hover={{ bg: "blackAlpha.100" }}
+      _hover={{ bg: "bg.muted" }} // Using theme tokens instead of blackAlpha
       textAlign={textAlign}
       width={width}
       whiteSpace="nowrap"
+      transition="background 0.2s"
+      userSelect="none"
     >
-      <HStack gap="1" justifyContent={textAlign === "end" ? "flex-end" : "flex-start"}>
-        <Text fontWeight="bold">{children}</Text>
-        <Box color={isSorted ? "blue.500" : "fg.muted"} flexShrink={0}>
-          {isSorted && sort.order === "asc" && <LuArrowUp size="14" />}
-          {isSorted && sort.order === "desc" && <LuArrowDown size="14" />}
-          {!isSorted && <LuArrowUpDown size="14" style={{ opacity: 0.3 }} />}
+      <HStack 
+        gap="2" 
+        justifyContent={textAlign === "end" ? "flex-end" : "flex-start"}
+      >
+        <Text fontWeight="semibold" color={isSorted ? "fg.info" : "fg"}>
+          {children}
+        </Text>
+        
+        <Box 
+          color={isSorted ? "blue.500" : "fg.subtle"} 
+          flexShrink={0}
+          display="flex"
+          alignItems="center"
+        >
+          {isSorted ? (
+            currentOrder === "asc" ? <LuArrowUp size="16" /> : <LuArrowDown size="16" />
+          ) : (
+            <LuArrowUpDown size="14" style={{ opacity: 0.3 }} />
+          )}
         </Box>
       </HStack>
     </Table.ColumnHeader>
