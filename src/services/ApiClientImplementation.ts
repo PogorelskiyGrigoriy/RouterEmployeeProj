@@ -1,21 +1,32 @@
 import { api } from "@/api/axiosInstance";
 import type { AxiosRequestConfig } from "axios";
-import type { ApiClient } from "./ApiClient"; 
-import type { EmployeeFilters } from "@/schemas/filter.schema"; 
-import type { Employee, NewEmployee, EmployeeUpdatePayload } from "@/schemas/employee.schema"; 
-import type { SortState } from "@/store/sort-store"; 
-import { getLimitDate } from "@/utils/dateUtils"; 
+
+import { 
+  employeeSchema, 
+  type Employee, 
+  type NewEmployee, 
+  type EmployeeUpdatePayload 
+} from "@/schemas/employee.schema";
+import type { EmployeeFilters } from "@/schemas/filter.schema";
+
+import type { SortState } from "@/store/sort-store";
+import { getLimitDate } from "@/utils/dateUtils";
+
+import type { ApiClient } from "./ApiClient";
 
 const ENDPOINTS = {
   EMPLOYEES: "/employees",
 } as const;
 
 /**
- * JSON-Server implementation of the ApiClient.
- * Maps application filters to json-server specific query parameters.
+ * JSON-Server implementation of the ApiClient with Zod validation.
  */
 class ApiClientJsonServer implements ApiClient {
   
+  /**
+   * Fetches employees and performs "Soft Validation".
+   * Filters out corrupted items instead of failing the whole request.
+   */
   async getEmployees(
     filters?: EmployeeFilters, 
     sort?: SortState, 
@@ -23,31 +34,55 @@ class ApiClientJsonServer implements ApiClient {
   ): Promise<Employee[]> {
     const params = this.buildParams(filters, sort, config?.params);
 
-    const { data } = await api.get<Employee[]>(ENDPOINTS.EMPLOYEES, { 
+    const { data } = await api.get<unknown[]>(ENDPOINTS.EMPLOYEES, { 
       ...config, 
       params 
     });
+
+    // Validating each item separately to prevent one bad record from breaking the UI
+    const validatedData = data.reduce<Employee[]>((acc, item) => {
+      const result = employeeSchema.safeParse(item);
+      if (result.success) {
+        acc.push(result.data);
+      } else {
+        console.error("[API Data Corruption]: Skipping invalid employee record", {
+          id: (item as any)?.id,
+          errors: result.error.format()
+        });
+      }
+      return acc;
+    }, []);
     
-    return data;
+    return validatedData;
   }
 
+  /**
+   * Creates a new employee with "Strict Validation".
+   * Throws an error if the server response doesn't match our schema.
+   */
   async addEmployee(employee: NewEmployee): Promise<Employee> {
-    const { data } = await api.post<Employee>(ENDPOINTS.EMPLOYEES, employee);
-    return data;
+    const { data } = await api.post<unknown>(ENDPOINTS.EMPLOYEES, employee);
+    return employeeSchema.parse(data);
   }
 
+  /**
+   * Deletes an employee record. No validation needed for empty response.
+   */
   async deleteEmployee(id: string): Promise<void> {
     await api.delete(`${ENDPOINTS.EMPLOYEES}/${id}`);
   }
 
+  /**
+   * Updates an employee with "Strict Validation".
+   * Ensures the patched data returned by the server is valid.
+   */
   async updateEmployee({ id, changes }: EmployeeUpdatePayload): Promise<Employee> {
-    // Json-server использует PATCH для частичного обновления
-    const { data } = await api.patch<Employee>(`${ENDPOINTS.EMPLOYEES}/${id}`, changes);
-    return data;
+    const { data } = await api.patch<unknown>(`${ENDPOINTS.EMPLOYEES}/${id}`, changes);
+    return employeeSchema.parse(data);
   }
 
   /**
-   * Helper to transform UI state into API query parameters
+   * Transforms UI filter/sort state into JSON-Server query parameters.
    */
   private buildParams(
     filters?: EmployeeFilters, 
@@ -63,8 +98,6 @@ class ApiClientJsonServer implements ApiClient {
       if (filters.minSalary !== undefined) params.salary_gte = filters.minSalary;
       if (filters.maxSalary !== undefined) params.salary_lte = filters.maxSalary;
 
-      // Логика дат: для минимального возраста (20 лет) 
-      // дата рождения должна быть МЕНЬШЕ или равна (родился раньше)
       if (filters.minAge !== undefined) {
         params.birthDate_lte = getLimitDate(filters.minAge);
       }

@@ -17,7 +17,7 @@ export const employeeSchema = z.object({
     .max(salary.max, `Max: ${salary.max}`),
   birthDate: z.string().min(1, "Birth date is required"), // Валидацию возраста добавим в .refine ниже
   department: departmentSchema,
-  avatar: z.string().url().optional(),
+  avatar: z.string().url().nullable().optional(),
 });
 
 /**
