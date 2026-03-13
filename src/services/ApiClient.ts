@@ -1,6 +1,6 @@
 /**
  * @module ApiClient
- * Abstract interface for employee management data provider.
+ * Abstract interface for employee management data provider with Zod validation.
  */
 
 import type { AxiosRequestConfig } from "axios";
@@ -14,29 +14,33 @@ import type { SortState } from "@/store/sort-store";
 
 /**
  * Defines mandatory methods for any data source (API or Stub).
+ * All implementations are expected to validate data against Zod schemas.
  */
 export interface ApiClient {
   /**
-   * Fetches a list of employees based on filters and sorting criteria.
+   * Fetches employees and validates each record. 
+   * Corrupted records should be filtered out.
    */
   getEmployees(
     filters?: EmployeeFilters, 
     sort?: SortState, 
     config?: AxiosRequestConfig
-  ): Promise<readonly Employee[]>;
+  ): Promise<Employee[]>;
   
   /**
-   * Creates a new employee entry.
+   * Creates an employee and validates the server response.
+   * Throws ZodError if response is invalid.
    */
   addEmployee(employee: NewEmployee): Promise<Employee>;
   
   /**
-   * Removes an employee by their unique identifier.
+   * Removes an employee. No validation expected for empty responses.
    */
   deleteEmployee(id: string): Promise<void>;
   
   /**
-   * Partially or fully updates an existing employee record.
+   * Updates an employee and validates the patched response.
+   * Throws ZodError if response is invalid.
    */
   updateEmployee(payload: EmployeeUpdatePayload): Promise<Employee>;
 }
