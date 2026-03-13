@@ -2,14 +2,15 @@ import { z } from "zod";
 import { emailSchema, passwordSchema } from "./common";
 
 /**
- * 1. Роли пользователей
+ * Defines valid user roles within the system.
+ * Used for Role-Based Access Control (RBAC).
  */
 export const userRoleSchema = z.enum(['ADMIN', 'USER']);
 export type UserRole = z.infer<typeof userRoleSchema>;
 
 /**
- * 2. Данные для входа (LoginData)
- * Используем готовые правила из common.ts
+ * Schema for login credentials.
+ * Reuses validation rules from common schema (email/password).
  */
 export const loginSchema = z.object({
   email: emailSchema,
@@ -18,7 +19,8 @@ export const loginSchema = z.object({
 export type LoginData = z.infer<typeof loginSchema>;
 
 /**
- * 3. Данные профиля (UserData)
+ * Schema for authenticated user profile data.
+ * Validates the structure of the user object stored in the state.
  */
 export const userDataSchema = z.object({
   id: z.string(),
@@ -26,14 +28,3 @@ export const userDataSchema = z.object({
   role: userRoleSchema,
 });
 export type UserData = z.infer<typeof userDataSchema>;
-
-/**
- * 4. Состояние стора (AuthState)
- * Оставляем интерфейсом, так как это внутренняя структура Store.
- * Но используем типы, сгенерированные Zod выше.
- */
-export interface AuthState {
-  readonly user: UserData | null;
-  readonly isAuthenticated: boolean;
-  readonly isLoading: boolean;
-}

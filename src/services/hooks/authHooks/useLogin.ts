@@ -1,8 +1,3 @@
-/**
- * @module useLogin
- * Mutation hook for user authentication process.
- */
-
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { authService } from '@/services/AuthServiceImplementation';
@@ -12,38 +7,49 @@ import type { LoginData, UserData } from '@/schemas/auth.schema';
 import { toaster } from "@/components/ui/toaster-config";
 
 /**
- * Hook to handle login logic, state updates, and navigation.
+ * Custom hook to handle user authentication via TanStack Query mutation.
+ * Manages side effects: updating the store, notifications, and navigation.
  */
 export const useLogin = () => {
+  // Extracting only the necessary action from the store
   const setLogin = useAuthStore((state) => state.setLogin);
   const navigate = useNavigate();
   const location = useLocation();
 
   return useMutation({
+    /**
+     * Executes the login logic via the abstract auth service.
+     */
     mutationFn: (data: LoginData) => authService.login(data),
     
+    /**
+     * On successful login:
+     * 1. Updates global state.
+     * 2. Shows a welcome notification.
+     * 3. Redirects to the previous page or home.
+     */
     onSuccess: (userData: UserData) => {
-      // 1. Update Global State
       setLogin(userData);
       
-      // 2. Notify User
       toaster.create({
         title: "Success",
         description: `Welcome back, ${userData.username}!`,
         type: "success",
       });
       
-      // 3. Smart Redirect
-      // If user was kicked out from a private route, return them there.
+      // Attempt to redirect to the protected route the user tried to access earlier
       const from = location.state?.from?.pathname || ROUTES.HOME;
       navigate(from, { replace: true });
     },
 
+    /**
+     * On login failure:
+     * Triggers an error toast with the message returned by the service.
+     */
     onError: (error: Error) => {
-      // 4. Global Error Handling
       toaster.create({
         title: "Login Failed",
-        description: error.message || "Invalid credentials. Please try again.",
+        description: error.message || "Invalid credentials",
         type: "error",
       });
     }

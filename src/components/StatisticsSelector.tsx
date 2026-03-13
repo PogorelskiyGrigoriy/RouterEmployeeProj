@@ -18,26 +18,37 @@ import {
 } from "@/components/ui/menu"; 
 
 import { STATS_NAV_LINKS } from "@/config/navigation";
-import { useAuthStore } from "@/store/useAuthStore";
+// Importing updated selectors
+import { useIsAuthenticated, useUserRole } from "@/store/useAuthStore";
 
 export const StatisticsSelector = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const user = useAuthStore((state) => state.user);
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  /**
+   * Refactored: Accessing auth state via specialized selectors.
+   */
+  const isAuthenticated = useIsAuthenticated();
+  const userRole = useUserRole();
 
-  // 1. Filter views based on user permissions
+  /**
+   * 1. Permission-based Filtering.
+   * Filters available statistics views based on the current user's role.
+   */
   const allowedStats = useMemo(() => {
-    if (!isAuthenticated || !user) return [];
-    return STATS_NAV_LINKS.filter(link => link.roles.includes(user.role));
-  }, [isAuthenticated, user]);
+    if (!isAuthenticated || !userRole) return [];
+    return STATS_NAV_LINKS.filter(link => link.roles.includes(userRole));
+  }, [isAuthenticated, userRole]);
 
-  // 2. Determine currently active statistic view
+  /**
+   * 2. Active View Tracking.
+   * Identifies which statistics dashboard is currently displayed based on URL.
+   */
   const activeStat = useMemo(() => {
     return allowedStats.find(link => link.to === location.pathname);
   }, [allowedStats, location.pathname]);
 
+  // Hide the selector if no views are available for the current role
   if (allowedStats.length === 0) return null;
 
   return (

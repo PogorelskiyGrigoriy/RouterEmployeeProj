@@ -3,8 +3,6 @@
  * Sticky header providing navigation and user session controls.
  */
 
-"use client";
-
 import { useMemo } from "react";
 import { NavLink } from "react-router-dom";
 import { 
@@ -20,15 +18,25 @@ import {
 } from "@chakra-ui/react";
 
 import { StatisticsSelector } from "./StatisticsSelector";
-import { useAuthStore } from "@/store/useAuthStore";
+// Updated imports to use new selectors
+import { useAuthStore, useIsAuthenticated } from "@/store/useAuthStore";
 import { useLogout } from "@/services/hooks/authHooks/useLogout";
 import { MAIN_NAV_LINKS, ROUTES } from "@/config/navigation";
 
 export const Navbar = () => {
+  /**
+   * Refactored: Accessing 'user' via atomic selector and 
+   * 'isAuthenticated' via the new derived state selector.
+   */
   const user = useAuthStore((state) => state.user);
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isAuthenticated = useIsAuthenticated(); 
+  
   const { mutate: logout, isPending } = useLogout();
 
+  /**
+   * Memoized navigation links based on user role.
+   * Only re-calculates when the user or their auth status changes.
+   */
   const visibleLinks = useMemo(() => {
     if (!isAuthenticated || !user) return [];
     return MAIN_NAV_LINKS.filter((link) => link.roles.includes(user.role));
@@ -48,7 +56,7 @@ export const Navbar = () => {
       <Container maxW="6xl" px={{ base: "4", md: "8" }}> 
         <HStack justify="space-between" py="3">
           
-          {/* Левая часть: Ссылки */}
+          {/* Left section: Navigation links */}
           <HStack gap={{ base: "4", md: "8" }}>
             {!isAuthenticated ? (
               <ChakraLink asChild variant="plain" fontWeight="bold" color="blue.600">
@@ -70,7 +78,7 @@ export const Navbar = () => {
                       _after: {
                         content: '""',
                         position: "absolute",
-                        bottom: "-14px", // Чуть ниже, чтобы лечь на границу
+                        bottom: "-14px",
                         left: 0,
                         width: "100%",
                         height: "2px",
@@ -87,7 +95,7 @@ export const Navbar = () => {
 
           <Spacer />
 
-          {/* Правая часть: Юзер и Выход */}
+          {/* Right section: User info and Logout control */}
           {isAuthenticated && user && (
             <HStack gap={{ base: "3", md: "5" }}>
               <Box maxW={{ base: "100px", md: "200px" }}>
