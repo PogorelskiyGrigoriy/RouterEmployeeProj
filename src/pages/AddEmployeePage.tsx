@@ -26,14 +26,6 @@ const AddEmployeePage = () => {
         });
         handleClose();
       },
-      onError: (error) => {
-        toaster.create({
-          title: "Registration Failed",
-          // Сообщение теперь может прийти от ZodError (через хук мутации)
-          description: error.message || "Please check the form data",
-          type: "error",
-        });
-      }
     });
   };
 

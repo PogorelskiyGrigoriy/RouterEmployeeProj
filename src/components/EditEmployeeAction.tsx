@@ -8,16 +8,16 @@ import { useState } from "react";
 import { IconButton, Box } from "@chakra-ui/react";
 import { LuPencil } from "react-icons/lu";
 
-import { 
-  DrawerBackdrop, 
-  DrawerBody, 
-  DrawerCloseTrigger, 
-  DrawerContent, 
-  DrawerHeader, 
-  DrawerRoot, 
-  DrawerTitle, 
-  DrawerTrigger 
-} from "@/components/ui/drawer"; 
+import {
+  DrawerBackdrop,
+  DrawerBody,
+  DrawerCloseTrigger,
+  DrawerContent,
+  DrawerHeader,
+  DrawerRoot,
+  DrawerTitle,
+  DrawerTrigger
+} from "@/components/ui/drawer";
 import { EmployeeForm } from "./EmployeeForm";
 
 import { useUpdateEmployee } from "@/services/hooks/mutationHooks/useUpdateEmployee";
@@ -34,10 +34,10 @@ export const EditEmployeeAction = ({ employee }: Props) => {
 
   const handleUpdate = (formData: NewEmployee) => {
     mutate(
-      { 
-        id: employee.id, 
+      {
+        id: employee.id,
         changes: formData // formData соответствует NewEmployee, что валидно для изменений
-      }, 
+      },
       {
         onSuccess: () => {
           toaster.create({
@@ -47,46 +47,39 @@ export const EditEmployeeAction = ({ employee }: Props) => {
           });
           setIsOpen(false);
         },
-        onError: (error) => {
-          toaster.create({
-            title: "Update Failed",
-            description: error.message || "Could not save changes",
-            type: "error",
-          });
-        }
       }
     );
   };
 
   return (
-    <DrawerRoot 
-      open={isOpen} 
-      onOpenChange={(e) => setIsOpen(e.open)} 
+    <DrawerRoot
+      open={isOpen}
+      onOpenChange={(e) => setIsOpen(e.open)}
       placement={{ base: "bottom", md: "end" }}
       size={{ base: "full", md: "xs" }}
     >
       <DrawerBackdrop />
-      
+
       <DrawerTrigger asChild>
-        <IconButton 
-          variant="ghost" 
-          colorPalette="blue" 
-          size="sm" 
+        <IconButton
+          variant="ghost"
+          colorPalette="blue"
+          size="sm"
           aria-label="Edit employee"
           disabled={isPending}
         >
           <LuPencil />
         </IconButton>
       </DrawerTrigger>
-      
-      <DrawerContent 
+
+      <DrawerContent
         borderTopRadius={{ base: "2xl", md: "none" }}
         maxH={{ base: "90vh", md: "100vh" }}
       >
-        <Box 
-          display={{ base: "block", md: "none" }} 
-          w="10" h="1" bg="border" borderRadius="full" 
-          mx="auto" mt="3" 
+        <Box
+          display={{ base: "block", md: "none" }}
+          w="10" h="1" bg="border" borderRadius="full"
+          mx="auto" mt="3"
         />
 
         <DrawerHeader>
@@ -94,14 +87,14 @@ export const EditEmployeeAction = ({ employee }: Props) => {
         </DrawerHeader>
 
         <DrawerBody pb="8">
-          <EmployeeForm 
-            employee={employee} 
-            onSubmit={handleUpdate} 
+          <EmployeeForm
+            employee={employee}
+            onSubmit={handleUpdate}
             isLoading={isPending}
             onCancel={() => setIsOpen(false)}
           />
         </DrawerBody>
-        
+
         <DrawerCloseTrigger />
       </DrawerContent>
     </DrawerRoot>
