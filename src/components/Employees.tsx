@@ -2,7 +2,7 @@
  * @module Employees
  * Main container for the employee list. 
  * Switches between Mobile Card view and Desktop Table view.
- * Updated to support Zod-driven totals and server-side counts.
+ * Fixed: Removed nested <th> inside <th> for birthDate column.
  */
 
 import { Box, Center, Spinner, Table, Text, VStack } from "@chakra-ui/react";
@@ -60,7 +60,7 @@ export const Employees = () => {
 
   return (
     <Box>
-      {/* MOBILE VIEW */}
+      {/* MOBILE VIEW (Stack of Cards) */}
       <Box display={{ base: "block", md: "none" }} mb="4">
         <MobileSortActions />
         <VStack gap="3" align="stretch">
@@ -70,7 +70,7 @@ export const Employees = () => {
         </VStack>
       </Box>
 
-      {/* DESKTOP VIEW */}
+      {/* DESKTOP VIEW (Structured Table) */}
       <Box 
         display={{ base: "none", md: "block" }}
         borderWidth="1px" 
@@ -82,7 +82,9 @@ export const Employees = () => {
         <Table.Root size="md" variant="line" stickyHeader>
           <Table.Header>
             <Table.Row bg="bg.subtle">
-              {/* Ключи строго соответствуют Employee schema */}
+              {/* ВАЖНО: SortableColumn теперь сам является компонентом Table.ColumnHeader.
+                  Мы передаем пропсы (width, display, textAlign) напрямую в него.
+              */}
               <SortableColumn field="fullName" width="full">
                 Employee
               </SortableColumn>
@@ -91,9 +93,15 @@ export const Employees = () => {
                 Department
               </Table.ColumnHeader>
               
-              <Table.ColumnHeader display={{ base: "none", lg: "table-cell" }}>
-                <SortableColumn field="birthDate">Birth Date</SortableColumn>
-              </Table.ColumnHeader>
+              {/* ИСПРАВЛЕНО: Убрана внешняя обертка Table.ColumnHeader. 
+                  display передается напрямую, чтобы избежать ошибки "th inside th".
+              */}
+              <SortableColumn 
+                field="birthDate" 
+                display={{ base: "none", lg: "table-cell" }}
+              >
+                Birth Date
+              </SortableColumn>
               
               <SortableColumn field="salary" textAlign="end">
                 Salary
@@ -119,6 +127,7 @@ export const Employees = () => {
         </Table.Root>
       </Box>
 
+      {/* Footer Stats */}
       <Box p="3" mt="2">
         <Text fontSize="xs" color="fg.muted" textAlign="right" fontStyle="italic">
           Showing {filteredCount} of {totalCount} total employees

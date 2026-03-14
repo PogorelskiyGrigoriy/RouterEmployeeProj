@@ -1,50 +1,37 @@
-/**
- * @module SortableColumn
- * Reusable header component that integrates with useSortStore.
- * Optimized with selectors to prevent unnecessary re-renders.
- */
-
-import { Box, HStack, Text, Table } from "@chakra-ui/react";
+import { Box, HStack, Text, Table, type TableColumnHeaderProps } from "@chakra-ui/react";
 import { LuArrowUp, LuArrowDown, LuArrowUpDown } from "react-icons/lu";
 import { useSortStore } from "@/store/sort-store";
 import type { Employee } from "@/schemas/employee.schema";
 
-interface SortableColumnProps {
+// Наследуем свойства Table.ColumnHeader, чтобы принимать display, width и т.д.
+interface SortableColumnProps extends TableColumnHeaderProps {
   field: keyof Employee;
   children: React.ReactNode;
-  textAlign?: "start" | "end" | "center";
-  width?: string;
 }
 
 export const SortableColumn = ({ 
   field, 
   children, 
   textAlign = "start", 
-  width 
+  ...rest // Собираем все остальные пропсы (display, width, и т.д.)
 }: SortableColumnProps) => {
-  /**
-   * Performance Optimization:
-   * We use specific selectors so this header only re-renders 
-   * when its own key or the global order changes.
-   */
   const currentSortKey = useSortStore((state) => state.sort.key);
   const currentOrder = useSortStore((state) => state.sort.order);
   const toggleSort = useSortStore((state) => state.toggleSort);
 
   const isSorted = currentSortKey === field;
-  
   const handleToggle = () => toggleSort(field);
 
   return (
     <Table.ColumnHeader
       onClick={handleToggle}
       cursor="pointer"
-      _hover={{ bg: "bg.muted" }} // Using theme tokens instead of blackAlpha
+      _hover={{ bg: "bg.muted" }}
       textAlign={textAlign}
-      width={width}
       whiteSpace="nowrap"
       transition="background 0.2s"
       userSelect="none"
+      {...rest} // ПРИМЕНЯЕМ пропсы здесь
     >
       <HStack 
         gap="2" 
