@@ -1,6 +1,7 @@
 /**
  * @module StatisticsChart
  * Responsive bar chart integrated with Chakra UI theme tokens.
+ * Data keys are strictly typed to ensure consistency with Zod-validated stats.
  */
 
 "use client";
@@ -29,7 +30,6 @@ export const StatisticsChart = ({
   labelY = "Employees",
   tooltipLabelKey = "tooltipValue",
 }: StatsChartProps) => {
-  // 1. Fetch theme tokens to sync Recharts with current theme
   const [accent, grayMuted, gridColor, textPrimary] = useToken("colors", [
     "blue.500",
     "fg.muted",
@@ -37,7 +37,7 @@ export const StatisticsChart = ({
     "fg.emphasized",
   ]);
 
-  // 2. Memoize tooltip styles to prevent inline object recreation
+  // Memoize tooltip styles
   const tooltipStyles = useMemo(() => ({
     contentStyle: {
       borderRadius: "12px",
@@ -93,7 +93,7 @@ export const StatisticsChart = ({
               axisLine={false}
               tickLine={false}
               tick={{ fontSize: 11, fill: grayMuted }}
-              dy={10} // Offset for better spacing
+              dy={10}
             />
             
             <YAxis
@@ -119,7 +119,7 @@ export const StatisticsChart = ({
               name={labelY}
               fill={accent}
               radius={[4, 4, 0, 0]}
-              barSize={32} // Maintain consistent bar width
+              barSize={32}
               minPointSize={3}
             />
           </BarChart>

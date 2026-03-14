@@ -18,37 +18,34 @@ import {
 } from "@/components/ui/menu"; 
 
 import { STATS_NAV_LINKS } from "@/config/navigation";
-// Importing updated selectors
 import { useIsAuthenticated, useUserRole } from "@/store/useAuthStore";
+import type { UserRole } from "@/schemas/auth.schema";
 
 export const StatisticsSelector = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  /**
-   * Refactored: Accessing auth state via specialized selectors.
-   */
   const isAuthenticated = useIsAuthenticated();
-  const userRole = useUserRole();
+  const userRole = useUserRole() as UserRole | null;
 
   /**
-   * 1. Permission-based Filtering.
-   * Filters available statistics views based on the current user's role.
+   * Permission-based Filtering
    */
   const allowedStats = useMemo(() => {
     if (!isAuthenticated || !userRole) return [];
-    return STATS_NAV_LINKS.filter(link => link.roles.includes(userRole));
+    
+    return STATS_NAV_LINKS.filter(link => 
+      (link.roles as string[]).includes(userRole)
+    );
   }, [isAuthenticated, userRole]);
 
   /**
-   * 2. Active View Tracking.
-   * Identifies which statistics dashboard is currently displayed based on URL.
+   * Active View Tracking.
    */
   const activeStat = useMemo(() => {
     return allowedStats.find(link => link.to === location.pathname);
   }, [allowedStats, location.pathname]);
 
-  // Hide the selector if no views are available for the current role
   if (allowedStats.length === 0) return null;
 
   return (
@@ -74,6 +71,7 @@ export const StatisticsSelector = () => {
             ms="2" 
             transition="transform 0.2s"
             color={activeStat ? "blue.500" : "fg.muted"} 
+            transform={activeStat ? "rotate(0deg)" : "none"} 
           />
         </Button>
       </MenuTrigger>
