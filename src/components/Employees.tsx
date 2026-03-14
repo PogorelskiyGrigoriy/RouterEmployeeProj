@@ -2,6 +2,7 @@
  * @module Employees
  * Main container for the employee list. 
  * Switches between Mobile Card view and Desktop Table view.
+ * Updated to support Zod-driven totals and server-side counts.
  */
 
 import { Box, Center, Spinner, Table, Text, VStack } from "@chakra-ui/react";
@@ -16,30 +17,29 @@ import { useEmployees } from "@/services/hooks/useEmployees";
 import { useUserRole } from "@/store/useAuthStore";
 
 export const Employees = () => {
-  const { employees, isLoading, error, filteredCount } = useEmployees();
+  const { employees, isLoading, error, filteredCount, totalCount } = useEmployees();
   
-  /**
-   * Refactored: Use dedicated selector to check admin status.
-   * This is more stable than checking the whole user object.
-   */
   const userRole = useUserRole();
   const isAdmin = userRole === "ADMIN";
 
-  // --- 1. Loading State ---
+  // --- Loading State ---
   if (isLoading) return (
     <Center h="200px"><Spinner size="xl" color="blue.500" /></Center>
   );
 
-  // --- 2. Error State ---
+  // --- Error State ---
   if (error) return (
     <Center h="200px">
-      <Text color="red.500" fontWeight="medium">
-        Error loading employees: {error.message}
-      </Text>
+      <VStack gap="2">
+        <Text color="red.500" fontWeight="medium">
+          Error loading employees
+        </Text>
+        <Text fontSize="xs" color="fg.muted">{error.message}</Text>
+      </VStack>
     </Center>
   );
 
-  // --- 3. Empty State (No results after filtering) ---
+  // --- Empty State ---
   if (filteredCount === 0) return (
     <Center 
       h="300px" 
@@ -60,7 +60,7 @@ export const Employees = () => {
 
   return (
     <Box>
-      {/* MOBILE VIEW (Stacked Cards) */}
+      {/* MOBILE VIEW */}
       <Box display={{ base: "block", md: "none" }} mb="4">
         <MobileSortActions />
         <VStack gap="3" align="stretch">
@@ -70,7 +70,7 @@ export const Employees = () => {
         </VStack>
       </Box>
 
-      {/* DESKTOP VIEW (Structured Table) */}
+      {/* DESKTOP VIEW */}
       <Box 
         display={{ base: "none", md: "block" }}
         borderWidth="1px" 
@@ -82,7 +82,7 @@ export const Employees = () => {
         <Table.Root size="md" variant="line" stickyHeader>
           <Table.Header>
             <Table.Row bg="bg.subtle">
-              {/* Field names now strictly match our Zod Employee Schema */}
+              {/* Ключи строго соответствуют Employee schema */}
               <SortableColumn field="fullName" width="full">
                 Employee
               </SortableColumn>
@@ -119,10 +119,9 @@ export const Employees = () => {
         </Table.Root>
       </Box>
 
-      {/* FOOTER: Summary Info */}
       <Box p="3" mt="2">
-        <Text fontSize="xs" color="fg.subtle" textAlign="right" fontStyle="italic">
-          Displaying {filteredCount} out of {employees.length} results
+        <Text fontSize="xs" color="fg.muted" textAlign="right" fontStyle="italic">
+          Showing {filteredCount} of {totalCount} total employees
         </Text>
       </Box>
     </Box>

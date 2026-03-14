@@ -1,36 +1,45 @@
 import { HStack, Text, Button } from "@chakra-ui/react";
 import { Tag } from "./ui/tag";
 import { useFilters } from "@/store/filters-store";
-import { EMPLOYEES_CONFIG } from "@/config/employees-config";
+import { employeeFilterSchema } from "@/schemas/employee.schema";
+
+/**
+ * @module ActiveFilters
+ * Displays tags for currently active filters.
+ * Uses default values from Zod schema to determine "active" state.
+ */
 
 export const ActiveFilters = () => {
   const { filters, setFilters, resetFilters } = useFilters();
-  const { salary: salConf, age: ageConf } = EMPLOYEES_CONFIG;
+  
+  // Get defaults directly from our schema to stay in sync
+  const defaults = employeeFilterSchema.parse({});
 
   const activeChips = [
     {
       id: "dept",
-      isActive: filters.department !== "All",
+      isActive: filters.department !== defaults.department,
       label: "Dept",
       value: filters.department,
       color: "blue",
-      onClear: () => setFilters({ department: "All" }),
+      onClear: () => setFilters({ department: defaults.department }),
     },
     {
       id: "salary",
-      isActive: filters.minSalary !== salConf.min || filters.maxSalary !== salConf.max,
+      isActive: filters.minSalary !== defaults.minSalary || filters.maxSalary !== defaults.maxSalary,
       label: "Salary",
-      value: `${filters.minSalary} - ${filters.maxSalary}`,
+      // Optional: format as currency or abbreviated (e.g., 10k - 20k)
+      value: `${filters.minSalary.toLocaleString()} - ${filters.maxSalary.toLocaleString()}`,
       color: "green",
-      onClear: () => setFilters({ minSalary: salConf.min, maxSalary: salConf.max }),
+      onClear: () => setFilters({ minSalary: defaults.minSalary, maxSalary: defaults.maxSalary }),
     },
     {
       id: "age",
-      isActive: filters.minAge !== ageConf.min || filters.maxAge !== ageConf.max,
+      isActive: filters.minAge !== defaults.minAge || filters.maxAge !== defaults.maxAge,
       label: "Age",
       value: `${filters.minAge} - ${filters.maxAge}`,
       color: "purple",
-      onClear: () => setFilters({ minAge: ageConf.min, maxAge: ageConf.max }),
+      onClear: () => setFilters({ minAge: defaults.minAge, maxAge: defaults.maxAge }),
     },
   ].filter(c => c.isActive);
 

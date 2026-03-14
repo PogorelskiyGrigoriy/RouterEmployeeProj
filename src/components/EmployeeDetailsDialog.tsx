@@ -1,3 +1,9 @@
+/**
+ * @module EmployeeDetailsDialog
+ * Detailed view of employee data. 
+ * Synchronized with Zod-validated schema and central date utilities.
+ */
+
 import {
   DialogBody,
   DialogCloseTrigger,
@@ -14,7 +20,7 @@ import { calculateAge } from "@/utils/dateUtils";
 import type { Employee } from "@/schemas/employee.schema";
 
 interface Props {
-  employee: Employee;
+  readonly employee: Employee;
 }
 
 export const EmployeeDetailsDialog = ({ employee }: Props) => {
@@ -26,27 +32,29 @@ export const EmployeeDetailsDialog = ({ employee }: Props) => {
           variant="ghost"
           size="sm"
           color="fg.muted"
+          onClick={(e) => e.stopPropagation()} 
         >
           <LuChevronRight size="24" />
         </IconButton>
       </DialogTrigger>
 
-      <DialogContent borderRadius="2xl" pb="4">
+      <DialogContent borderRadius="2xl" pb="4" bg="bg.panel">
         <DialogHeader>
-          <DialogTitle>Employee Profile</DialogTitle>
+          <DialogTitle fontSize="xl">Employee Profile</DialogTitle>
         </DialogHeader>
 
         <DialogBody>
           <VStack align="stretch" gap="6">
-            {/* Секция с аватаром и именем */}
             <Box py="2">
-              <EmployeeIdentity name={employee.fullName} avatar={employee.avatar} />
+              <EmployeeIdentity 
+                name={employee.fullName} 
+                avatar={employee.avatar ?? undefined} 
+              />
             </Box>
 
             <Separator />
 
-            {/* Детальная информация */}
-            <VStack align="stretch" gap="4">
+            <VStack align="stretch" gap="5">
               <InfoRow 
                 icon={<LuBriefcase size="18" />} 
                 label="Department" 
@@ -59,7 +67,7 @@ export const EmployeeDetailsDialog = ({ employee }: Props) => {
                 value={
                   <VStack align="end" gap="0">
                     <DateText dateString={employee.birthDate} />
-                    <Text fontSize="xs" color="fg.muted">
+                    <Text fontSize="xs" color="fg.muted" fontWeight="normal">
                       {calculateAge(employee.birthDate)} years old
                     </Text>
                   </VStack>
@@ -81,13 +89,20 @@ export const EmployeeDetailsDialog = ({ employee }: Props) => {
   );
 };
 
-// Вспомогательный компонент для строк инфо
-const InfoRow = ({ icon, label, value }: { icon: React.ReactNode, label: string, value: React.ReactNode }) => (
-  <HStack justify="space-between" width="full">
-    <HStack color="fg.muted" gap="2">
-      {icon}
-      <Text fontSize="sm">{label}</Text>
+interface InfoRowProps {
+  icon: React.ReactNode;
+  label: string;
+  value: React.ReactNode;
+}
+
+const InfoRow = ({ icon, label, value }: InfoRowProps) => (
+  <HStack justify="space-between" width="full" align="flex-start">
+    <HStack color="fg.muted" gap="3">
+      <Box color="blue.500">{icon}</Box>
+      <Text fontSize="sm" fontWeight="medium">{label}</Text>
     </HStack>
-    <Box fontWeight="medium">{value}</Box>
+    <Box fontWeight="semibold" textAlign="right">
+      {value}
+    </Box>
   </HStack>
 );

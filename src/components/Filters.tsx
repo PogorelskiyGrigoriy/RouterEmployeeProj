@@ -1,49 +1,41 @@
 /**
  * @module Filters
- * Client-side filtering form that updates the global filters store.
+ * Client-side filtering form integrated with Zod schema (using defaults).
+ * Manual type casting used to bridge Zod Input/Output types.
  */
 
 import { VStack, HStack, Input, Button } from "@chakra-ui/react";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Field } from "@/components/ui/field";
 import { DepartmentSelect } from "@/components/shared/DepartmentSelect";
 
 import { useFilters } from "@/store/filters-store";
-import { type EmployeeFilter } from "@/schemas/employee.schema";
+import { employeeFilterSchema, type EmployeeFilter } from "@/schemas/employee.schema";
 import { EMPLOYEES_CONFIG } from "@/config/employees-config";
 
 interface Props {
-  onClose: () => void;
+  readonly onClose: () => void;
 }
 
-const DEFAULT_FILTERS: EmployeeFilter = {
-  department: "All",
-  minSalary: EMPLOYEES_CONFIG.salary.min,
-  maxSalary: EMPLOYEES_CONFIG.salary.max,
-  minAge: EMPLOYEES_CONFIG.age.min,
-  maxAge: EMPLOYEES_CONFIG.age.max,
-};
-
 export const Filters = ({ onClose }: Props) => {
-  // Access store using selectors for performance
   const currentFilters = useFilters((state) => state.filters);
   const { setFilters, resetFilters } = useFilters();
+  const { salary: salConf } = EMPLOYEES_CONFIG;
+
+  const defaultValues = employeeFilterSchema.parse({});
 
   const { 
     register, 
     handleSubmit, 
     reset,
-    watch,
     formState: { errors, isValid } 
   } = useForm<EmployeeFilter>({
     mode: "onChange",
+    resolver: zodResolver(employeeFilterSchema) as Resolver<EmployeeFilter>,
     defaultValues: currentFilters
   });
-
-  // Dynamic watch for range validation
-  const [minSal, minAgeVal] = watch(["minSalary", "minAge"]);
-  const { salary: salConf, age: ageConf } = EMPLOYEES_CONFIG;
 
   const handleApply = (data: EmployeeFilter) => {
     setFilters(data);
@@ -52,20 +44,18 @@ export const Filters = ({ onClose }: Props) => {
 
   const handleReset = () => {
     resetFilters();
-    reset(DEFAULT_FILTERS);
+    reset(defaultValues);
   };
 
   return (
     <form onSubmit={handleSubmit(handleApply)}>
       <VStack gap="6" align="stretch" py="4">
         
-        {/* Department Selection - Используем наш кастомный селект */}
         <DepartmentSelect 
           variant="filter"
           registration={register("department")} 
         />
 
-        {/* Salary Range */}
         <Field 
           label={`Salary (${salConf.currency})`}
           invalid={!!errors.minSalary || !!errors.maxSalary}
@@ -75,24 +65,16 @@ export const Filters = ({ onClose }: Props) => {
             <Input 
               type="number"
               placeholder="Min"
-              {...register("minSalary", { 
-                valueAsNumber: true,
-                min: { value: salConf.min, message: `Min: ${salConf.min}` }
-              })} 
+              {...register("minSalary", { valueAsNumber: true })} 
             />
             <Input 
               type="number"
               placeholder="Max"
-              {...register("maxSalary", { 
-                valueAsNumber: true,
-                validate: (v) => (v ?? 0) >= (minSal ?? 0) || "Invalid range",
-                max: { value: salConf.max, message: `Max: ${salConf.max}` }
-              })} 
+              {...register("maxSalary", { valueAsNumber: true })} 
             />
           </HStack>
         </Field>
 
-        {/* Age Range */}
         <Field 
           label="Age Range"
           invalid={!!errors.minAge || !!errors.maxAge}
@@ -102,25 +84,23 @@ export const Filters = ({ onClose }: Props) => {
             <Input 
               type="number"
               placeholder="Min"
-              {...register("minAge", { 
-                valueAsNumber: true,
-                min: { value: ageConf.min, message: `Min: ${ageConf.min}` }
-              })} 
+              {...register("minAge", { valueAsNumber: true })} 
             />
             <Input 
               type="number"
               placeholder="Max"
-              {...register("maxAge", { 
-                valueAsNumber: true,
-                validate: (v) => (v ?? 0) >= (minAgeVal ?? 0) || "Invalid range",
-                max: { value: ageConf.max, message: `Max: ${ageConf.max}` }
-              })} 
+              {...register("maxAge", { valueAsNumber: true })} 
             />
           </HStack>
         </Field>
 
         <HStack gap="4" mt="4">
-          <Button variant="ghost" colorPalette="gray" onClick={handleReset} flex="1">
+          <Button 
+            variant="ghost" 
+            colorPalette="gray" 
+            onClick={handleReset} 
+            flex="1"
+          >
             Reset
           </Button>
           <Button 

@@ -1,6 +1,7 @@
 /**
  * @module DepartmentsTable
  * Presentational component for department-level statistics.
+ * Consumes validated data from DepartmentInfo schema.
  */
 
 import { Table } from "@chakra-ui/react";
@@ -8,7 +9,7 @@ import { CountBadge, CurrencyText, AgeText } from "./ui/DataDisplay";
 import type { DepartmentInfo } from "@/schemas/department.schema";
 
 interface Props {
-  departmentsInfo: DepartmentInfo[];
+  readonly departmentsInfo: readonly DepartmentInfo[];
 }
 
 export const DepartmentsTable = ({ departmentsInfo }: Props) => {
@@ -17,16 +18,18 @@ export const DepartmentsTable = ({ departmentsInfo }: Props) => {
       variant="line" 
       size="md" 
       showColumnBorder 
+      interactive
+      stickyHeader
       shadow="sm" 
       borderRadius="lg"
-      overflow="hidden" // Чтобы borderRadius работал корректно
+      overflow="hidden"
     >
       <Table.Header>
         <Table.Row bg="bg.subtle">
-          <Table.ColumnHeader py="4">Department</Table.ColumnHeader>
-          <Table.ColumnHeader textAlign="center">Employees</Table.ColumnHeader>
-          <Table.ColumnHeader textAlign="center">Avg Salary</Table.ColumnHeader>
-          <Table.ColumnHeader textAlign="center">Avg Age</Table.ColumnHeader>
+          <Table.ColumnHeader py="4" fontWeight="bold">Department</Table.ColumnHeader>
+          <Table.ColumnHeader textAlign="center" fontWeight="bold">Employees</Table.ColumnHeader>
+          <Table.ColumnHeader textAlign="center" fontWeight="bold">Avg Salary</Table.ColumnHeader>
+          <Table.ColumnHeader textAlign="center" fontWeight="bold">Avg Age</Table.ColumnHeader>
         </Table.Row>
       </Table.Header>
 
@@ -37,8 +40,7 @@ export const DepartmentsTable = ({ departmentsInfo }: Props) => {
           return (
             <Table.Row 
               key={info.department} 
-              _hover={{ bg: "bg.muted/50" }}
-              transition="background 0.2s"
+              _hover={{ bg: "bg.muted" }}
             >
               <Table.Cell fontWeight="semibold" color="fg.emphasized">
                 {info.department}
@@ -52,7 +54,7 @@ export const DepartmentsTable = ({ departmentsInfo }: Props) => {
                 {hasEmployees ? (
                   <CurrencyText value={info.avgSalary} />
                 ) : (
-                  "—"
+                  <Table.Cell color="fg.muted">—</Table.Cell>
                 )}
               </Table.Cell>
               
@@ -60,7 +62,7 @@ export const DepartmentsTable = ({ departmentsInfo }: Props) => {
                 {hasEmployees ? (
                   <AgeText value={info.avgAge} />
                 ) : (
-                  "—"
+                  <Table.Cell color="fg.muted">—</Table.Cell>
                 )}
               </Table.Cell>
             </Table.Row>
