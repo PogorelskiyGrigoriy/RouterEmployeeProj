@@ -20,7 +20,7 @@ export const ROUTES = {
 export interface NavItemConfig {
   readonly to: string;
   readonly label: string;
-  readonly roles: UserRole[]; 
+  readonly roles: readonly UserRole[]; 
 }
 
 /**
@@ -37,7 +37,7 @@ export const MAIN_NAV_LINKS: readonly NavItemConfig[] = [
     label: "Add Employee", 
     roles: ["ADMIN"] 
   },
-] as const;
+];
 
 /**
  * Secondary links grouped under the Statistics dropdown.
@@ -58,4 +58,4 @@ export const STATS_NAV_LINKS: readonly NavItemConfig[] = [
     label: "Dept Stats", 
     roles: ["USER", "ADMIN"] 
   },
-] as const;
+];
