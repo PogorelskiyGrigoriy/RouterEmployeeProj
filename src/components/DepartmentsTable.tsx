@@ -1,10 +1,4 @@
-/**
- * @module DepartmentsTable
- * Presentational component for department-level statistics.
- * Consumes validated data from DepartmentInfo schema.
- */
-
-import { Table } from "@chakra-ui/react";
+import { Table, Text } from "@chakra-ui/react"; // Добавили Text
 import { CountBadge, CurrencyText, AgeText } from "./ui/DataDisplay";
 import type { DepartmentInfo } from "@/schemas/department.schema";
 
@@ -54,7 +48,7 @@ export const DepartmentsTable = ({ departmentsInfo }: Props) => {
                 {hasEmployees ? (
                   <CurrencyText value={info.avgSalary} />
                 ) : (
-                  <Table.Cell color="fg.muted">—</Table.Cell>
+                  <Text color="fg.muted">—</Text> 
                 )}
               </Table.Cell>
               
@@ -62,7 +56,7 @@ export const DepartmentsTable = ({ departmentsInfo }: Props) => {
                 {hasEmployees ? (
                   <AgeText value={info.avgAge} />
                 ) : (
-                  <Table.Cell color="fg.muted">—</Table.Cell>
+                  <Text color="fg.muted">—</Text>
                 )}
               </Table.Cell>
             </Table.Row>
