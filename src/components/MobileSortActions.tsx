@@ -1,16 +1,15 @@
 import { HStack, MenuRoot, MenuTrigger, MenuContent, MenuItem, Button, Text } from "@chakra-ui/react";
 import { LuArrowDownAZ, LuArrowDownWideNarrow, LuCalendarDays, LuArrowUp, LuArrowDown, LuArrowUpDown } from "react-icons/lu";
 import { useSortStore } from "@/store/sort-store";
-import type { Employee } from "@/schemas/employee.schema";
 
 export const MobileSortActions = () => {
   const { sort, toggleSort } = useSortStore();
 
-  const sortOptions: { key: keyof Employee; label: string; icon: any }[] = [
+  const sortOptions = [
     { key: "fullName", label: "Name", icon: <LuArrowDownAZ /> },
     { key: "salary", label: "Salary", icon: <LuArrowDownWideNarrow /> },
     { key: "birthDate", label: "Age", icon: <LuCalendarDays /> },
-  ];
+  ] as const;
 
   const currentOption = sortOptions.find(opt => opt.key === sort.key);
 
@@ -25,7 +24,6 @@ export const MobileSortActions = () => {
               <>
                 {currentOption.icon}
                 {currentOption.label}
-                {/* Безопасная проверка order */}
                 {sort.order === "asc" && <LuArrowUp size="14" />}
                 {sort.order === "desc" && <LuArrowDown size="14" />}
               </>
@@ -52,7 +50,6 @@ export const MobileSortActions = () => {
                   {option.icon}
                   <Text>{option.label}</Text>
                 </HStack>
-                {/* Безопасный вывод текста ордера */}
                 {sort.key === option.key && sort.order && (
                   <Text fontSize="2xs" fontWeight="black" color="blue.500" textTransform="uppercase">
                     {sort.order}
