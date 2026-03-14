@@ -1,20 +1,25 @@
 /**
  * @module EmployeeForm
  * Universal form for creating and updating employee records.
+ * Optimized with dynamic Zod schema selection to handle New/Existing states.
  */
 
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Stack, Input, Button, HStack } from "@chakra-ui/react";
 
 import { Field } from "@/components/ui/field";
 import { DepartmentSelect } from "@/components/shared/DepartmentSelect";
 
-import type { Employee, NewEmployee } from "@/schemas/employee.schema";
+import { 
+  employeeSchema,
+  newEmployeeSchema,
+  type Employee, 
+  type NewEmployee 
+} from "@/schemas/employee.schema";
 import type { Department } from "@/schemas/department.schema";
-
 import { EMPLOYEES_CONFIG } from "@/config/employees-config";
-import { calculateAge, getLimitDate } from "@/utils/dateUtils";
 
 interface Props {
   onSubmit: (data: NewEmployee) => void;
@@ -30,15 +35,15 @@ const DEFAULT_VALUES: NewEmployee = {
   birthDate: "",
 };
 
-const NAME_PATTERN = {
-  value: /^[a-zA-Zа-яА-ЯёЁ\s-]+$/,
-  message: "Only letters and hyphens allowed"
-};
-
 export const EmployeeForm = ({ onSubmit, isLoading, employee, onCancel }: Props) => {
   const isEditMode = !!employee;
   const { salary, age } = EMPLOYEES_CONFIG;
+  const schema = isEditMode ? employeeSchema : newEmployeeSchema;
 
+  /**
+   * Конфигурация формы.
+   * Динамический резолвер переключается между схемами в зависимости от пропса employee.
+   */
   const { 
     register, 
     handleSubmit, 
@@ -46,10 +51,12 @@ export const EmployeeForm = ({ onSubmit, isLoading, employee, onCancel }: Props)
     formState: { errors, isValid, isDirty } 
   } = useForm<NewEmployee>({
     mode: "onChange",
-    defaultValues: employee || DEFAULT_VALUES
+    // Использование правильной схемы предотвращает блокировку при отсутствии 'id'
+    resolver: zodResolver(schema) as any, 
+    defaultValues: (employee || DEFAULT_VALUES) as NewEmployee
   });
 
-  // Sync state when switching between different employees (e.g. in a Drawer)
+  // Синхронизация данных при смене сотрудника (например, в Drawer)
   useEffect(() => {
     reset(employee || DEFAULT_VALUES);
   }, [employee, reset]);
@@ -62,6 +69,11 @@ export const EmployeeForm = ({ onSubmit, isLoading, employee, onCancel }: Props)
     }
   };
 
+  /**
+   * Кнопка заблокирована если:
+   * 1. Форма невалидна (isValid)
+   * 2. В режиме редактирования ничего не изменено (!isDirty)
+   */
   const isSubmitDisabled = !isValid || (isEditMode && !isDirty);
 
   return (
@@ -75,19 +87,15 @@ export const EmployeeForm = ({ onSubmit, isLoading, employee, onCancel }: Props)
           errorText={errors.fullName?.message}
         >
           <Input 
-            {...register("fullName", { 
-              required: "Name is required",
-              minLength: { value: 3, message: "Min 3 chars" },
-              pattern: NAME_PATTERN
-            })} 
+            {...register("fullName")} 
             placeholder="e.g. Jane Smith"
           />
         </Field>
 
-        {/* Department - custom comnonent*/}
+        {/* Department */}
         <DepartmentSelect 
           variant="form"
-          registration={register("department", { required: "Select department" })}
+          registration={register("department")}
           errorText={errors.department?.message}
         />
 
@@ -99,12 +107,7 @@ export const EmployeeForm = ({ onSubmit, isLoading, employee, onCancel }: Props)
         >
           <Input 
             type="number" 
-            {...register("salary", { 
-              valueAsNumber: true,
-              required: "Salary is required",
-              min: { value: salary.min, message: `Min: ${salary.min}` },
-              max: { value: salary.max, message: `Max: ${salary.max}` }
-            })} 
+            {...register("salary", { valueAsNumber: true })} 
           />
         </Field>
 
@@ -119,16 +122,7 @@ export const EmployeeForm = ({ onSubmit, isLoading, employee, onCancel }: Props)
             type="date" 
             disabled={isEditMode}
             opacity={isEditMode ? 0.6 : 1}
-            min={getLimitDate(age.max)} 
-            max={getLimitDate(age.min)}
-            {...register("birthDate", { 
-              required: "Required",
-              validate: (val) => {
-                const currentAge = calculateAge(val);
-                return (currentAge >= age.min && currentAge <= age.max) || 
-                       `Age must be ${age.min}-${age.max}`;
-              }
-            })} 
+            {...register("birthDate")} 
           />
         </Field>
 

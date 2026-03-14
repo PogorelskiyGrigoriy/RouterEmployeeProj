@@ -1,6 +1,7 @@
 /**
  * @module EditEmployeeAction
  * Drawer-based action to modify employee information.
+ * Uses Zod types for consistent update payloads.
  */
 
 import { useState } from "react";
@@ -31,14 +32,11 @@ export const EditEmployeeAction = ({ employee }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
   const { mutate, isPending } = useUpdateEmployee();
 
-  /**
-   * Updates employee data and closes the drawer on success
-   */
   const handleUpdate = (formData: NewEmployee) => {
     mutate(
       { 
         id: employee.id, 
-        changes: formData
+        changes: formData // formData соответствует NewEmployee, что валидно для изменений
       }, 
       {
         onSuccess: () => {
@@ -49,6 +47,13 @@ export const EditEmployeeAction = ({ employee }: Props) => {
           });
           setIsOpen(false);
         },
+        onError: (error) => {
+          toaster.create({
+            title: "Update Failed",
+            description: error.message || "Could not save changes",
+            type: "error",
+          });
+        }
       }
     );
   };

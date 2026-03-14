@@ -14,7 +14,6 @@ const AddEmployeePage = () => {
   const navigate = useNavigate();
   const { mutate, isPending } = useAddEmployee();
 
-  // 1. Объявляем функцию здесь
   const handleClose = () => navigate(ROUTES.HOME);
 
   const handleAdd = (data: NewEmployee) => {
@@ -25,14 +24,13 @@ const AddEmployeePage = () => {
           description: `${newEmployee.fullName} has been successfully registered.`,
           type: "success",
         });
-
-        // 2. Используем функцию для редиректа
         handleClose();
       },
       onError: (error) => {
         toaster.create({
           title: "Registration Failed",
-          description: error instanceof Error ? error.message : "Something went wrong",
+          // Сообщение теперь может прийти от ZodError (через хук мутации)
+          description: error.message || "Please check the form data",
           type: "error",
         });
       }
@@ -40,7 +38,6 @@ const AddEmployeePage = () => {
   };
 
   return (
-    // 3. Добавляем position="relative", чтобы крестик позиционировался относительно контейнера
     <Container maxW="lg" py={{ base: "6", md: "12" }} position="relative">
       <CloseButton 
         position="absolute" 
@@ -54,9 +51,7 @@ const AddEmployeePage = () => {
 
       <Stack gap="8">
         <Box textAlign="center">
-          <Heading size="3xl" letterSpacing="tight">
-            New Hire
-          </Heading>
+          <Heading size="3xl" letterSpacing="tight">New Hire</Heading>
           <Box color="fg.muted" fontSize="sm" mt="2">
             Fill in the details to add a new member to the team.
           </Box>
@@ -73,7 +68,7 @@ const AddEmployeePage = () => {
           <EmployeeForm 
             onSubmit={handleAdd} 
             isLoading={isPending} 
-            onCancel={handleClose} // Используем ту же функцию
+            onCancel={handleClose} 
           />
         </Box>
       </Stack>

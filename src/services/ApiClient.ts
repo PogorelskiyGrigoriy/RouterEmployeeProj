@@ -9,7 +9,7 @@ import type {
   NewEmployee, 
   EmployeeUpdatePayload 
 } from "@/schemas/employee.schema";
-import type { EmployeeFilters } from "@/schemas/filter.schema";
+import type { EmployeeFilter } from "@/schemas/employee.schema";
 import type { SortState } from "@/store/sort-store";
 
 /**
@@ -22,7 +22,7 @@ export interface ApiClient {
    * Corrupted records should be filtered out.
    */
   getEmployees(
-    filters?: EmployeeFilters, 
+    filters?: EmployeeFilter, 
     sort?: SortState, 
     config?: AxiosRequestConfig
   ): Promise<Employee[]>;
