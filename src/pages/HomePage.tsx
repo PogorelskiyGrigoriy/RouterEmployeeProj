@@ -34,6 +34,7 @@ import { ActiveFilters } from "@/components/ActiveFilters";
 import { useEmployees } from "@/services/hooks/useEmployees";
 
 export const HomePage = () => {
+  
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   
   const { filteredCount, totalCount } = useEmployees();

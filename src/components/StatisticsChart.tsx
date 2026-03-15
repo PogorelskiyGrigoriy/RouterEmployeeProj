@@ -79,7 +79,6 @@ export const StatisticsChart = ({
         height={{ base: "280px", md: "400px" }}
         shadow="xs"
         position="relative"
-        minW="0"
       >
         <ResponsiveContainer>
           <BarChart data={data} margin={CHART_MARGIN}>

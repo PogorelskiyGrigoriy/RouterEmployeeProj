@@ -25,45 +25,43 @@ import ErrorPage from "@/pages/ErrorPage"
  */
 export const appRouter = createBrowserRouter([
   {
-    // Public Route
-    path: ROUTES.LOGIN,
-    element: <LoginPage />,
-  },
-  {
-    // Protected Sector (All children require authentication)
     path: "/",
-    element: (
-      <ProtectedRoute>
-        <LayoutPage />
-      </ProtectedRoute>
-    ),
-
     errorElement: <ErrorPage />,
-
     children: [
-      { 
-        index: true, 
-        element: <HomePage /> 
-      },
-      { 
-        path: ROUTES.ADD_EMPLOYEE, 
+      { path: ROUTES.LOGIN, element: <LoginPage /> },
+      {
+        path: "/",
         element: (
-          <ProtectedRoute allowedRoles={["ADMIN"]}>
-            <AddEmployeePage />
+          <ProtectedRoute>
+            <LayoutPage />
           </ProtectedRoute>
-        ) 
-      },
-      { 
-        path: ROUTES.STATS_AGE, 
-        element: <AgeStatisticsPage /> 
-      },
-      { 
-        path: ROUTES.STATS_SALARY, 
-        element: <SalaryStatisticsPage /> 
-      },
-      { 
-        path: ROUTES.STATS_DEPT, 
-        element: <DepartmentStatisticPage /> 
+        ),
+        children: [
+          { 
+            index: true, 
+            element: <HomePage /> 
+          },
+          { 
+            path: ROUTES.ADD_EMPLOYEE, 
+            element: (
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                <AddEmployeePage />
+              </ProtectedRoute>
+            ) 
+          },
+          { 
+            path: ROUTES.STATS_AGE, 
+            element: <AgeStatisticsPage /> 
+          },
+          { 
+            path: ROUTES.STATS_SALARY, 
+            element: <SalaryStatisticsPage /> 
+          },
+          { 
+            path: ROUTES.STATS_DEPT, 
+            element: <DepartmentStatisticPage /> 
+          },
+        ],
       },
     ],
   },
