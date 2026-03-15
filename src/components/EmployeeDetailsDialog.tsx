@@ -1,7 +1,7 @@
 /**
  * @module EmployeeDetailsDialog
- * Detailed view of employee data. 
- * Synchronized with Zod-validated schema and central date utilities.
+ * Detailed read-only view of employee profiles.
+ * Features automated age calculation and consistent data formatting.
  */
 
 import {
@@ -23,6 +23,9 @@ interface Props {
   readonly employee: Employee;
 }
 
+/**
+ * Modal dialog that presents full employee details.
+ */
 export const EmployeeDetailsDialog = ({ employee }: Props) => {
   return (
     <DialogRoot motionPreset="slide-in-bottom" size="sm">
@@ -32,6 +35,7 @@ export const EmployeeDetailsDialog = ({ employee }: Props) => {
           variant="ghost"
           size="sm"
           color="fg.muted"
+          // Prevents card click events from firing when the icon is clicked
           onClick={(e) => e.stopPropagation()} 
         >
           <LuChevronRight size="24" />
@@ -45,6 +49,7 @@ export const EmployeeDetailsDialog = ({ employee }: Props) => {
 
         <DialogBody>
           <VStack align="stretch" gap="6">
+            {/* Header section with identity molecule */}
             <Box py="2">
               <EmployeeIdentity 
                 name={employee.fullName} 
@@ -54,6 +59,7 @@ export const EmployeeDetailsDialog = ({ employee }: Props) => {
 
             <Separator />
 
+            {/* Structured data rows */}
             <VStack align="stretch" gap="5">
               <InfoRow 
                 icon={<LuBriefcase size="18" />} 
@@ -95,6 +101,9 @@ interface InfoRowProps {
   value: React.ReactNode;
 }
 
+/**
+ * Internal helper for consistent key-value layout within the dialog.
+ */
 const InfoRow = ({ icon, label, value }: InfoRowProps) => (
   <HStack justify="space-between" width="full" align="flex-start">
     <HStack color="fg.muted" gap="3">

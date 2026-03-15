@@ -1,8 +1,7 @@
 /**
  * @module Employees
  * Main container for the employee list. 
- * Switches between Mobile Card view and Desktop Table view.
- * Fixed: Removed nested <th> inside <th> for birthDate column.
+ * Orchestrates the switch between Mobile Card view and Desktop Table view.
  */
 
 import { Box, Center, Spinner, Table, Text, VStack } from "@chakra-ui/react";
@@ -16,18 +15,22 @@ import { SortableColumn } from "./ui/SortableColumn";
 import { useEmployees } from "@/services/hooks/useEmployees";
 import { useUserRole } from "@/store/useAuthStore";
 
+/**
+ * Root component for the employee listing feature.
+ * Manages fetching states and responsive layout transitions.
+ */
 export const Employees = () => {
   const { employees, isLoading, error, filteredCount, totalCount } = useEmployees();
   
   const userRole = useUserRole();
   const isAdmin = userRole === "ADMIN";
 
-  // --- Loading State ---
+  // --- Loading State: Centered spinner for initial data fetch ---
   if (isLoading) return (
     <Center h="200px"><Spinner size="xl" color="blue.500" /></Center>
   );
 
-  // --- Error State ---
+  // --- Error State: User-friendly error message with technical details ---
   if (error) return (
     <Center h="200px">
       <VStack gap="2">
@@ -39,7 +42,7 @@ export const Employees = () => {
     </Center>
   );
 
-  // --- Empty State ---
+  // --- Empty State: Visual feedback when filters return no results ---
   if (filteredCount === 0) return (
     <Center 
       h="300px" 
@@ -60,7 +63,7 @@ export const Employees = () => {
 
   return (
     <Box>
-      {/* MOBILE VIEW (Stack of Cards) */}
+      {/* MOBILE VIEW: Rendered as a stack of touch-friendly cards */}
       <Box display={{ base: "block", md: "none" }} mb="4">
         <MobileSortActions />
         <VStack gap="3" align="stretch">
@@ -70,7 +73,7 @@ export const Employees = () => {
         </VStack>
       </Box>
 
-      {/* DESKTOP VIEW (Structured Table) */}
+      {/* DESKTOP VIEW: Structured data table for high density */}
       <Box 
         display={{ base: "none", md: "block" }}
         borderWidth="1px" 
@@ -82,8 +85,8 @@ export const Employees = () => {
         <Table.Root size="md" variant="line" stickyHeader>
           <Table.Header>
             <Table.Row bg="bg.subtle">
-              {/* ВАЖНО: SortableColumn теперь сам является компонентом Table.ColumnHeader.
-                  Мы передаем пропсы (width, display, textAlign) напрямую в него.
+              {/* NOTE: SortableColumn acts as a Table.ColumnHeader internally.
+                Layout props (width, display, textAlign) are passed directly.
               */}
               <SortableColumn field="fullName" width="full">
                 Employee
@@ -93,8 +96,8 @@ export const Employees = () => {
                 Department
               </Table.ColumnHeader>
               
-              {/* ИСПРАВЛЕНО: Убрана внешняя обертка Table.ColumnHeader. 
-                  display передается напрямую, чтобы избежать ошибки "th inside th".
+              {/* FIXED: Direct 'display' prop prevents the "<th> inside <th>" error.
+                This column remains hidden on medium screens for better readability.
               */}
               <SortableColumn 
                 field="birthDate" 
@@ -127,7 +130,7 @@ export const Employees = () => {
         </Table.Root>
       </Box>
 
-      {/* Footer Stats */}
+      {/* FOOTER STATS: Quick glance at the current filtering scope */}
       <Box p="3" mt="2">
         <Text fontSize="xs" color="fg.muted" textAlign="right" fontStyle="italic">
           Showing {filteredCount} of {totalCount} total employees

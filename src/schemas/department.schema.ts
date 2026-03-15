@@ -1,3 +1,9 @@
+/**
+ * @module DepartmentSchema
+ * Logic and validation for Department entities.
+ * Includes schemas for forms, filters, and analytical data.
+ */
+
 import { z } from "zod";
 
 /**

@@ -1,6 +1,7 @@
 /**
  * @module StatisticsSelector
  * Role-based dropdown for switching between different statistics dashboards.
+ * Provides visual feedback for the currently active analytics view.
  */
 
 "use client";
@@ -21,6 +22,10 @@ import { STATS_NAV_LINKS } from "@/config/navigation";
 import { useIsAuthenticated, useUserRole } from "@/store/useAuthStore";
 import type { UserRole } from "@/schemas/auth.schema";
 
+/**
+ * Dropdown selector for statistical views.
+ * Automatically filters options based on the user's role and highlights the active route.
+ */
 export const StatisticsSelector = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -29,7 +34,8 @@ export const StatisticsSelector = () => {
   const userRole = useUserRole() as UserRole | null;
 
   /**
-   * Permission-based Filtering
+   * RBAC filtering for statistics links.
+   * Ensures users only see dashboards they are authorized to view.
    */
   const allowedStats = useMemo(() => {
     if (!isAuthenticated || !userRole) return [];
@@ -40,12 +46,15 @@ export const StatisticsSelector = () => {
   }, [isAuthenticated, userRole]);
 
   /**
-   * Active View Tracking.
+   * Active State Tracking:
+   * Compares the current URL path with defined statistic routes to determine
+   * if the selector should be in its "active" (highlighted) state.
    */
   const activeStat = useMemo(() => {
     return allowedStats.find(link => link.to === location.pathname);
   }, [allowedStats, location.pathname]);
 
+  // If the user has no permissions for any stats, don't render the selector at all.
   if (allowedStats.length === 0) return null;
 
   return (
@@ -71,6 +80,7 @@ export const StatisticsSelector = () => {
             ms="2" 
             transition="transform 0.2s"
             color={activeStat ? "blue.500" : "fg.muted"} 
+            // Simple visual cue: icon color deepens when active
             transform={activeStat ? "rotate(0deg)" : "none"} 
           />
         </Button>

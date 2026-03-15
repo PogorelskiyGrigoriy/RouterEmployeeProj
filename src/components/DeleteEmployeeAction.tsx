@@ -1,6 +1,7 @@
 /**
  * @module DeleteEmployeeAction
- * A confirmation dialog for deleting an employee.
+ * A confirmation dialog for deleting an employee record.
+ * Integrates with TanStack Query mutations for state-aware UI updates.
  */
 
 import { useState } from "react";
@@ -25,12 +26,19 @@ interface Props {
   name: string;
 }
 
+/**
+ * Action component that renders a delete button and handles the confirmation flow.
+ */
 export const DeleteEmployeeAction = ({ id, name }: Props) => {
+  // Local state to manage dialog visibility
   const [open, setOpen] = useState(false);
   
-  // 1. Используем onSuccess для закрытия диалога
+  // Mutation hook providing current status and trigger function
   const { mutate: deleteEmp, isPending } = useDeleteEmployee();
 
+  /**
+   * Triggers the deletion and closes the dialog upon successful API response.
+   */
   const handleDelete = () => {
     deleteEmp(id, {
       onSuccess: () => setOpen(false),
@@ -50,7 +58,7 @@ export const DeleteEmployeeAction = ({ id, name }: Props) => {
           colorPalette="red" 
           size="sm" 
           disabled={isPending}
-          aria-label="Delete employee"
+          aria-label={`Delete ${name}`}
         >
           <LuTrash2 />
         </IconButton>

@@ -1,20 +1,27 @@
+/**
+ * @module ActiveFilters
+ * Orchestrates the display of active filter tags.
+ * Synchronizes with Zod schema defaults to identify modified search criteria.
+ */
+
 import { HStack, Text, Button } from "@chakra-ui/react";
 import { Tag } from "./ui/tag";
 import { useFilters } from "@/store/filters-store";
 import { employeeFilterSchema } from "@/schemas/employee.schema";
 
 /**
- * @module ActiveFilters
- * Displays tags for currently active filters.
- * Uses default values from Zod schema to determine "active" state.
+ * Component that renders removable tags for each active filter.
  */
-
 export const ActiveFilters = () => {
   const { filters, setFilters, resetFilters } = useFilters();
   
-  // Get defaults directly from our schema to stay in sync
+  // Dynamic default values from schema to ensure consistency
   const defaults = employeeFilterSchema.parse({});
 
+  /**
+   * Definition of filter chips.
+   * Logic for 'isActive' depends on comparing current state with schema defaults.
+   */
   const activeChips = [
     {
       id: "dept",
@@ -28,7 +35,6 @@ export const ActiveFilters = () => {
       id: "salary",
       isActive: filters.minSalary !== defaults.minSalary || filters.maxSalary !== defaults.maxSalary,
       label: "Salary",
-      // Optional: format as currency or abbreviated (e.g., 10k - 20k)
       value: `${filters.minSalary.toLocaleString()} - ${filters.maxSalary.toLocaleString()}`,
       color: "green",
       onClear: () => setFilters({ minSalary: defaults.minSalary, maxSalary: defaults.maxSalary }),
@@ -43,6 +49,7 @@ export const ActiveFilters = () => {
     },
   ].filter(c => c.isActive);
 
+  // Render nothing if no filters deviate from defaults
   if (activeChips.length === 0) return null;
 
   return (
@@ -67,6 +74,7 @@ export const ActiveFilters = () => {
         </Tag>
       ))}
 
+      {/* Global reset button */}
       <Button variant="plain" size="xs" color="blue.500" onClick={resetFilters}>
         Clear all
       </Button>

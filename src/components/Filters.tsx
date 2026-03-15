@@ -1,7 +1,7 @@
 /**
  * @module Filters
- * Client-side filtering form integrated with Zod schema (using defaults).
- * Manual type casting used to bridge Zod Input/Output types.
+ * A specialized form for filtering employee data.
+ * Bridges global Zustand state with local validation using Zod and React Hook Form.
  */
 
 import { VStack, HStack, Input, Button } from "@chakra-ui/react";
@@ -16,14 +16,20 @@ import { employeeFilterSchema, type EmployeeFilter } from "@/schemas/employee.sc
 import { EMPLOYEES_CONFIG } from "@/config/employees-config";
 
 interface Props {
+  /** Callback to close the filter overlay or modal upon application */
   readonly onClose: () => void;
 }
 
+/**
+ * Filter form component providing inputs for department, salary range, and age.
+ */
 export const Filters = ({ onClose }: Props) => {
+  // Syncing with global filter store
   const currentFilters = useFilters((state) => state.filters);
   const { setFilters, resetFilters } = useFilters();
   const { salary: salConf } = EMPLOYEES_CONFIG;
 
+  // Derive initial/empty values directly from schema definitions
   const defaultValues = employeeFilterSchema.parse({});
 
   const { 
@@ -37,11 +43,17 @@ export const Filters = ({ onClose }: Props) => {
     defaultValues: currentFilters
   });
 
+  /**
+   * Updates the global store and triggers the close callback.
+   */
   const handleApply = (data: EmployeeFilter) => {
     setFilters(data);
     onClose();
   };
 
+  /**
+   * Clears both global store and local form state.
+   */
   const handleReset = () => {
     resetFilters();
     reset(defaultValues);
@@ -51,11 +63,13 @@ export const Filters = ({ onClose }: Props) => {
     <form onSubmit={handleSubmit(handleApply)}>
       <VStack gap="6" align="stretch" py="4">
         
+        {/* Department filter using specialized 'filter' variant (includes "All") */}
         <DepartmentSelect 
           variant="filter"
           registration={register("department")} 
         />
 
+        {/* Salary Range Inputs */}
         <Field 
           label={`Salary (${salConf.currency})`}
           invalid={!!errors.minSalary || !!errors.maxSalary}
@@ -75,6 +89,7 @@ export const Filters = ({ onClose }: Props) => {
           </HStack>
         </Field>
 
+        {/* Age Range Inputs */}
         <Field 
           label="Age Range"
           invalid={!!errors.minAge || !!errors.maxAge}
@@ -94,6 +109,7 @@ export const Filters = ({ onClose }: Props) => {
           </HStack>
         </Field>
 
+        {/* Action Buttons */}
         <HStack gap="4" mt="4">
           <Button 
             variant="ghost" 

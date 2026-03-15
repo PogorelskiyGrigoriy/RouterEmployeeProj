@@ -1,6 +1,7 @@
 /**
  * @module LoginForm
  * Accessible authentication form with real-time validation.
+ * Uses React Hook Form for state management and TanStack Query for the login mutation.
  */
 
 "use client"
@@ -13,6 +14,9 @@ import { Field } from "@/components/ui/field";
 import { useLogin } from "@/services/hooks/authHooks/useLogin";
 import type { LoginData } from "@/schemas/auth.schema";
 
+/**
+ * Handles user login with validation and server-side error feedback.
+ */
 export const LoginForm = () => {
   const { mutate, isPending, isError, error, reset: resetMutation } = useLogin();
   
@@ -22,11 +26,15 @@ export const LoginForm = () => {
     watch,
     formState: { errors, isValid, isDirty } 
   } = useForm<LoginData>({
-    mode: "onBlur",
+    mode: "onBlur", // Validates when user leaves the field for a less intrusive UX
     defaultValues: { email: "", password: "" }
   });
 
-  // Clear mutation error when user starts typing again
+  /**
+   * UX Optimization:
+   * Clears the previous "Invalid credentials" error message as soon as the user
+   * starts typing a new email or password, providing immediate feedback.
+   */
   const [email, password] = watch(["email", "password"]);
   useEffect(() => {
     if (isError) resetMutation();
@@ -37,14 +45,23 @@ export const LoginForm = () => {
   };
 
   return (
-    <Box maxW="380px" w="full" mx="auto" p="6" borderRadius="xl" shadow="sm" border="1px solid" borderColor="border.subtle">
+    <Box 
+      maxW="380px" 
+      w="full" 
+      mx="auto" 
+      p="6" 
+      borderRadius="xl" 
+      shadow="sm" 
+      border="1px solid" 
+      borderColor="border.subtle"
+    >
       <form onSubmit={handleSubmit(handleLogin)}>
         <Stack gap="5">
           <Heading size="lg" textAlign="center" letterSpacing="tight">
             Sign In
           </Heading>
 
-          {/* Authentication Error Alert */}
+          {/* Authentication Error Alert: Shows if the API returns an error */}
           {isError && (
             <Alert.Root status="error" variant="subtle" borderRadius="md">
               <Alert.Indicator />
@@ -57,7 +74,7 @@ export const LoginForm = () => {
           )}
 
           <Stack gap="4">
-            {/* Email */}
+            {/* Email Field with validation */}
             <Field 
               label="Email" 
               invalid={!!errors.email} 
@@ -78,7 +95,7 @@ export const LoginForm = () => {
               />
             </Field>
 
-            {/* Password */}
+            {/* Password Field with length requirement */}
             <Field 
               label="Password" 
               invalid={!!errors.password} 
@@ -101,6 +118,7 @@ export const LoginForm = () => {
             type="submit" 
             colorPalette="blue" 
             loading={isPending} 
+            // Ensures button is clickable only when form is valid and touched
             disabled={!isValid || !isDirty}
             width="full"
             mt="2"

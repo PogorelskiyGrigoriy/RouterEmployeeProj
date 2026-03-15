@@ -1,6 +1,7 @@
 /**
  * @module useLogout
- * Custom mutation hook to handle secure user sign-out and data cleanup.
+ * A custom mutation hook for handling secure user sign-out and session cleanup.
+ * Integrates TanStack Query, Zustand state, and UI notifications.
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -12,6 +13,7 @@ import { toaster } from "@/components/ui/toaster-config";
 
 /**
  * Handles the logout lifecycle: API call, state reset, cache invalidation, and redirection.
+ * @returns A TanStack Query mutation object for the logout operation.
  */
 export const useLogout = () => {
   const setLogout = useAuthStore((state) => state.setLogout);
@@ -20,31 +22,33 @@ export const useLogout = () => {
 
   return useMutation({
     /**
-     * Triggers the logout process in the auth service.
+     * Triggers the logout process in the concrete auth service implementation.
      */
     mutationFn: () => authService.logout(),
     
     /**
-     * Executes cleanup logic regardless of the mutation result (success or error).
-     * This ensures the user is never stuck in an authenticated state locally.
+     * Executes cleanup logic regardless of the mutation outcome (success or error).
+     * This "Total Cleanup" approach ensures no sensitive data remains in the browser.
      */
     onSettled: () => {
-      // 1. Clear global authentication state (Zustand + LocalStorage)
+      // 1. Reset global authentication state in Zustand (and synced LocalStorage)
       setLogout();
       
-      /** * 2. Wipe TanStack Query Cache. 
-       * Prevents sensitive data from previous sessions from leaking to the next user.
+      /** * 2. Clear the entire TanStack Query Cache. 
+       * Critical for security: ensures data from the previous user's session 
+       * is not accessible to the next person using the same browser.
        */
       queryClient.clear();
       
-      // 3. User feedback and secure redirection
+      // 3. Provide user feedback and handle secure redirection
       toaster.create({
         title: "Signed out",
-        description: "You have been successfully logged out",
+        description: "You have been successfully logged out.",
         type: "info",
       });
       
-      // Redirect to login page and clear history stack to prevent 'back' button access
+      // Navigate to the login screen and replace current history entry 
+      // to prevent the user from navigating back to protected pages.
       navigate(ROUTES.LOGIN, { replace: true });
     }
   });

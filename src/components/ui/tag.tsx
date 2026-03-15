@@ -1,4 +1,4 @@
-import { Tag as ChakraTag } from "@chakra-ui/react" // Импортируем как ChakraTag
+import { Tag as ChakraTag } from "@chakra-ui/react"
 import * as React from "react"
 
 export interface TagProps extends ChakraTag.RootProps {
@@ -30,7 +30,6 @@ export const Tag = React.forwardRef<HTMLDivElement, TagProps>(
         {endElement && <ChakraTag.EndElement>{endElement}</ChakraTag.EndElement>}
         {closable && (
           <ChakraTag.EndElement>
-            {/* Используем встроенный триггер закрытия */}
             <ChakraTag.CloseTrigger onClick={onClose} />
           </ChakraTag.EndElement>
         )}

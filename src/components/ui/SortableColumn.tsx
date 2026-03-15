@@ -1,10 +1,16 @@
+/**
+ * @module SortableColumn
+ * A specialized table header component that integrates with the global sort store.
+ * Supports cyclic sorting states and consistent visual feedback.
+ */
+
 import { Box, HStack, Text, Table, type TableColumnHeaderProps } from "@chakra-ui/react";
 import { LuArrowUp, LuArrowDown, LuArrowUpDown } from "react-icons/lu";
 import { useSortStore } from "@/store/sort-store";
 import type { Employee } from "@/schemas/employee.schema";
 
-// Наследуем свойства Table.ColumnHeader, чтобы принимать display, width и т.д.
 interface SortableColumnProps extends TableColumnHeaderProps {
+  /** The employee property associated with this column */
   field: keyof Employee;
   children: React.ReactNode;
 }
@@ -13,7 +19,7 @@ export const SortableColumn = ({
   field, 
   children, 
   textAlign = "start", 
-  ...rest // Собираем все остальные пропсы (display, width, и т.д.)
+  ...rest // Collects Chakra layout props (display, width, etc.)
 }: SortableColumnProps) => {
   const currentSortKey = useSortStore((state) => state.sort.key);
   const currentOrder = useSortStore((state) => state.sort.order);
@@ -31,7 +37,7 @@ export const SortableColumn = ({
       whiteSpace="nowrap"
       transition="background 0.2s"
       userSelect="none"
-      {...rest} // ПРИМЕНЯЕМ пропсы здесь
+      {...rest} // Applies passed layout props directly to the header cell
     >
       <HStack 
         gap="2" 
@@ -41,6 +47,7 @@ export const SortableColumn = ({
           {children}
         </Text>
         
+        {/* Dynamic Sort Icon Indicator */}
         <Box 
           color={isSorted ? "blue.500" : "fg.subtle"} 
           flexShrink={0}

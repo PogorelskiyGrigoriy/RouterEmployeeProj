@@ -1,7 +1,7 @@
 /**
  * @module EmployeeRow
- * Displays a single employee record in a table format.
- * Optimized for Chakra UI 3.0 and strict Zod types.
+ * Displays a single employee record as a table row.
+ * Optimized for high-density desktop views with responsive column visibility.
  */
 
 import { Table, HStack, VStack, Text } from "@chakra-ui/react";
@@ -24,7 +24,7 @@ export const EmployeeRow = ({ employee: empl, isAdmin }: EmployeeRowProps) => {
       _hover={{ bg: "bg.muted/50" }} 
       transition="background-color 0.2s"
     >
-      {/* 1. Employee Identity (Name + Avatar) */}
+      {/* 1. Identity: Primary information (Name + Avatar) */}
       <Table.Cell width="full">
         <EmployeeIdentity 
           name={empl.fullName} 
@@ -32,12 +32,12 @@ export const EmployeeRow = ({ employee: empl, isAdmin }: EmployeeRowProps) => {
         />
       </Table.Cell>
       
-      {/* 2. Department Badge */}
+      {/* 2. Organizational unit */}
       <Table.Cell whiteSpace="nowrap">
         <DeptBadge>{empl.department}</DeptBadge>
       </Table.Cell>
       
-      {/* 3. Birth Date & Calculated Age (Hidden on mobile) */}
+      {/* 3. Temporal Data: Hidden on smaller screens to prevent horizontal overflow */}
       <Table.Cell display={{ base: "none", lg: "table-cell" }} whiteSpace="nowrap">
         <VStack align="start" gap="0">
           <DateText dateString={empl.birthDate} />
@@ -47,12 +47,12 @@ export const EmployeeRow = ({ employee: empl, isAdmin }: EmployeeRowProps) => {
         </VStack>
       </Table.Cell>
       
-      {/* 4. Salary Display */}
+      {/* 4. Financial Data: Right-aligned for easier numeric comparison */}
       <Table.Cell textAlign="end" whiteSpace="nowrap">
         <CurrencyText value={empl.salary} />
       </Table.Cell>
       
-      {/* 5. Admin-only Actions (Edit / Delete) */}
+      {/* 5. Management Actions: Conditionally rendered based on role */}
       {isAdmin && (
         <Table.Cell textAlign="end" whiteSpace="nowrap">
           <HStack gap="1" justifyContent="flex-end">

@@ -1,11 +1,21 @@
-import { Table, Text } from "@chakra-ui/react"; // Добавили Text
+/**
+ * @module DepartmentsTable
+ * A data table that displays aggregated statistics per department.
+ * Uses shared UI components for consistent numeric and currency formatting.
+ */
+
+import { Table, Text } from "@chakra-ui/react";
 import { CountBadge, CurrencyText, AgeText } from "./ui/DataDisplay";
 import type { DepartmentInfo } from "@/schemas/department.schema";
 
 interface Props {
+  /** Aggregated department metrics from the analytics hook */
   readonly departmentsInfo: readonly DepartmentInfo[];
 }
 
+/**
+ * Presentational component for department-level analytics.
+ */
 export const DepartmentsTable = ({ departmentsInfo }: Props) => {
   return (
     <Table.Root 
@@ -29,6 +39,7 @@ export const DepartmentsTable = ({ departmentsInfo }: Props) => {
 
       <Table.Body>
         {departmentsInfo.map((info) => {
+          // Guard check to handle empty departments gracefully
           const hasEmployees = info.numEmployees > 0;
           
           return (
@@ -44,6 +55,7 @@ export const DepartmentsTable = ({ departmentsInfo }: Props) => {
                 <CountBadge value={info.numEmployees} />
               </Table.Cell>
               
+              {/* Conditional rendering for salary: shows fallback if 0 employees */}
               <Table.Cell textAlign="center">
                 {hasEmployees ? (
                   <CurrencyText value={info.avgSalary} />
@@ -52,6 +64,7 @@ export const DepartmentsTable = ({ departmentsInfo }: Props) => {
                 )}
               </Table.Cell>
               
+              {/* Conditional rendering for age: shows fallback if 0 employees */}
               <Table.Cell textAlign="center">
                 {hasEmployees ? (
                   <AgeText value={info.avgAge} />

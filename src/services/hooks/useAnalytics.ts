@@ -1,6 +1,7 @@
 /**
  * @module useAnalytics
- * Derives chart-ready data from Zod-validated employee records.
+ * Prepares chart-ready data structures from validated employee records.
+ * Acts as a bridge between raw data and visualization components.
  */
 
 import { useMemo } from "react";
@@ -12,21 +13,31 @@ import { countBy } from "lodash";
 import type { StatsDataItem } from "@/schemas/statsInterface.schema";
 import type { Employee } from "@/schemas/employee.schema";
 
+/**
+ * Custom hook to transform employee data into specific chart formats.
+ * @param type - The dimension of analysis: 'age', 'salary', or 'department'.
+ * @returns An array of data points optimized for the StatsChart component.
+ */
 export const useAnalytics = (type: 'age' | 'salary' | 'department'): StatsDataItem[] => {
+  // Access the current filtered dataset
   const { employees } = useEmployees();
 
   return useMemo(() => {
-    // If no employees (loading or filtered out), return empty array for the charts
+    // If no data is available (loading or all records filtered out), return empty set
     if (!employees || employees.length === 0) return [];
 
     switch (type) {
+      /**
+       * CASE: Salary Distribution
+       * Groups employees into financial brackets defined in the global config.
+       */
       case 'salary': {
         const config = EMPLOYEES_CONFIG.salary;
-        /**
-         * Explicitly typing <Employee> ensures 'e.salary' is recognized by TS
-         */
+        
         return getBinnedData<Employee>(employees, config, (e) => e.salary, {
+          // Format X-axis labels (e.g., "5k", "10k")
           xKey: (v) => `${v / 1000}${config.unit}`,
+          // Provide descriptive tooltips with currency formatting
           tooltip: (v, isLast) => {
             const end = isLast ? config.max : v + config.interval - 1;
             return `${config.currency}${v.toLocaleString()} — ${config.currency}${end.toLocaleString()}`;
@@ -34,6 +45,10 @@ export const useAnalytics = (type: 'age' | 'salary' | 'department'): StatsDataIt
         });
       }
 
+      /**
+       * CASE: Age Distribution
+       * Groups employees into age bins (e.g., 20-24, 25-29) using birth date calculations.
+       */
       case 'age': {
         const config = EMPLOYEES_CONFIG.age;
         return getBinnedData<Employee>(
@@ -54,6 +69,10 @@ export const useAnalytics = (type: 'age' | 'salary' | 'department'): StatsDataIt
         );
       }
 
+      /**
+       * CASE: Department Breakdown
+       * Performs a simple count of employees across all registered departments.
+       */
       case 'department': {
         const stats = countBy(employees, 'department');
         return EMPLOYEES_CONFIG.departments.map(dept => ({

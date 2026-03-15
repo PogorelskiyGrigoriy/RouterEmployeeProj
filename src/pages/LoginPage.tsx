@@ -1,3 +1,9 @@
+/**
+ * @module LoginPage
+ * Provides the entry point for user authentication.
+ * Leverages React Hook Form for state management and Zod for schema validation.
+ */
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -17,16 +23,15 @@ import { loginSchema, type LoginData } from "@/schemas/auth.schema";
 
 /**
  * LoginPage Component.
- * Provides a user interface for authentication using Chakra UI and React Hook Form.
- * Integrates with Zod for client-side validation.
+ * Features a centralized card layout with comprehensive error handling and loading states.
  */
 export const LoginPage = () => {
-  // Access mutation state and logic from custom auth hook
+  // Authentication logic via custom TanStack Query mutation hook
   const { mutate, isPending } = useLogin();
 
   /**
-   * Form initialization with Zod validation resolver.
-   * 'onBlur' mode ensures validation triggers when user leaves a field.
+   * Form initialization.
+   * 'onBlur' mode balances real-time feedback with non-intrusive UX.
    */
   const {
     register,
@@ -37,14 +42,11 @@ export const LoginPage = () => {
     mode: "onBlur",
   });
 
-  /**
-   * Form submission handler.
-   * Passes validated data to the login mutation.
-   */
   const onSubmit = (data: LoginData) => mutate(data);
 
   return (
     <Container maxW="lg" py={{ base: "12", md: "24" }}>
+      {/* Main Login Card */}
       <Box p="10" borderWidth="1px" borderRadius="2xl" boxShadow="sm" bg="bg.panel">
         <form onSubmit={handleSubmit(onSubmit)}>
           <Fieldset.Root size="lg" disabled={isPending}>
@@ -56,7 +58,7 @@ export const LoginPage = () => {
               </Box>
 
               <Stack gap="4">
-                {/* Email Field with dynamic error handling */}
+                {/* Email Field */}
                 <Field
                   label="Email"
                   invalid={!!errors.email}
@@ -70,7 +72,7 @@ export const LoginPage = () => {
                   />
                 </Field>
 
-                {/* Password Field with dynamic error handling */}
+                {/* Password Field */}
                 <Field
                   label="Password"
                   invalid={!!errors.password}
@@ -98,7 +100,9 @@ export const LoginPage = () => {
           </Fieldset.Root>
         </form>
 
-        {/* Demo Credentials Helper - for development/testing purposes only */}
+        {/* Demo Credentials Helper: 
+          Visible only in the UI to facilitate testing/review. 
+        */}
         <VStack
           mt="8"
           gap="2"

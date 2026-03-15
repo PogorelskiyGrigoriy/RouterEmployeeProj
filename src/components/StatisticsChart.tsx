@@ -1,7 +1,8 @@
 /**
  * @module StatisticsChart
- * Responsive bar chart integrated with Chakra UI theme tokens.
- * Data keys are strictly typed to ensure consistency with Zod-validated stats.
+ * A generic, responsive bar chart component.
+ * Deeply integrated with Chakra UI theme tokens for consistent styling of colors, 
+ * typography, and spacing.
  */
 
 "use client";
@@ -20,6 +21,7 @@ import {
 
 import type { StatsChartProps } from "@/schemas/statsInterface.schema";
 
+/** Constant margin config to maximize usable chart area while keeping labels visible */
 const CHART_MARGIN = { top: 10, right: 10, left: -20, bottom: 0 } as const;
 
 export const StatisticsChart = ({
@@ -30,6 +32,10 @@ export const StatisticsChart = ({
   labelY = "Employees",
   tooltipLabelKey = "tooltipValue",
 }: StatsChartProps) => {
+  /**
+   * Accessing Chakra UI Design Tokens:
+   * This ensures the chart colors match the rest of the application's UI perfectly.
+   */
   const [accent, grayMuted, gridColor, textPrimary] = useToken("colors", [
     "blue.500",
     "fg.muted",
@@ -37,13 +43,17 @@ export const StatisticsChart = ({
     "fg.emphasized",
   ]);
 
-  // Memoize tooltip styles
+  /**
+   * Performance Optimization:
+   * Memoizing styles to prevent unnecessary Recharts recalculations 
+   * unless the primary text color changes.
+   */
   const tooltipStyles = useMemo(() => ({
     contentStyle: {
       borderRadius: "12px",
       border: "none",
       boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
-      backgroundColor: "var(--chakra-colors-bg-panel)",
+      backgroundColor: "var(--chakra-colors-bg-panel)", // CSS Variable for dynamic dark/light mode
       padding: "8px 12px",
     },
     labelStyle: {
@@ -84,7 +94,7 @@ export const StatisticsChart = ({
           <BarChart data={data} margin={CHART_MARGIN}>
             <CartesianGrid
               strokeDasharray="3 3"
-              vertical={false}
+              vertical={false} // Clean look with horizontal grid lines only
               stroke={gridColor}
             />
             
@@ -100,7 +110,7 @@ export const StatisticsChart = ({
               axisLine={false}
               tickLine={false}
               tick={{ fontSize: 11, fill: grayMuted }}
-              allowDecimals={false}
+              allowDecimals={false} // Best for headcount/integer statistics
               dx={-5}
             />
             
@@ -109,6 +119,7 @@ export const StatisticsChart = ({
               contentStyle={tooltipStyles.contentStyle}
               labelStyle={tooltipStyles.labelStyle}
               itemStyle={tooltipStyles.itemStyle}
+              /** Logic to pull custom descriptive text into the tooltip header */
               labelFormatter={(_, payload) =>
                 payload?.[0]?.payload?.[tooltipLabelKey as string] ?? ""
               }
@@ -118,9 +129,9 @@ export const StatisticsChart = ({
               dataKey={dataKeyY as string}
               name={labelY}
               fill={accent}
-              radius={[4, 4, 0, 0]}
+              radius={[4, 4, 0, 0]} // Modern rounded top corners
               barSize={32}
-              minPointSize={3}
+              minPointSize={3} // Ensures very small bars remain visible/interactable
             />
           </BarChart>
         </ResponsiveContainer>

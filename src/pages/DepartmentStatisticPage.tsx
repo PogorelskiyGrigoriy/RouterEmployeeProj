@@ -1,6 +1,7 @@
 /**
  * @module DepartmentStatisticsPage
- * Tabular view of department-wise analytics and employee distribution.
+ * Analytics view providing a tabular breakdown of organizational structure.
+ * Displays headcount and financial metrics per department.
  */
 
 "use client"
@@ -9,10 +10,14 @@ import { Container, Heading, VStack, Box, Center, Spinner, Text } from "@chakra-
 import { useDepartmentStats } from "@/services/hooks/useDepartmentStats"
 import { DepartmentsTable } from "@/components/DepartmentsTable"
 
+/**
+ * Page component that orchestrates the department statistics view.
+ */
 const DepartmentStatisticsPage = () => {
   const { departmentsInfo, isLoading } = useDepartmentStats()
 
-  // 1. Loading State (Chakra UI 3 compliant)
+  // --- Loading State ---
+  // Providing visual feedback while complex cross-department calculations occur
   if (isLoading) {
     return (
       <Center h="60vh">
@@ -27,6 +32,7 @@ const DepartmentStatisticsPage = () => {
   return (
     <Container maxW="6xl" py={{ base: "6", md: "10" }}>
       <VStack align="stretch" gap="8">
+        {/* Header Section */}
         <Box>
           <Heading size="2xl" letterSpacing="tight">
             Department Statistics
@@ -36,13 +42,14 @@ const DepartmentStatisticsPage = () => {
           </Text>
         </Box>
 
+        {/* Data Presentation Layer */}
         <Box 
           borderWidth="1px" 
           borderColor="border.subtle" 
           borderRadius="2xl" 
           bg="bg.panel" 
           shadow="sm"
-          overflow="hidden" // Чтобы углы таблицы не вылезали за рамку карточки
+          overflow="hidden" // Ensures table rows respect the card's border radius
         >
           <DepartmentsTable departmentsInfo={departmentsInfo} />
         </Box>

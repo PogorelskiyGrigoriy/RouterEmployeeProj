@@ -1,3 +1,9 @@
+/**
+ * @module ApiClientImplementation
+ * Concrete implementation of the ApiClient interface for a JSON-Server backend.
+ * Features dual-mode validation: "Soft" for lists and "Strict" for mutations.
+ */
+
 import { api } from "@/api/axiosInstance";
 import type { AxiosRequestConfig } from "axios";
 import { ZodError } from "zod";
@@ -22,13 +28,14 @@ const ENDPOINTS = {
 } as const;
 
 /**
- * JSON-Server implementation of the ApiClient with Zod validation.
+ * JSON-Server implementation with integrated Zod schema enforcement.
  */
 class ApiClientJsonServer implements ApiClient {
   
   /**
    * Fetches employees and performs "Soft Validation".
-   * Filters out corrupted items instead of failing the whole request.
+   * Instead of failing the entire request, it filters out individual records 
+   * that don't match the schema and notifies the user.
    */
   async getEmployees(
     filters?: EmployeeFilter, 
@@ -58,7 +65,7 @@ class ApiClientJsonServer implements ApiClient {
       return acc;
     }, []);
 
-    // Если нашли битые данные, уведомляем пользователя один раз
+    // Notify user if some records were skipped due to integrity issues
     if (corruptionCount > 0) {
       toaster.create({
         title: "Data Integrity Notice",
@@ -72,7 +79,7 @@ class ApiClientJsonServer implements ApiClient {
 
   /**
    * Creates a new employee with "Strict Validation".
-   * Throws and toasts an error if the server response doesn't match our schema.
+   * Throws an exception and triggers a toast if the server response is invalid.
    */
   async addEmployee(employee: NewEmployee): Promise<Employee> {
     try {
@@ -85,14 +92,14 @@ class ApiClientJsonServer implements ApiClient {
   }
 
   /**
-   * Deletes an employee record. No validation needed for empty response.
+   * Deletes an employee record by ID.
    */
   async deleteEmployee(id: string): Promise<void> {
     await api.delete(`${ENDPOINTS.EMPLOYEES}/${id}`);
   }
 
   /**
-   * Updates an employee with "Strict Validation".
+   * Updates an existing employee using PATCH and performs "Strict Validation".
    */
   async updateEmployee({ id, changes }: EmployeeUpdatePayload): Promise<Employee> {
     try {
@@ -105,7 +112,7 @@ class ApiClientJsonServer implements ApiClient {
   }
 
   /**
-   * Private helper to format and toast Zod errors centrally.
+   * Private helper to format and display Zod validation errors to the UI.
    */
   private handleZodError(error: unknown, contextMessage: string) {
     if (error instanceof ZodError) {
@@ -119,7 +126,8 @@ class ApiClientJsonServer implements ApiClient {
   }
 
   /**
-   * Transforms UI filter/sort state into JSON-Server query parameters.
+   * Transforms UI filter and sort states into JSON-Server compatible query parameters.
+   * Handles logic for range-based filtering (salary/age).
    */
   private buildParams(
     filters?: EmployeeFilter,
@@ -129,12 +137,16 @@ class ApiClientJsonServer implements ApiClient {
     const params: Record<string, any> = { ...baseParams };
 
     if (filters) {
+      // Filter by department unless 'All' is selected
       if (filters.department && filters.department !== "All") {
         params.department = filters.department;
       }
+      
+      // Salary range filtering
       if (filters.minSalary !== undefined) params.salary_gte = filters.minSalary;
       if (filters.maxSalary !== undefined) params.salary_lte = filters.maxSalary;
 
+      // Age range filtering (converted to birth dates)
       if (filters.minAge !== undefined) {
         params.birthDate_lte = getLimitDate(filters.minAge);
       }
@@ -143,6 +155,7 @@ class ApiClientJsonServer implements ApiClient {
       }
     }
 
+    // Apply sorting parameters
     if (sort?.key && sort?.order) {
       params._sort = sort.key;
       params._order = sort.order;
@@ -152,4 +165,5 @@ class ApiClientJsonServer implements ApiClient {
   }
 }
 
+/** Exporting a singleton instance for application-wide use */
 export const apiClient: ApiClient = new ApiClientJsonServer();

@@ -1,3 +1,9 @@
+/**
+ * @module useLogin
+ * A custom mutation hook for handling user authentication.
+ * Integrates TanStack Query with the AuthStore and centralized navigation logic.
+ */
+
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { authService } from '@/services/AuthServiceImplementation';
@@ -7,26 +13,28 @@ import type { LoginData, UserData } from '@/schemas/auth.schema';
 import { toaster } from "@/components/ui/toaster-config";
 
 /**
- * Custom hook to handle user authentication via TanStack Query mutation.
- * Manages side effects: updating the store, notifications, and navigation.
+ * Custom hook to manage the login process.
+ * Handles the authentication request, state updates, notifications, and routing logic.
+ * * @returns A TanStack Query mutation object for the login operation.
  */
 export const useLogin = () => {
-  // Extracting only the necessary action from the store
+  // Extracting only the necessary action from the store to prevent unnecessary re-renders
   const setLogin = useAuthStore((state) => state.setLogin);
   const navigate = useNavigate();
   const location = useLocation();
 
   return useMutation({
     /**
-     * Executes the login logic via the abstract auth service.
+     * Executes the login logic via the concrete auth service implementation.
+     * @param data - The user credentials validated by LoginData schema.
      */
     mutationFn: (data: LoginData) => authService.login(data),
     
     /**
-     * On successful login:
-     * 1. Updates global state.
-     * 2. Shows a welcome notification.
-     * 3. Redirects to the previous page or home.
+     * Side effects on successful authentication:
+     * 1. Updates the global AuthStore with user profile data.
+     * 2. Displays a success notification.
+     * 3. Redirects to the intended destination or defaults to Home.
      */
     onSuccess: (userData: UserData) => {
       setLogin(userData);
@@ -37,14 +45,14 @@ export const useLogin = () => {
         type: "success",
       });
       
-      // Attempt to redirect to the protected route the user tried to access earlier
+      // Navigate to the page the user was trying to access, or Home by default
       const from = location.state?.from?.pathname || ROUTES.HOME;
       navigate(from, { replace: true });
     },
 
     /**
-     * On login failure:
-     * Triggers an error toast with the message returned by the service.
+     * Side effects on authentication failure:
+     * Shows an error message provided by the service or a fallback string.
      */
     onError: (error: Error) => {
       toaster.create({

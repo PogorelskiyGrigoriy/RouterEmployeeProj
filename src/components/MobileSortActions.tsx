@@ -1,16 +1,29 @@
+/**
+ * @module MobileSortActions
+ * Responsive sorting controls for mobile view.
+ * Uses a menu-based UI to toggle sorting keys and directions (asc/desc).
+ */
+
 import { HStack, MenuRoot, MenuTrigger, MenuContent, MenuItem, Button, Text } from "@chakra-ui/react";
 import { LuArrowDownAZ, LuArrowDownWideNarrow, LuCalendarDays, LuArrowUp, LuArrowDown, LuArrowUpDown } from "react-icons/lu";
 import { useSortStore } from "@/store/sort-store";
 
+/**
+ * Renders a compact sorting interface visible only on mobile screens (<md).
+ */
 export const MobileSortActions = () => {
   const { sort, toggleSort } = useSortStore();
 
+  /**
+   * Configuration for sortable fields with their respective icons.
+   */
   const sortOptions = [
     { key: "fullName", label: "Name", icon: <LuArrowDownAZ /> },
     { key: "salary", label: "Salary", icon: <LuArrowDownWideNarrow /> },
     { key: "birthDate", label: "Age", icon: <LuCalendarDays /> },
   ] as const;
 
+  // Identify the currently active sorting strategy for the button label
   const currentOption = sortOptions.find(opt => opt.key === sort.key);
 
   return (
@@ -24,6 +37,7 @@ export const MobileSortActions = () => {
               <>
                 {currentOption.icon}
                 {currentOption.label}
+                {/* Visual feedback for sorting direction */}
                 {sort.order === "asc" && <LuArrowUp size="14" />}
                 {sort.order === "desc" && <LuArrowDown size="14" />}
               </>
@@ -42,6 +56,7 @@ export const MobileSortActions = () => {
               key={option.key} 
               value={option.key}
               onClick={() => toggleSort(option.key)}
+              // Keeps the menu open for easier multi-step sorting changes if needed
               closeOnSelect={false}
               cursor="pointer"
             >
@@ -50,6 +65,7 @@ export const MobileSortActions = () => {
                   {option.icon}
                   <Text>{option.label}</Text>
                 </HStack>
+                {/* Highlight the active sort order in the list */}
                 {sort.key === option.key && sort.order && (
                   <Text fontSize="2xs" fontWeight="black" color="blue.500" textTransform="uppercase">
                     {sort.order}

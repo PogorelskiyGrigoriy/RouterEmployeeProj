@@ -1,13 +1,13 @@
 /**
  * @module DataDisplay
- * Atomic UI components for consistent data formatting and presentation.
+ * Atomic UI components for consistent data formatting and presentation across the app.
  */
 
 import { Badge, Text, type BadgeProps, HStack, Avatar as ChakraAvatar } from "@chakra-ui/react";
-import { formatDateDisplay } from "@/utils/dateUtils"; // Импортируем нашу утилиту
+import { formatDateDisplay } from "@/utils/dateUtils";
 
 /**
- * BADGE: For counts and quantities.
+ * BADGE: Standardized display for counts and numeric quantities.
  */
 export const CountBadge = ({ value, ...props }: { value: number } & BadgeProps) => (
   <Badge variant="subtle" colorPalette="blue" px="2" borderRadius="md" {...props}>
@@ -16,7 +16,7 @@ export const CountBadge = ({ value, ...props }: { value: number } & BadgeProps) 
 );
 
 /**
- * TEXT: For age display.
+ * TEXT: Consistent age presentation.
  */
 export const AgeText = ({ value }: { value: number }) => (
   <Text color="gray.600">
@@ -25,7 +25,7 @@ export const AgeText = ({ value }: { value: number }) => (
 );
 
 /**
- * TEXT: Currency formatting (USD).
+ * TEXT: Financial formatting using US locale standards.
  */
 export const CurrencyText = ({ value }: { value: number }) => (
   <Text color="green.600" fontWeight="bold" fontFamily="mono">
@@ -38,16 +38,15 @@ export const CurrencyText = ({ value }: { value: number }) => (
 );
 
 /**
- * TEXT: Formatted birth date using shared utility.
+ * TEXT: Date display leveraging centralized date formatting utility.
  */
 export const DateText = ({ dateString }: { dateString: string }) => {
-  // ИСПОЛЬЗУЕМ УТИЛИТУ: Теперь формат даты везде будет одинаковым (например, 05.03.1990)
   const formatted = formatDateDisplay(dateString);
   return <Text color="fg.muted" fontSize="sm">{formatted}</Text>;
 };
 
 /**
- * MOLECULE: Employee Identity (Avatar + Name).
+ * MOLECULE: Combined identity block showing employee avatar and name.
  */
 export const EmployeeIdentity = ({ name, avatar }: { name: string, avatar?: string }) => (
   <HStack gap="3">
@@ -62,7 +61,7 @@ export const EmployeeIdentity = ({ name, avatar }: { name: string, avatar?: stri
 );
 
 /**
- * BADGE: Department labels.
+ * BADGE: Visual indicator for departments and organizational units.
  */
 export const DeptBadge = ({ children }: { children: React.ReactNode }) => (
   <Badge variant="subtle" colorPalette="blue" size="xs" px="2">

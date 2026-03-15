@@ -1,27 +1,42 @@
+/**
+ * @module AxiosInstance
+ * Centralized API client configuration with interceptors for authentication 
+ * and global error handling.
+ */
+
 import axios, { AxiosError } from 'axios';
 import { toaster } from "@/components/ui/toaster-config";
 import { useAuthStore } from '@/store/useAuthStore';
 import { appRouter } from '@/router/routes';
 import { ROUTES } from '@/config/navigation';
 
+/**
+ * Global axios instance with predefined base URL and timeout.
+ */
 export const api = axios.create({
   baseURL: 'http://localhost:4000',
   timeout: 10000,
 });
 
+/**
+ * Response Interceptor:
+ * Handles global API responses and error scenarios like 401 Unauthorized 
+ * or 500 Server Errors.
+ */
 api.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
+    // Handle request cancellation
     if (axios.isCancel(error)) return Promise.reject(error);
 
     const status = error.response?.status;
 
-    // СЛУЧАЙ А: Сессия истекла (401)
+    // CASE A: Unauthorized (401) - Session expired or invalid token
     if (status === 401) {
-      // Вызываем действие стора напрямую через getState()
+      // Direct store state access to clear auth data
       useAuthStore.getState().setLogout();
       
-      // Вызываем навигацию через объект роутера
+      // Programmatic navigation to login page
       appRouter.navigate(ROUTES.LOGIN, { replace: true });
 
       toaster.create({
@@ -32,15 +47,13 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // СЛУЧАЙ Б: Критическая ошибка сервера (500+)
+    // CASE B: Server-side errors (500+)
     if (status && status >= 500) {
-      // Мы просто пробрасываем ошибку дальше. 
-      // Если запрос был сделан при загрузке страницы, 
-      // React Router поймает её и покажет ErrorPage (errorElement).
+      // Propagate error to let React Router's ErrorPage handle it if triggered during routing
       return Promise.reject(error);
     }
 
-    // СЛУЧАЙ В: Обычные ошибки (404, 403, 400)
+    // CASE C: Client-side errors (400, 403, 404) or Network failures
     const message = (error.response?.data as any)?.message || error.message;
     toaster.create({
       title: `Error ${status || 'Network'}`,

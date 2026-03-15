@@ -1,13 +1,21 @@
+/**
+ * @module AuthServiceImplementation
+ * Mock implementation of the AuthService interface.
+ * Simulates real-world API behavior including network latency and schema validation.
+ */
+
 import { userDataSchema, type LoginData, type UserData } from "@/schemas/auth.schema";
 import type { AuthService } from "./AuthService";
 
 /**
- * Extends UserData for the mock database to include credentials.
+ * Internal type for the mock database.
+ * Extends the public UserData with a password field for credential verification.
  */
 type MockUser = UserData & { password: string };
 
 /**
- * Local database for development and testing purposes.
+ * Local in-memory database for development and testing.
+ * Provides predefined accounts with different access levels (RBAC).
  */
 const DUMMY_LOGIN_USERS: Record<string, MockUser> = {
   "admin@tel-ran.com": {
@@ -25,20 +33,24 @@ const DUMMY_LOGIN_USERS: Record<string, MockUser> = {
 };
 
 /**
- * Utility to simulate network latency.
+ * Helper utility to simulate asynchronous network latency.
+ * @param ms - Delay duration in milliseconds.
  */
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
 /**
- * Mock implementation of AuthService.
- * Simulates real API behavior with validation and delays.
+ * AuthService implementation used during development or offline mode.
+ * Mimics a real backend with validation logic and artificial delays.
  */
 class AuthServiceDummy implements AuthService {
   /**
-   * Simulates a login request.
-   * Validates credentials against the mock DB and parses result via Zod.
+   * Authenticates a user against the local mock database.
+   * @param credentials - Email and password validated by LoginData schema.
+   * @throws Error if credentials do not match any record.
+   * @returns A promise resolving to validated UserData.
    */
   async login({ email, password }: LoginData): Promise<UserData> {
+    // Artificial delay to mimic server response time
     await delay(1000);
     const foundUser = DUMMY_LOGIN_USERS[email];
 
@@ -47,14 +59,15 @@ class AuthServiceDummy implements AuthService {
     }
 
     /**
-     * Runtime validation: Ensures the returned data strictly matches UserData schema
-     * before it reaches the store or UI.
+     * Runtime validation check: 
+     * Ensures the data being returned strictly conforms to the UserData schema 
+     * before it is committed to the global state (Store).
      */
     return userDataSchema.parse(foundUser);
   }
 
   /**
-   * Simulates a logout request with a brief delay.
+   * Simulates a secure logout process.
    */
   async logout(): Promise<void> {
     await delay(500);
@@ -62,6 +75,6 @@ class AuthServiceDummy implements AuthService {
 }
 
 /**
- * Singleton instance of the auth service.
+ * Exporting a singleton instance for application-wide authentication logic.
  */
 export const authService: AuthService = new AuthServiceDummy();

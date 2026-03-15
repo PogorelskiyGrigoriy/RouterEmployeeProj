@@ -1,6 +1,7 @@
 /**
  * @module SalaryStatisticsPage
- * Analytics view for employee salary distribution across the organization.
+ * Analytics view dedicated to displaying salary distribution across the organization.
+ * Visualizes how many employees fall into specific salary brackets.
  */
 
 "use client"
@@ -9,12 +10,16 @@ import { Container, Center, Spinner, Text, Stack } from "@chakra-ui/react";
 import { useAnalytics } from "@/services/hooks/useAnalytics";
 import { StatisticsChart } from "@/components/StatisticsChart";
 
+/**
+ * Page component for Salary Analytics.
+ * Handles distribution data for financial overview.
+ */
 const SalaryStatisticsPage = () => {
-  // Получаем данные по зарплатам через хук аналитики
+  // Fetch processed salary range data
   const chartData = useAnalytics('salary');
 
-  // 1. Loading State (Chakra UI 3)
-  // Пока данные загружаются (null), показываем центрированный спиннер
+  // --- Loading State ---
+  // Ensuring smooth UX during data aggregation
   if (!chartData) {
     return (
       <Center h="60vh">
@@ -27,8 +32,8 @@ const SalaryStatisticsPage = () => {
     );
   }
 
-  // 2. Empty State
-  // Если данных нет (пустой массив), выводим понятное сообщение
+  // --- Empty State ---
+  // Actionable feedback if no salary records exist
   if (chartData.length === 0) {
     return (
       <Center h="60vh">
@@ -46,10 +51,10 @@ const SalaryStatisticsPage = () => {
         title="Salary Distribution"
         data={chartData}
         labelY="Employees"
-        // Эти ключи должны соответствовать структуре, которую возвращает useAnalytics('salary')
-        dataKeyX="xValue" 
-        dataKeyY="yValue"
-        tooltipLabelKey="tooltipValue"
+        // Mapping keys to the salary distribution object structure
+        dataKeyX="xValue"        // Range labels (e.g., "50k - 60k")
+        dataKeyY="yValue"        // Number of employees in that range
+        tooltipLabelKey="tooltipValue" // Descriptive text for tooltip
       />
     </Container>
   );

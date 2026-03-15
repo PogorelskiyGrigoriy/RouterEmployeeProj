@@ -1,7 +1,7 @@
 /**
  * @module EmployeeForm
  * Universal form for creating and updating employee records.
- * Optimized with dynamic Zod schema selection to handle New/Existing states.
+ * Optimized with dynamic Zod schema selection and state tracking (isDirty/isValid).
  */
 
 import { useEffect } from "react";
@@ -22,9 +22,13 @@ import type { Department } from "@/schemas/department.schema";
 import { EMPLOYEES_CONFIG } from "@/config/employees-config";
 
 interface Props {
+  /** Callback triggered on valid form submission */
   onSubmit: (data: NewEmployee) => void;
+  /** Submission status from parent mutation hook */
   isLoading: boolean;
+  /** If provided, switches form to 'Edit' mode */
   employee?: Employee;
+  /** Optional callback for handling cancellation */
   onCancel?: () => void;
 }
 
@@ -38,12 +42,12 @@ const DEFAULT_VALUES: NewEmployee = {
 export const EmployeeForm = ({ onSubmit, isLoading, employee, onCancel }: Props) => {
   const isEditMode = !!employee;
   const { salary, age } = EMPLOYEES_CONFIG;
+  
+  /** * Dynamic Schema selection.
+   * Edit mode requires ID validation, whereas creation mode focuses on new fields.
+   */
   const schema = isEditMode ? employeeSchema : newEmployeeSchema;
 
-  /**
-   * Конфигурация формы.
-   * Динамический резолвер переключается между схемами в зависимости от пропса employee.
-   */
   const { 
     register, 
     handleSubmit, 
@@ -51,16 +55,21 @@ export const EmployeeForm = ({ onSubmit, isLoading, employee, onCancel }: Props)
     formState: { errors, isValid, isDirty } 
   } = useForm<NewEmployee>({
     mode: "onChange",
-    // Использование правильной схемы предотвращает блокировку при отсутствии 'id'
     resolver: zodResolver(schema) as any, 
     defaultValues: (employee || DEFAULT_VALUES) as NewEmployee
   });
 
-  // Синхронизация данных при смене сотрудника (например, в Drawer)
+  /**
+   * Syncs internal form state with props.
+   * Crucial when the drawer is reused for different employees without unmounting.
+   */
   useEffect(() => {
     reset(employee || DEFAULT_VALUES);
   }, [employee, reset]);
 
+  /**
+   * Defines behavior for the secondary button (Cancel vs Clear).
+   */
   const handleSecondaryAction = () => {
     if (isEditMode) {
       onCancel?.();
@@ -70,9 +79,9 @@ export const EmployeeForm = ({ onSubmit, isLoading, employee, onCancel }: Props)
   };
 
   /**
-   * Кнопка заблокирована если:
-   * 1. Форма невалидна (isValid)
-   * 2. В режиме редактирования ничего не изменено (!isDirty)
+   * Validation logic:
+   * 1. Block if invalid based on Zod rules.
+   * 2. Block if in edit mode but no data was changed (optimization).
    */
   const isSubmitDisabled = !isValid || (isEditMode && !isDirty);
 
@@ -80,7 +89,7 @@ export const EmployeeForm = ({ onSubmit, isLoading, employee, onCancel }: Props)
     <form onSubmit={handleSubmit(onSubmit)}>
       <Stack gap="5">
         
-        {/* Full Name */}
+        {/* Full Name Input */}
         <Field 
           label="Full Name" 
           invalid={!!errors.fullName} 
@@ -92,14 +101,14 @@ export const EmployeeForm = ({ onSubmit, isLoading, employee, onCancel }: Props)
           />
         </Field>
 
-        {/* Department */}
+        {/* Shared Department Select Component */}
         <DepartmentSelect 
           variant="form"
           registration={register("department")}
           errorText={errors.department?.message}
         />
 
-        {/* Salary */}
+        {/* Salary Input with automatic numeric coercion */}
         <Field 
           label={`Salary (${salary.currency}${salary.min} - ${salary.max})`} 
           invalid={!!errors.salary} 
@@ -111,7 +120,7 @@ export const EmployeeForm = ({ onSubmit, isLoading, employee, onCancel }: Props)
           />
         </Field>
 
-        {/* Birth Date */}
+        {/* Birth Date Input - Disabled in Edit Mode by business logic */}
         <Field 
           label={`Birth Date (Age ${age.min}+)`} 
           invalid={!!errors.birthDate} 
@@ -126,6 +135,7 @@ export const EmployeeForm = ({ onSubmit, isLoading, employee, onCancel }: Props)
           />
         </Field>
 
+        {/* Form Action Bar */}
         <HStack gap="4" mt="4">
           <Button 
             variant="ghost" 
