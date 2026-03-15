@@ -60,7 +60,7 @@ export const StatisticsChart = ({
   }), [textPrimary]);
 
   return (
-    <Container maxW="6xl" py={{ base: "4", md: "8" }} px="0">
+    <Container>
       <Heading 
         size={{ base: "md", md: "xl" }} 
         mb={{ base: "4", md: "6" }} 
@@ -79,8 +79,9 @@ export const StatisticsChart = ({
         height={{ base: "280px", md: "400px" }}
         shadow="xs"
         position="relative"
+        minW="0"
       >
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer>
           <BarChart data={data} margin={CHART_MARGIN}>
             <CartesianGrid
               strokeDasharray="3 3"
